@@ -1,0 +1,40 @@
+# Python / Django
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.Python
+.venv/
+venv/
+env/
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+media/
+staticfiles/
+db.sqlite3
+*.sqlite3
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.sw?
+
+# Claude internal context
+.claude/
+
+# Misc
+test_imagen.jpg
