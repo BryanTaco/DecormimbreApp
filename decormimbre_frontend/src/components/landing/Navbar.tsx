@@ -27,12 +27,10 @@ function BrandLogo({ isDark }: { isDark: boolean }) {
           alt=""
           onError={() => setImgOk(false)}
           style={{
-            height: 32,
+            height: 36,
             width: 'auto',
             objectFit: 'contain',
             display: 'block',
-            filter: isDark ? 'brightness(0) invert(1)' : 'none',
-            transition: 'filter 200ms',
           }}
         />
       )}

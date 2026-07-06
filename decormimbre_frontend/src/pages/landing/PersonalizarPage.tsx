@@ -11,12 +11,12 @@ const Chair3DViewer = lazy(() => import('@/components/chair/Chair3DViewer'))
 // ─── Datos ────────────────────────────────────────────────────────────────────
 
 const TIPOS = [
-  { id: 'sofa',      label: 'Sofá',              img: '/products/sofa-serena.jpg',  desc: 'Para sala de estar, terraza o jardín' },
-  { id: 'silla',     label: 'Silla',             img: '/products/silla-nido.jpg',   desc: 'Individual, en pareja o en juego' },
-  { id: 'mesa',      label: 'Mesa',              img: '/products/silla-sierra.jpg', desc: 'Centro, comedor o auxiliar' },
-  { id: 'hamaca',    label: 'Hamaca / Pérgola',  img: '/products/set-exterior.jpg', desc: 'Descanso en exteriores e interiores' },
-  { id: 'cabecera',  label: 'Cabecera de cama',  img: '/products/cestas.jpg',       desc: 'Tejido artesanal para dormitorio' },
-  { id: 'accesorio', label: 'Accesorio',         img: '/products/cestas.jpg',       desc: 'Cestas, lámparas, espejos y más' },
+  { id: 'sofa',      label: 'Sofá',              img: '/products/sala-ebano.jpg',          desc: 'Para sala de estar, terraza o jardín' },
+  { id: 'silla',     label: 'Silla',             img: '/products/silla-circular.jpg',      desc: 'Individual, en pareja o en juego' },
+  { id: 'mesa',      label: 'Mesa',              img: '/products/set-comedor.jpg',          desc: 'Centro, comedor o auxiliar' },
+  { id: 'hamaca',    label: 'Hamaca / Pérgola',  img: '/products/hamaca-jardin.jpg',        desc: 'Descanso en exteriores e interiores' },
+  { id: 'cabecera',  label: 'Cabecera de cama',  img: '/products/daybeds-igloo.jpg',        desc: 'Tejido artesanal para dormitorio' },
+  { id: 'accesorio', label: 'Accesorio',         img: '/products/hamaca-nido-oscura.jpg',   desc: 'Cestas, lámparas, espejos y más' },
 ]
 
 const MATERIALES = [
@@ -24,7 +24,7 @@ const MATERIALES = [
     id: 'mimbre',
     label: 'Mimbre Natural',
     badge: 'Interior',
-    img: '/products/silla-nido.jpg',
+    img: '/products/silla-circular.jpg',
     desc: 'Fibra vegetal tejida a mano. Textura orgánica única, calidez y elegancia natural. Ideal para ambientes con humedad controlada.',
     props: ['Biodegradable', 'Hecho a mano', 'Textura única', '+20 años de vida'],
     color: '#7B5840',
@@ -34,7 +34,7 @@ const MATERIALES = [
     id: 'polialuminio',
     label: 'Polialuminio',
     badge: 'Exterior',
-    img: '/products/set-exterior.jpg',
+    img: '/products/set-exterior-nido.jpg',
     desc: 'HDPE con alma de aluminio. Resistencia extrema al sol, lluvia y humedad sin perder la estética del tejido artesanal.',
     props: ['Resistente UV', 'Impermeable', 'Sin mantenimiento', '+10 años exterior'],
     color: '#2C5440',
@@ -44,7 +44,7 @@ const MATERIALES = [
     id: 'combinado',
     label: 'Combinado',
     badge: 'Versátil',
-    img: '/products/sofa-serena.jpg',
+    img: '/products/loveseat-riviera.jpg',
     desc: 'La mejor elección cuando quieres la apariencia del mimbre natural con mayor durabilidad. Lo definimos juntos según tu espacio.',
     props: ['Flexible', 'Consultoría incluida', 'Bajo pedido', 'Personalizable'],
     color: '#4A3E7C',
@@ -566,6 +566,7 @@ export default function PersonalizarPage() {
                   <Chair3DViewer
                     color={currentColor}
                     material={currentMaterial}
+                    tipo={form.tipo || 'sofa'}
                     height={360}
                   />
                 </Suspense>

@@ -3,12 +3,12 @@ import { ArrowUpRight, ArrowRight } from 'lucide-react'
 import { motion } from 'motion/react'
 
 const CATALOG_ITEMS = [
-  { img: '/products/sofa-serena.jpg',  category: 'Sala',        name: 'Sofá Serena',         material: 'Polialuminio & Mimbre', price: 'Desde $620' },
-  { img: '/products/silla-nido.jpg',   category: 'Sala',        name: 'Silla Nido',           material: 'Mimbre Natural',        price: 'Desde $185' },
-  { img: '/products/set-exterior.jpg', category: 'Exterior',    name: 'Set Jardín',           material: 'Polialuminio',          price: 'Desde $890' },
-  { img: '/products/silla-sierra.jpg', category: 'Comedor',     name: 'Silla Sierra',         material: 'Polialuminio',          price: 'Desde $95'  },
-  { img: '/products/silla-nido.jpg',   category: 'Sala',        name: 'Butaca Nido',          material: 'Mimbre Natural',        price: 'Desde $185' },
-  { img: '/products/cestas.jpg',       category: 'Accesorios',  name: 'Cestas Artesanales',   material: 'Mimbre Natural',        price: 'Desde $45'  },
+  { img: '/products/silla-circular.jpg',    category: 'Sala',       name: 'Silla Orbital',        material: 'Mimbre Natural',        price: 'Desde $195' },
+  { img: '/products/set-comedor.jpg',       category: 'Comedor',    name: 'Set Comedor',           material: 'Polialuminio',          price: 'Desde $890' },
+  { img: '/products/loveseat-riviera.jpg',  category: 'Exterior',   name: 'Loveseat Riviera',      material: 'Mimbre Natural',        price: 'Desde $520' },
+  { img: '/products/sala-ebano.jpg',        category: 'Sala',       name: 'Set Sala Ébano',        material: 'Polialuminio',          price: 'Desde $780' },
+  { img: '/products/set-exterior-nido.jpg', category: 'Exterior',   name: 'Set Jardín Nido',       material: 'Polialuminio',          price: 'Desde $940' },
+  { img: '/products/butacas-artesanales.jpg', category: 'Sala',     name: 'Butacas Artesanales',   material: 'Mimbre Natural',        price: 'Desde $320' },
 ]
 
 export default function CatalogSection() {

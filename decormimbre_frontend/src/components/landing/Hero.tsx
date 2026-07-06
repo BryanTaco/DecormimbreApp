@@ -5,10 +5,10 @@ import { ArrowRight } from 'lucide-react'
 import Navbar from './Navbar'
 
 const BG_IMAGES = [
-  '/products/sofa-serena.jpg',
-  '/products/silla-nido.jpg',
-  '/products/set-exterior.jpg',
-  '/products/silla-sierra.jpg',
+  '/products/hero-sala-quito.jpg',
+  '/products/hero-chaise-piscina.jpg',
+  '/products/hero-sala-naranja-mar.jpg',
+  '/products/hero-sala-gris-mar.jpg',
 ]
 
 const SLIDES = [
