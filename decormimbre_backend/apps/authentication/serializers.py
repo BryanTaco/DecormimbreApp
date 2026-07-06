@@ -1,12 +1,20 @@
 from rest_framework import serializers
-from .models import Usuario, LogActividad
+from .models import Usuario, LogActividad, Notificacion
 
 
 class UsuarioSerializer(serializers.ModelSerializer):
+    cliente_id = serializers.SerializerMethodField()
+
     class Meta:
         model = Usuario
-        fields = ["id", "nombre", "email", "rol", "activo", "fecha_creacion"]
+        fields = ["id", "nombre", "email", "rol", "activo", "fecha_creacion", "cliente_id"]
         read_only_fields = ["id", "fecha_creacion"]
+
+    def get_cliente_id(self, obj):
+        try:
+            return str(obj.cliente_vinculado.id)
+        except Exception:
+            return None
 
 
 class UsuarioCreateSerializer(serializers.ModelSerializer):
@@ -40,6 +48,28 @@ class UsuarioUpdateSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
+
+
+class RegistroClienteSerializer(serializers.Serializer):
+    nombre = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=8)
+    telefono = serializers.CharField(max_length=15)
+
+    def validate_email(self, value):
+        if Usuario.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Ya existe una cuenta con este email.")
+        return value
+
+
+class NotificacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notificacion
+        fields = [
+            "id", "tipo", "titulo", "mensaje", "leida",
+            "entidad_tipo", "entidad_id", "para_propietario", "fecha_creacion",
+        ]
+        read_only_fields = ["id", "fecha_creacion"]
 
 
 class LogActividadSerializer(serializers.ModelSerializer):

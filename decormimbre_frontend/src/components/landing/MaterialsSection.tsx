@@ -1,5 +1,33 @@
 import { motion } from 'motion/react'
 
+const CHOICE_ICON_STYLE = {
+  width: 20,
+  height: 20,
+  flexShrink: 0,
+} as const
+
+const CHOICE_ICONS: Record<string, React.ReactNode> = {
+  interior: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="rgba(92,64,51,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={CHOICE_ICON_STYLE}>
+      <path d="M3 10.5 12 3l9 7.5" />
+      <path d="M5 9.5V21h14V9.5" />
+      <path d="M10 21v-6h4v6" />
+    </svg>
+  ),
+  cubierto: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="rgba(92,64,51,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={CHOICE_ICON_STYLE}>
+      <path d="M20 4c-7 0-13 4-13 12 0 1.5.3 2.9.8 4C9.5 20.6 11 21 12.5 21 19 21 21 13 20 4Z" />
+      <path d="M4 21c2-6 6-10 12-13" />
+    </svg>
+  ),
+  expuesto: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="rgba(92,64,51,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={CHOICE_ICON_STYLE}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8" />
+    </svg>
+  ),
+}
+
 const MATERIALS = [
   {
     name: 'Mimbre',
@@ -104,6 +132,7 @@ export default function MaterialsSection() {
               key={mat.name}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.02, y: -2 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.15 }}
               className="rounded-[2rem] overflow-hidden border"
@@ -225,12 +254,12 @@ export default function MaterialsSection() {
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
-              { icon: '🏠', title: 'Interior', desc: 'Mimbre natural. Ambientes climatizados con estética orgánica y calidez.' },
-              { icon: '🌿', title: 'Exterior cubierto', desc: 'Ambos materiales. Terrazas techadas o balcones con luz solar indirecta.' },
-              { icon: '☀️', title: 'Exterior expuesto', desc: 'Polialuminio. Piscinas, jardines y zonas con lluvia directa o sol intenso.' },
+              { icon: CHOICE_ICONS.interior, title: 'Interior', desc: 'Mimbre natural. Ambientes climatizados con estética orgánica y calidez.' },
+              { icon: CHOICE_ICONS.cubierto, title: 'Exterior cubierto', desc: 'Ambos materiales. Terrazas techadas o balcones con luz solar indirecta.' },
+              { icon: CHOICE_ICONS.expuesto, title: 'Exterior expuesto', desc: 'Polialuminio. Piscinas, jardines y zonas con lluvia directa o sol intenso.' },
             ].map((item) => (
               <div key={item.title} className="flex gap-4">
-                <span className="text-2xl mt-0.5">{item.icon}</span>
+                <span className="mt-0.5">{item.icon}</span>
                 <div>
                   <p
                     style={{

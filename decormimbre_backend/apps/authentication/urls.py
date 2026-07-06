@@ -3,6 +3,7 @@ from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
 from .views import (
     CustomTokenObtainPairView, MeView,
     UsuarioListCreateView, UsuarioDetailView,
+    RegistroClienteView, MisNotificacionesView, MarcarNotificacionLeidaView,
 )
 
 urlpatterns = [
@@ -12,4 +13,7 @@ urlpatterns = [
     path("me/", MeView.as_view(), name="me"),
     path("usuarios/", UsuarioListCreateView.as_view(), name="usuarios_list_create"),
     path("usuarios/<uuid:pk>/", UsuarioDetailView.as_view(), name="usuarios_detail"),
+    path("registro/", RegistroClienteView.as_view(), name="registro_cliente"),
+    path("notificaciones/", MisNotificacionesView.as_view(), name="mis_notificaciones"),
+    path("notificaciones/<uuid:pk>/leer/", MarcarNotificacionLeidaView.as_view(), name="leer_notificacion"),
 ]

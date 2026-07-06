@@ -1,13 +1,14 @@
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
 from utils.responses import success_response, error_response
 from utils.pagination import StandardPagination
-from .models import Usuario, LogActividad
+from .models import Usuario, LogActividad, Notificacion
 from .serializers import (
     UsuarioSerializer, UsuarioCreateSerializer,
     UsuarioUpdateSerializer, LogActividadSerializer,
+    RegistroClienteSerializer, NotificacionSerializer,
 )
 from .permissions import IsAdmin, IsAdminOrPropietario
 from .throttles import LoginRateThrottle
@@ -111,3 +112,67 @@ class LogActividadListView(APIView):
             qs = qs.filter(accion=accion)
         page = paginator.paginate_queryset(qs, request)
         return paginator.get_paginated_response(LogActividadSerializer(page, many=True).data)
+
+
+class RegistroClienteView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = RegistroClienteSerializer(data=request.data)
+        if not serializer.is_valid():
+            return error_response("VALIDACION_ERROR", str(serializer.errors))
+
+        data = serializer.validated_data
+
+        usuario = Usuario(
+            email=data["email"],
+            nombre=data["nombre"],
+            rol="CLIENTE",
+        )
+        usuario.set_password(data["password"])
+        usuario.save()
+
+        from apps.clientes.models import Cliente
+        # cedula_ruc is required/unique; use a traceable placeholder until the client completes their profile
+        cedula_placeholder = f"W{str(usuario.id).replace('-', '')[:9]}"
+        Cliente.objects.create(
+            nombre_completo=data["nombre"],
+            email=data["email"],
+            telefono=data["telefono"],
+            cedula_ruc=cedula_placeholder,
+            usuario_cuenta=usuario,
+        )
+
+        return success_response(
+            data={"id": str(usuario.id), "email": usuario.email, "nombre": usuario.nombre},
+            message="Cuenta creada exitosamente.",
+            status_code=status.HTTP_201_CREATED,
+        )
+
+
+class MisNotificacionesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        qs = Notificacion.objects.filter(
+            destinatario=request.user,
+            leida=False,
+        )
+        return success_response(data=NotificacionSerializer(qs, many=True).data)
+
+
+class MarcarNotificacionLeidaView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            notificacion = Notificacion.objects.get(pk=pk, destinatario=request.user)
+        except Notificacion.DoesNotExist:
+            return error_response(
+                "RECURSO_NO_ENCONTRADO",
+                "Notificación no encontrada.",
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+        notificacion.leida = True
+        notificacion.save(update_fields=["leida"])
+        return success_response(message="Notificación marcada como leída.")

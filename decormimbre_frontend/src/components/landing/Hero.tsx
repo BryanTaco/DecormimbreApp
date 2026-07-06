@@ -5,10 +5,10 @@ import { ArrowRight } from 'lucide-react'
 import Navbar from './Navbar'
 
 const BG_IMAGES = [
-  'https://images.unsplash.com/photo-1593062096033-9a26b09da705?w=1920&q=85&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1920&q=85&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&q=85&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1629079447777-1e605162dc8d?w=1920&q=85&auto=format&fit=crop',
+  '/products/sofa-serena.jpg',
+  '/products/silla-nido.jpg',
+  '/products/set-exterior.jpg',
+  '/products/silla-sierra.jpg',
 ]
 
 const SLIDES = [
@@ -52,7 +52,7 @@ export default function Hero() {
                     src={src}
                     alt=""
                     className="w-full h-full object-cover hero-kb"
-                    style={{ animationDuration: '7s' }}
+                    style={{ animationDuration: '7s', objectPosition: 'center' }}
                   />
                 </motion.div>
               )}

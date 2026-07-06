@@ -3,48 +3,12 @@ import { ArrowUpRight, ArrowRight } from 'lucide-react'
 import { motion } from 'motion/react'
 
 const CATALOG_ITEMS = [
-  {
-    img: 'https://images.unsplash.com/photo-1593062096033-9a26b09da705?w=700&q=85&auto=format&fit=crop&crop=center',
-    category: 'Sala',
-    name: 'Sofá Serena',
-    material: 'Polialuminio & Mimbre',
-    price: 'Desde $620',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=700&q=85&auto=format&fit=crop&crop=center',
-    category: 'Sala',
-    name: 'Silla Nido',
-    material: 'Mimbre Natural',
-    price: 'Desde $185',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1629079447777-1e605162dc8d?w=700&q=85&auto=format&fit=crop&crop=center',
-    category: 'Exterior',
-    name: 'Set Jardín',
-    material: 'Polialuminio',
-    price: 'Desde $890',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1613052440827-2f5a9a48f5b4?w=700&q=85&auto=format&fit=crop&crop=center',
-    category: 'Comedor',
-    name: 'Silla Sierra',
-    material: 'Polialuminio',
-    price: 'Desde $95',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1567538096621-38d2284b23ff?w=700&q=85&auto=format&fit=crop&crop=center',
-    category: 'Sala',
-    name: 'Butaca Nido',
-    material: 'Mimbre Natural',
-    price: 'Desde $185',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=85&auto=format&fit=crop&crop=center',
-    category: 'Accesorios',
-    name: 'Cestas Artesanales',
-    material: 'Mimbre Natural',
-    price: 'Desde $45',
-  },
+  { img: '/products/sofa-serena.jpg',  category: 'Sala',        name: 'Sofá Serena',         material: 'Polialuminio & Mimbre', price: 'Desde $620' },
+  { img: '/products/silla-nido.jpg',   category: 'Sala',        name: 'Silla Nido',           material: 'Mimbre Natural',        price: 'Desde $185' },
+  { img: '/products/set-exterior.jpg', category: 'Exterior',    name: 'Set Jardín',           material: 'Polialuminio',          price: 'Desde $890' },
+  { img: '/products/silla-sierra.jpg', category: 'Comedor',     name: 'Silla Sierra',         material: 'Polialuminio',          price: 'Desde $95'  },
+  { img: '/products/silla-nido.jpg',   category: 'Sala',        name: 'Butaca Nido',          material: 'Mimbre Natural',        price: 'Desde $185' },
+  { img: '/products/cestas.jpg',       category: 'Accesorios',  name: 'Cestas Artesanales',   material: 'Mimbre Natural',        price: 'Desde $45'  },
 ]
 
 export default function CatalogSection() {

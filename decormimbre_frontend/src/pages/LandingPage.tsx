@@ -5,6 +5,7 @@ import MaterialsSection from '@/components/landing/MaterialsSection'
 import ProcessSection from '@/components/landing/ProcessSection'
 import ContactSection from '@/components/landing/ContactSection'
 import Footer from '@/components/landing/Footer'
+import AiAssistant from '@/components/AiAssistant'
 
 export default function LandingPage() {
   return (
@@ -16,6 +17,7 @@ export default function LandingPage() {
       <ProcessSection />
       <ContactSection />
       <Footer />
+      <AiAssistant />
     </main>
   )
 }

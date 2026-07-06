@@ -1,29 +1,79 @@
 @import "tailwindcss";
 @import "@fontsource-variable/cormorant";
 @import "@fontsource-variable/dm-sans";
+@import "@fontsource-variable/playfair-display";
 
+/* ─── Tema de fuentes ─────────────────────────────────────────────────────── */
 @theme {
-  --font-display: 'Cormorant Variable', Georgia, 'Times New Roman', serif;
+  --font-display: 'Cormorant Variable', 'Playfair Display Variable', Georgia, 'Times New Roman', serif;
+  --font-heading: 'Playfair Display Variable', 'Cormorant Variable', Georgia, serif;
   --font-body: 'DM Sans Variable', system-ui, -apple-system, sans-serif;
 }
 
+/* ─── Base ────────────────────────────────────────────────────────────────── */
 :root {
   font-family: var(--font-body);
   font-size: 16px;
+  line-height: 1.6;
+
+  /* Escala tipográfica */
+  --text-xs:   0.6875rem;   /* 11px */
+  --text-sm:   0.8125rem;   /* 13px */
+  --text-base: 0.9375rem;   /* 15px */
+  --text-lg:   1.0625rem;   /* 17px */
+  --text-xl:   1.25rem;     /* 20px */
+  --text-2xl:  1.5rem;      /* 24px */
+  --text-3xl:  1.875rem;    /* 30px */
+
+  /* Paleta de marca */
+  --color-wood:    #5C4033;
+  --color-wood-dk: #3d2215;
+  --color-cream:   #f5f0eb;
+  --color-sand:    #C4A882;
 }
 
 body {
   margin: 0;
   overflow-x: hidden;
-  background-color: #f5f0eb;
+  background-color: var(--color-cream);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* Hero Ken Burns */
+/* ─── Tipografía de display (Cormorant) ──────────────────────────────────── */
+.font-display,
+[data-display] {
+  font-family: var(--font-display);
+  font-feature-settings: "kern" 1, "liga" 1, "onum" 1, "swsh" 1;
+  font-variant-ligatures: common-ligatures;
+}
+
+/* ─── Tipografía de heading (Playfair) ───────────────────────────────────── */
+.font-heading,
+[data-heading] {
+  font-family: var(--font-heading);
+  font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
+}
+
+/* ─── Cuerpo de texto ────────────────────────────────────────────────────── */
+.font-body,
+[data-body] {
+  font-family: var(--font-body);
+  font-feature-settings: "kern" 1, "ss01" 1;
+}
+
+/* ─── Números tabulares para precios ─────────────────────────────────────── */
+.tabular-nums {
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Hero Ken Burns ─────────────────────────────────────────────────────── */
 @keyframes kenBurns {
   0%   { transform: scale(1.06) translate(0, 0); }
   100% { transform: scale(1) translate(-1%, 0.5%); }
@@ -32,3 +82,16 @@ body {
 .hero-kb {
   animation: kenBurns 7s ease-out forwards;
 }
+
+/* ─── Smooth focus ───────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid rgba(92, 64, 51, 0.5);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ─── Scrollbar sutil ────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(92,64,51,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(92,64,51,0.35); }

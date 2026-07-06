@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { useAuthStore } from '@/store/auth'
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -25,8 +26,17 @@ api.interceptors.response.use(
           original.headers.Authorization = `Bearer ${data.access}`
           return api(original)
         } catch {
-          localStorage.clear()
+          useAuthStore.getState().clearAuth()
+          const rol = useAuthStore.getState().user?.rol
+          window.location.href = rol === 'CLIENTE' ? '/login' : '/admin/login'
+        }
+      } else {
+        useAuthStore.getState().clearAuth()
+        const path = window.location.pathname
+        if (path.startsWith('/admin')) {
           window.location.href = '/admin/login'
+        } else if (path.startsWith('/cuenta')) {
+          window.location.href = '/login'
         }
       }
     }

@@ -20,6 +20,14 @@ class Cliente(models.Model):
     activo = models.BooleanField(default=True)
     fecha_registro = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
+    usuario_cuenta = models.OneToOneField(
+        "authentication.Usuario",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cliente_vinculado",
+        help_text="Cuenta de acceso del cliente al portal web",
+    )
     creado_por = models.ForeignKey(
         "authentication.Usuario",
         on_delete=models.SET_NULL,
