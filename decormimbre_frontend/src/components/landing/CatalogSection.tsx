@@ -1,17 +1,20 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowUpRight, ArrowRight } from 'lucide-react'
 import { motion } from 'motion/react'
+import FichaTecnica, { type Producto } from './FichaTecnica'
 
 const CATALOG_ITEMS = [
-  { img: '/products/silla-circular.jpg',    category: 'Sala',       name: 'Silla Orbital',        material: 'Mimbre Natural',        price: 'Desde $195' },
-  { img: '/products/set-comedor.jpg',       category: 'Comedor',    name: 'Set Comedor',           material: 'Polialuminio',          price: 'Desde $890' },
-  { img: '/products/loveseat-riviera.jpg',  category: 'Exterior',   name: 'Loveseat Riviera',      material: 'Mimbre Natural',        price: 'Desde $520' },
-  { img: '/products/sala-ebano.jpg',        category: 'Sala',       name: 'Set Sala Ébano',        material: 'Polialuminio',          price: 'Desde $780' },
-  { img: '/products/set-exterior-nido.jpg', category: 'Exterior',   name: 'Set Jardín Nido',       material: 'Polialuminio',          price: 'Desde $940' },
-  { img: '/products/butacas-artesanales.jpg', category: 'Sala',     name: 'Butacas Artesanales',   material: 'Mimbre Natural',        price: 'Desde $320' },
+  { img: '/products/papasan-set.jpg',        category: 'Sala',       name: 'Sillas Nido',          material: 'Mimbre Natural',        price: 'Desde $195' },
+  { img: '/products/comedor-tejido.jpg',     category: 'Comedor',    name: 'Set Comedor',           material: 'Mimbre & Madera',       price: 'Desde $890' },
+  { img: '/products/set-sala-tejido.jpg',    category: 'Sala',       name: 'Sala Tejida',           material: 'Mimbre Natural',        price: 'Desde $780' },
+  { img: '/products/sala-modular-oscura.jpg', category: 'Sala',      name: 'Set Sala Ébano',        material: 'Polialuminio',          price: 'Desde $820' },
+  { img: '/products/set-exterior-huevo.jpg', category: 'Exterior',   name: 'Set Jardín Nido',       material: 'Polialuminio',          price: 'Desde $940' },
+  { img: '/products/butacas-sunroom.jpg',    category: 'Sala',       name: 'Butacas Artesanales',   material: 'Mimbre Natural',        price: 'Desde $320' },
 ]
 
 export default function CatalogSection() {
+  const [ficha, setFicha] = useState<Producto | null>(null)
   return (
     <section className="bg-white py-24 px-6 md:px-10">
       <div className="max-w-6xl mx-auto">
@@ -80,7 +83,7 @@ export default function CatalogSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.07 }}
             >
-              <Link to="/catalogo" style={{ textDecoration: 'none', display: 'block' }}>
+              <div onClick={() => setFicha(item)} style={{ display: 'block' }}>
                 <div className="group rounded-[1.5rem] overflow-hidden border border-[rgba(92,64,51,0.07)] hover:shadow-xl transition-shadow duration-400 bg-[#f5f0eb] cursor-pointer">
                   <div className="relative overflow-hidden" style={{ paddingBottom: '70%', position: 'relative' }}>
                     <img
@@ -165,11 +168,12 @@ export default function CatalogSection() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             </motion.div>
           ))}
         </div>
       </div>
+      <FichaTecnica producto={ficha} onClose={() => setFicha(null)} />
     </section>
   )
 }

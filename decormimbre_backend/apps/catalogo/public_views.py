@@ -1,7 +1,7 @@
 from rest_framework import serializers, status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
-from utils.responses import success_response, error_response
+from utils.responses import success_response, error_response, validation_error_response
 from apps.authentication.models import Notificacion, Usuario
 
 
@@ -30,7 +30,7 @@ class CotizacionRapidaView(APIView):
     def post(self, request):
         serializer = CotizacionRapidaSerializer(data=request.data)
         if not serializer.is_valid():
-            return error_response("VALIDACION_ERROR", str(serializer.errors))
+            return validation_error_response(serializer)
 
         data = serializer.validated_data
 

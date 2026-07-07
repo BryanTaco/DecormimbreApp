@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { LayoutDashboard, FileText, Package, LogOut, User } from 'lucide-react'
+import { LayoutDashboard, FileText, Package, LogOut } from 'lucide-react'
 import { useAuthStore } from '@/store/auth'
 import Logo from '@/components/landing/Logo'
 import { useEffect } from 'react'

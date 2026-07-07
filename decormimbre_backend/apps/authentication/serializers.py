@@ -34,11 +34,33 @@ class UsuarioCreateSerializer(serializers.ModelSerializer):
 
 
 class UsuarioUpdateSerializer(serializers.ModelSerializer):
+    """Actualización administrativa: permite cambiar rol y estado. Solo para IsAdmin."""
     password = serializers.CharField(write_only=True, min_length=8, required=False)
 
     class Meta:
         model = Usuario
         fields = ["nombre", "email", "rol", "activo", "password"]
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop("password", None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
+
+class PerfilUpdateSerializer(serializers.ModelSerializer):
+    """
+    Actualización del propio perfil (PUT /me/).
+    NO expone 'rol' ni 'activo' para evitar escalada de privilegios.
+    """
+    password = serializers.CharField(write_only=True, min_length=8, required=False)
+
+    class Meta:
+        model = Usuario
+        fields = ["nombre", "email", "password"]
 
     def update(self, instance, validated_data):
         password = validated_data.pop("password", None)

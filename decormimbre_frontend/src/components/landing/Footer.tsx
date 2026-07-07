@@ -1,5 +1,21 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Logo from './Logo'
+import { EMPRESA, waLink } from '@/lib/empresa'
+
+function FooterBrand() {
+  const [imgOk, setImgOk] = useState(true)
+  return imgOk ? (
+    <img
+      src="/brand/Logo.png"
+      alt="Decormimbre"
+      onError={() => setImgOk(false)}
+      style={{ height: 34, width: 'auto', objectFit: 'contain', display: 'block' }}
+    />
+  ) : (
+    <Logo color="rgba(255,255,255,0.7)" size={30} />
+  )
+}
 
 const LINKS = [
   { label: 'Catálogo', to: '/catalogo' },
@@ -23,7 +39,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link to="/" className="flex items-center gap-2.5 no-underline mb-4">
-              <Logo color="rgba(255,255,255,0.7)" size={30} />
+              <FooterBrand />
               <span
                 style={{
                   fontFamily: 'var(--font-display)',
@@ -109,9 +125,15 @@ export default function Footer() {
                 className="flex flex-col gap-2"
                 style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'rgba(255,255,255,0.45)', fontWeight: 300 }}
               >
-                <span>info@decormimbre.ec</span>
-                <span>+593 99 000 0000</span>
-                <span>Quito, Ecuador</span>
+                <a href={`mailto:${EMPRESA.email}`} style={{ color: 'rgba(255,255,255,0.55)', textDecoration: 'none' }}>
+                  {EMPRESA.email}
+                </a>
+                <a href={waLink()} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.55)', textDecoration: 'none' }}>
+                  WhatsApp {EMPRESA.whatsappDisplay}
+                </a>
+                <span>{EMPRESA.telefonoFijo}</span>
+                <span>Versalles N23-56 y Marchena</span>
+                <span>{EMPRESA.ciudad}</span>
               </div>
             </div>
           </div>
@@ -142,7 +164,7 @@ export default function Footer() {
               fontWeight: 300,
             }}
           >
-            Arte artesanal ecuatoriano desde 2009
+            Arte artesanal ecuatoriano desde 1999
           </p>
         </div>
       </div>

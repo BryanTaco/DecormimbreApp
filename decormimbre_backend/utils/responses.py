@@ -17,6 +17,32 @@ def error_response(code, message, field=None, status_code=status.HTTP_400_BAD_RE
     return Response({"success": False, "error": error}, status=status_code)
 
 
+def validation_error_response(serializer, status_code=status.HTTP_400_BAD_REQUEST):
+    """
+    Construye una respuesta de error de validación limpia a partir de un serializer.
+
+    Extrae el primer campo con error y su primer mensaje, sin exponer la
+    representación interna del dict de errores de DRF (ErrorDetail/codes).
+    """
+    errors = serializer.errors
+    field = None
+    message = "Datos inválidos."
+    if isinstance(errors, dict) and errors:
+        field, messages = next(iter(errors.items()))
+        if isinstance(messages, (list, tuple)) and messages:
+            message = str(messages[0])
+        else:
+            message = str(messages)
+        if field == "non_field_errors":
+            field = None
+    return error_response(
+        "VALIDACION_ERROR",
+        message,
+        field=field,
+        status_code=status_code,
+    )
+
+
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
     if response is None:

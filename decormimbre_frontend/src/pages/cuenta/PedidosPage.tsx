@@ -10,7 +10,8 @@ const PROGRESO: Record<string, number> = {
 const ESTADO_LABEL: Record<string, string> = {
   PENDIENTE: 'Pendiente', EN_PRODUCCION: 'En producción', LISTO: 'Listo', EN_ENTREGA: 'En camino', ENTREGADO: 'Entregado',
 }
-const ESTADO_ICON: Record<string, React.ElementType> = {
+type IconComponent = React.ComponentType<{ size?: number; color?: string }>
+const ESTADO_ICON: Record<string, IconComponent> = {
   PENDIENTE: Clock, EN_PRODUCCION: Wrench, LISTO: CheckCircle2, EN_ENTREGA: Truck, ENTREGADO: CheckCircle2,
 }
 

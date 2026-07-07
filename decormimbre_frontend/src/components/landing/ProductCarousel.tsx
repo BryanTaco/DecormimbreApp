@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import FichaTecnica, { type Producto } from './FichaTecnica'
 
 const PRODUCTS = [
   {
@@ -36,22 +37,33 @@ const PRODUCTS = [
     description: 'Juego de exterior en polialuminio trenzado oscuro. Sofá + 2 sillones + mesa. Resistente a lluvia, UV y temperatura.',
     material: 'Polialuminio',
     price: 'Desde $940',
-    src: '/products/set-exterior-nido.jpg',
+    src: '/products/set-exterior-huevo.jpg',
     bg: '#3D5A40',
+  },
+  {
+    name: 'Sillones Ventanal',
+    collection: 'Colección Luz',
+    description: 'Sillones de mimbre tejido junto al ventanal. Textura natural y curvas envolventes para espacios luminosos.',
+    material: 'Mimbre Natural',
+    price: 'Desde $360',
+    src: '/products/sillones-ventanal.jpg',
+    bg: '#9B7B5A',
   },
 ]
 
 type Role = 'center' | 'left' | 'right' | 'back'
 
-function CardItem({ product, role }: { product: (typeof PRODUCTS)[0]; role: Role }) {
+function CardItem({ product, role, onExpand }: { product: (typeof PRODUCTS)[0]; role: Role; onExpand?: () => void }) {
   const isCenter = role === 'center'
   const isBack = role === 'back'
 
+  // Tarjetas laterales más separadas del borde y más difuminadas → el producto
+  // central queda claramente en foco (padding visual en el fondo).
   const TRANSFORMS: Record<Role, React.CSSProperties> = {
-    center: { position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%) scale(1)', width: 'min(340px, 72vw)', zIndex: 20, opacity: 1, filter: 'none' },
-    left: { position: 'absolute', left: '14%', top: '50%', transform: 'translate(-50%, -50%) scale(0.78) rotate(-4deg)', width: 'min(280px, 56vw)', zIndex: 10, opacity: 0.7, filter: 'blur(1.5px)' },
-    right: { position: 'absolute', left: '86%', top: '50%', transform: 'translate(-50%, -50%) scale(0.78) rotate(4deg)', width: 'min(280px, 56vw)', zIndex: 10, opacity: 0.7, filter: 'blur(1.5px)' },
-    back: { position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%) scale(0.55)', width: 'min(260px, 50vw)', zIndex: 5, opacity: 0, filter: 'blur(4px)' },
+    center: { position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%) scale(1)', width: 'min(360px, 74vw)', zIndex: 20, opacity: 1, filter: 'none' },
+    left: { position: 'absolute', left: '20%', top: '50%', transform: 'translate(-50%, -50%) scale(0.66) rotate(-4deg)', width: 'min(240px, 50vw)', zIndex: 10, opacity: 0.4, filter: 'blur(3px)' },
+    right: { position: 'absolute', left: '80%', top: '50%', transform: 'translate(-50%, -50%) scale(0.66) rotate(4deg)', width: 'min(240px, 50vw)', zIndex: 10, opacity: 0.4, filter: 'blur(3px)' },
+    back: { position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%) scale(0.5)', width: 'min(240px, 46vw)', zIndex: 5, opacity: 0, filter: 'blur(5px)' },
   }
 
   return (
@@ -78,6 +90,13 @@ function CardItem({ product, role }: { product: (typeof PRODUCTS)[0]; role: Role
               <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{product.material}</span>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'rgba(255,255,255,0.85)', fontStyle: 'italic' }}>{product.price}</span>
             </div>
+            <button
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); onExpand?.() }}
+              style={{ marginTop: 14, width: '100%', padding: '10px 14px', borderRadius: 99, border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600, letterSpacing: '0.04em' }}
+            >
+              Ver ficha técnica
+            </button>
           </>
         )}
       </div>
@@ -86,9 +105,16 @@ function CardItem({ product, role }: { product: (typeof PRODUCTS)[0]; role: Role
 }
 
 export default function ProductCarousel() {
+  const N = PRODUCTS.length
   const [activeIndex, setActiveIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [ficha, setFicha] = useState<Producto | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const dragX = useRef<number | null>(null)
+
+  const toFicha = (p: (typeof PRODUCTS)[0]): Producto => ({
+    img: p.src, name: p.name, collection: p.collection, material: p.material, price: p.price, desc: p.description,
+  })
 
   useEffect(() => {
     PRODUCTS.forEach((p) => { const img = new Image(); img.src = p.src })
@@ -97,15 +123,34 @@ export default function ProductCarousel() {
   const navigate = (dir: 'next' | 'prev') => {
     if (isAnimating) return
     setIsAnimating(true)
-    setActiveIndex((prev) => (dir === 'next' ? (prev + 1) % 4 : (prev + 3) % 4))
+    setActiveIndex((prev) => (dir === 'next' ? (prev + 1) % N : (prev - 1 + N) % N))
     timerRef.current = setTimeout(() => setIsAnimating(false), 650)
   }
 
-  const roles: Record<number, Role> = {
-    [activeIndex]: 'center',
-    [(activeIndex + 3) % 4]: 'left',
-    [(activeIndex + 1) % 4]: 'right',
-    [(activeIndex + 2) % 4]: 'back',
+  const goTo = (i: number) => {
+    if (isAnimating || i === activeIndex) return
+    setIsAnimating(true)
+    setActiveIndex(i)
+    setTimeout(() => setIsAnimating(false), 650)
+  }
+
+  // Arrastrar / deslizar para cambiar de producto
+  const onPointerDown = (e: React.PointerEvent) => {
+    dragX.current = e.clientX
+    try { e.currentTarget.setPointerCapture(e.pointerId) } catch { /* noop */ }
+  }
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (dragX.current === null) return
+    const dx = e.clientX - dragX.current
+    dragX.current = null
+    if (Math.abs(dx) > 45) navigate(dx < 0 ? 'next' : 'prev')
+  }
+
+  const roleFor = (idx: number): Role => {
+    if (idx === activeIndex) return 'center'
+    if (idx === (activeIndex - 1 + N) % N) return 'left'
+    if (idx === (activeIndex + 1) % N) return 'right'
+    return 'back'
   }
 
   const activeProd = PRODUCTS[activeIndex]
@@ -118,10 +163,19 @@ export default function ProductCarousel() {
       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 1, overflow: 'hidden' }}>
         <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(80px, 22vw, 320px)', fontWeight: 700, fontStyle: 'italic', color: 'rgba(255,255,255,0.05)', lineHeight: 1, letterSpacing: '-0.03em', whiteSpace: 'nowrap', filter: 'blur(2px)', userSelect: 'none' }}>DECORMIMBRE</span>
       </div>
+      {/* Viñeta radial: oscurece los bordes para enfocar el producto central */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 8, pointerEvents: 'none', background: 'radial-gradient(ellipse 60% 70% at 50% 50%, transparent 40%, rgba(0,0,0,0.45) 100%)' }} />
 
       <div style={{ position: 'relative', height: '100vh', maxHeight: 720, minHeight: 560 }}>
-        <div style={{ position: 'absolute', inset: 0, zIndex: 10 }}>
-          {PRODUCTS.map((product, idx) => <CardItem key={idx} product={product} role={roles[idx]} />)}
+        {/* Zona de arrastre para deslizar entre productos */}
+        <div
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          style={{ position: 'absolute', inset: 0, zIndex: 10, cursor: 'grab', touchAction: 'pan-y' }}
+        >
+          {PRODUCTS.map((product, idx) => (
+            <CardItem key={idx} product={product} role={roleFor(idx)} onExpand={() => setFicha(toFicha(product))} />
+          ))}
         </div>
 
         <div style={{ position: 'absolute', top: 28, left: 24, zIndex: 60 }}>
@@ -130,19 +184,16 @@ export default function ProductCarousel() {
 
         <div style={{ position: 'absolute', bottom: 32, left: 24, right: 24, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div className="flex items-center gap-3">
-            {([{ dir: 'prev' as const, Icon: ArrowLeft }, { dir: 'next' as const, Icon: ArrowRight }]).map(({ dir, Icon }) => (
-              <button key={dir} onClick={() => navigate(dir)} style={{ width: 48, height: 48, borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 200ms' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.18)'; e.currentTarget.style.transform = 'scale(1.06)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'scale(1)' }}>
-                <Icon size={18} strokeWidth={2} />
-              </button>
-            ))}
-            <div className="flex items-center gap-1.5 ml-2">
+            {/* Indicadores (puntos) — clic o desliza para cambiar */}
+            <div className="flex items-center gap-1.5">
               {PRODUCTS.map((_, i) => (
-                <button key={i} onClick={() => { if (!isAnimating) { setIsAnimating(true); setActiveIndex(i); setTimeout(() => setIsAnimating(false), 650) } }}
-                  style={{ width: i === activeIndex ? 20 : 6, height: 4, borderRadius: 2, background: i === activeIndex ? '#fff' : 'rgba(255,255,255,0.35)', border: 'none', cursor: 'pointer', padding: 0, transition: 'all 400ms ease' }} />
+                <button key={i} onClick={() => goTo(i)} aria-label={`Producto ${i + 1}`}
+                  style={{ width: i === activeIndex ? 22 : 7, height: 5, borderRadius: 3, background: i === activeIndex ? '#fff' : 'rgba(255,255,255,0.35)', border: 'none', cursor: 'pointer', padding: 0, transition: 'all 400ms ease' }} />
               ))}
             </div>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', marginLeft: 6, userSelect: 'none' }}>
+              ← Desliza para explorar →
+            </span>
           </div>
           <Link to="/catalogo" style={{ textDecoration: 'none' }}>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 2.5vw, 28px)', fontStyle: 'italic', color: 'rgba(255,255,255,0.88)', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
@@ -151,6 +202,8 @@ export default function ProductCarousel() {
           </Link>
         </div>
       </div>
+
+      <FichaTecnica producto={ficha} onClose={() => setFicha(null)} />
     </section>
   )
 }

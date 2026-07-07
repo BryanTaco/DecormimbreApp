@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, ListAPIView
 from rest_framework.views import APIView
-from utils.responses import success_response, error_response
+from utils.responses import success_response, error_response, validation_error_response
 from utils.pagination import StandardPagination
 from apps.authentication.permissions import IsAdminOrPropietario
 from .models import MateriaPrima, Lote, MovimientoInventario, AlertaStock
@@ -35,7 +35,7 @@ class MateriaPrimaListCreateView(ListCreateAPIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Materia prima creada.", status_code=status.HTTP_201_CREATED)
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class MateriaPrimaDetailView(RetrieveUpdateAPIView):
@@ -51,7 +51,7 @@ class MateriaPrimaDetailView(RetrieveUpdateAPIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Materia prima actualizada.")
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class LoteListCreateView(ListCreateAPIView):
@@ -77,7 +77,7 @@ class LoteListCreateView(ListCreateAPIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Lote registrado.", status_code=status.HTTP_201_CREATED)
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class MovimientoListView(ListAPIView):
@@ -105,7 +105,7 @@ class AjusteCreateView(APIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Ajuste registrado.", status_code=status.HTTP_201_CREATED)
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class AlertaStockListView(ListAPIView):

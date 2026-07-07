@@ -109,6 +109,8 @@ REST_FRAMEWORK = {
         "anon": "100/hour",
         "user": "1000/hour",
         "login": "5/15min",
+        "tracking": "20/min",
+        "asistente": "30/hour",
     },
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.NamespaceVersioning",
     "DEFAULT_VERSION": "v1",
@@ -156,6 +158,11 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Decormimbre <noreply@dec
 
 # ── Negocio ────────────────────────────────────────────────────────────────────
 IVA_PORCENTAJE = Decimal("0.15")
+
+# ── Asistente virtual (Claude / Anthropic) ─────────────────────────────────────
+# Si ANTHROPIC_API_KEY está vacío, el asistente usa un respondedor local de reserva.
+ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
+ASISTENTE_MODEL = env("ASISTENTE_MODEL", default="claude-opus-4-8")
 
 # ── Internacionalización ───────────────────────────────────────────────────────
 LANGUAGE_CODE = "es-ec"

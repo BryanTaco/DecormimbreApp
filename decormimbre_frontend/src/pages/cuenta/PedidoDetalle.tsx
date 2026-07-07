@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowLeft, CheckCircle2, Clock, Wrench, Truck, Package, MapPin } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Wrench, Truck, Package } from 'lucide-react'
 import { getMiPedido } from '@/api/authApi'
 
 const TIMELINE_STEPS = [

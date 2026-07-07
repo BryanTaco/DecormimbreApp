@@ -73,6 +73,27 @@ def test_me_sin_auth_retorna_401():
     assert r.status_code == 401
 
 
+@pytest.mark.django_db
+def test_me_no_permite_escalar_rol(api_prop):
+    """Un usuario no debe poder cambiar su propio rol vía PUT /me/ (escalada de privilegios)."""
+    client, prop = api_prop
+    r = client.put(reverse("v1:me"), {"rol": "ADMIN"})
+    assert r.status_code == 200
+    prop.refresh_from_db()
+    assert prop.rol == "PROPIETARIO"  # el rol NO cambió
+    assert not prop.is_admin
+
+
+@pytest.mark.django_db
+def test_me_no_permite_cambiar_activo(api_prop):
+    """PUT /me/ no debe permitir modificar el campo 'activo'."""
+    client, prop = api_prop
+    r = client.put(reverse("v1:me"), {"activo": False})
+    assert r.status_code == 200
+    prop.refresh_from_db()
+    assert prop.activo is True  # sigue activo
+
+
 # ── Gestión de usuarios (solo ADMIN) ──────────────────────────────────────────
 
 @pytest.mark.django_db

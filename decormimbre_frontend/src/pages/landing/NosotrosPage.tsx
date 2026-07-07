@@ -3,9 +3,11 @@ import { motion } from 'motion/react'
 import { ArrowLeft, ArrowUpRight } from 'lucide-react'
 import Navbar from '@/components/landing/Navbar'
 import MaterialsSection from '@/components/landing/MaterialsSection'
+import MapEmbed from '@/components/landing/MapEmbed'
+import AiAssistant from '@/components/AiAssistant'
 
 const VALORES = [
-  { num: '+15', label: 'Años de experiencia', desc: 'Tejiendo muebles artesanales desde 2009 en el Ecuador.' },
+  { num: '+25', label: 'Años de experiencia', desc: 'Tejiendo muebles artesanales desde 1999 en el Ecuador.' },
   { num: '+2000', label: 'Piezas entregadas', desc: 'Cada una única, diseñada y tejida para un cliente específico.' },
   { num: '100%', label: 'Artesanía manual', desc: 'Ningún mueble sale de una máquina. Todo pasa por manos expertas.' },
   { num: '0', label: 'Piezas en stock', desc: 'Producimos bajo pedido. Tu mueble es exclusivo, no seriado.' },
@@ -21,8 +23,8 @@ export default function NosotrosPage() {
       {/* Hero */}
       <div className="relative overflow-hidden" style={{ height: '55vh', minHeight: 400 }}>
         <img
-          src="https://images.unsplash.com/photo-1593062096033-9a26b09da705?w=1920&q=85&auto=format&fit=crop"
-          alt="Artesanos Decormimbre"
+          src="/products/hero-sala-quito.jpg"
+          alt="Muebles artesanales Decormimbre"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div
@@ -112,10 +114,11 @@ export default function NosotrosPage() {
                 margin: '0 0 16px',
               }}
             >
-              Decormimbre nació en 2009 como un taller familiar en la sierra ecuatoriana.
-              Lo que empezó como un oficio transmitido de generación en generación se
-              convirtió en una empresa que respeta la técnica ancestral del tejido de mimbre
-              mientras la adapta a los espacios contemporáneos.
+              Fundada en 1999, Decormimbre es una empresa quiteña de fabricación, venta y
+              decoración de muebles, especializada en el arte del tejido de mimbre. Con más
+              de dos décadas de trayectoria, desde su taller y showroom en el sector de
+              Versalles, cerca del Mercado Santa Clara, ofrece muebles de mimbre y madera,
+              sofás, salas, comedores y complementos de decoración para el hogar.
             </p>
             <p
               style={{
@@ -127,9 +130,10 @@ export default function NosotrosPage() {
                 margin: 0,
               }}
             >
-              Cada pieza pasa por las manos de maestros artesanos que dedican entre 8 y 40
-              horas a su creación. No hay dos muebles iguales: las variaciones mínimas del
-              tejido son la firma de que algo fue hecho por una persona, no por una máquina.
+              Cada pieza pasa por las manos de maestros artesanos que combinan la técnica
+              ancestral del tejido con diseños contemporáneos. No hay dos muebles iguales:
+              las variaciones mínimas del tejido son la firma de que algo fue hecho por una
+              persona, no por una máquina.
             </p>
           </motion.div>
 
@@ -191,6 +195,161 @@ export default function NosotrosPage() {
         </div>
       </div>
 
+      {/* Qué hacemos + info de la empresa */}
+      <div className="bg-white py-20 px-6 md:px-10 border-t border-[rgba(92,64,51,0.06)]">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mb-12 max-w-2xl"
+          >
+            <span
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '10px',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.2em',
+                color: 'rgba(92,64,51,0.5)',
+              }}
+            >
+              Qué hacemos
+            </span>
+            <h2
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(28px, 4vw, 42px)',
+                fontWeight: 400,
+                fontStyle: 'italic',
+                color: '#3d2215',
+                letterSpacing: '-0.02em',
+                margin: '10px 0 0',
+                lineHeight: 1.15,
+              }}
+            >
+              Muebles y decoración hechos a mano
+            </h2>
+          </motion.div>
+
+          {/* Especialidades */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-14">
+            {[
+              { t: 'Muebles de mimbre', d: 'Tejido artesanal de fibra natural para interiores.' },
+              { t: 'Muebles de madera', d: 'Estructuras sólidas con acabados a medida.' },
+              { t: 'Sofás y salas', d: 'Juegos de sala cómodos y a la medida de tu espacio.' },
+              { t: 'Comedores', d: 'Mesas y sillas para el comedor, en mimbre o madera.' },
+              { t: 'Muebles de exterior', d: 'Polialuminio resistente al sol, la lluvia y el tiempo.' },
+              { t: 'Decoración del hogar', d: 'Cestas, accesorios y complementos artesanales.' },
+            ].map((s) => (
+              <motion.div
+                key={s.t}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45 }}
+                className="rounded-[1.25rem] p-5 border border-[rgba(92,64,51,0.08)] bg-[#f5f0eb]"
+              >
+                <p
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: 'rgba(92,64,51,0.9)',
+                    margin: '0 0 4px',
+                  }}
+                >
+                  {s.t}
+                </p>
+                <p
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '12px',
+                    color: 'rgba(92,64,51,0.55)',
+                    lineHeight: 1.5,
+                    margin: 0,
+                    fontWeight: 300,
+                  }}
+                >
+                  {s.d}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Datos de la empresa */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="rounded-[1.5rem] p-8 md:p-10 border border-[rgba(92,64,51,0.1)] bg-[#1e1008]"
+          >
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '10px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.2em',
+                color: 'rgba(255,255,255,0.4)',
+                margin: '0 0 20px',
+              }}
+            >
+              Decormimbre — Decoraciones
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+              {[
+                { label: 'Dónde estamos', value: 'Versalles N23-56, entre Mercadillo y Marchena, cerca del Mercado Santa Clara — Quito, Ecuador.' },
+                { label: 'Contacto', value: 'WhatsApp 098 057 2561\n(02) 256 4256\ndecormimbre@yahoo.com' },
+                { label: 'Especialidad', value: 'Muebles de mimbre y madera, sofás, salas, comedores y decoración para el hogar.' },
+              ].map((c) => (
+                <div key={c.label}>
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.14em',
+                      color: 'rgba(255,255,255,0.45)',
+                      margin: '0 0 8px',
+                    }}
+                  >
+                    {c.label}
+                  </p>
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '14px',
+                      color: 'rgba(255,255,255,0.8)',
+                      lineHeight: 1.6,
+                      margin: 0,
+                      fontWeight: 300,
+                      whiteSpace: 'pre-line',
+                    }}
+                  >
+                    {c.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Mapa de ubicación */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mt-6"
+          >
+            <MapEmbed height={340} />
+          </motion.div>
+        </div>
+      </div>
+
       {/* Sección materiales */}
       <MaterialsSection />
 
@@ -246,6 +405,7 @@ export default function NosotrosPage() {
           </Link>
         </motion.div>
       </div>
+      <AiAssistant />
     </div>
   )
 }

@@ -98,7 +98,7 @@ export default function Hero() {
               </span>
               <span className="w-8 h-px bg-white/40" />
               <span className="text-[10px] font-medium uppercase tracking-[0.28em] text-white/60">
-                Desde 2009
+                Desde 1999
               </span>
             </motion.div>
 
@@ -225,7 +225,7 @@ export default function Hero() {
             style={{ zIndex: 20 }}
           >
             {[
-              { num: '+15', label: 'años de experiencia' },
+              { num: '+25', label: 'años de experiencia' },
               { num: '+2000', label: 'piezas entregadas' },
               { num: '100%', label: 'artesanía ecuatoriana' },
             ].map((s) => (

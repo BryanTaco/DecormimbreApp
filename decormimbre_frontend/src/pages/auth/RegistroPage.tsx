@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, ArrowLeft, UserPlus } from 'lucide-react'
 import { motion } from 'motion/react'
-import { registrarCliente, loginCliente, getMe } from '@/api/authApi'
+import { registrarCliente, loginCliente } from '@/api/authApi'
 import { useAuthStore } from '@/store/auth'
 import Logo from '@/components/landing/Logo'
 

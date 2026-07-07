@@ -4,18 +4,30 @@ No requiere Redis ni Django Channels — usa long-polling sobre WSGI con Streami
 """
 import json
 import time
+from django.core.cache import cache
 from django.http import StreamingHttpResponse
-from django.shortcuts import get_object_or_404
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.authtoken.models import Token
 from .models import Pedido
-from .serializers import PedidoPublicoSerializer
 
 
 INTERVALO_POLL = 5  # segundos entre consultas a la BD
 TIMEOUT_MAX = 300    # cierra la conexión tras 5 min (cliente reconecta)
+
+# Límite de conexiones SSE simultáneas por IP (previene agotamiento de workers).
+# NOTA: con gunicorn WSGI síncrono cada conexión SSE ocupa un worker durante
+# hasta TIMEOUT_MAX segundos. En producción se debe usar un worker asíncrono
+# (--worker-class gevent) para que estas conexiones no bloqueen el servidor.
+MAX_SSE_POR_IP = 3
+SSE_LOCK_TTL = TIMEOUT_MAX + 10
+
+
+def _client_ip(request):
+    xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR", "unknown")
 
 
 def _snapshot_pedido(pedido):
@@ -47,31 +59,35 @@ def _snapshot_pedido(pedido):
     }
 
 
-def _sse_stream(pedido):
+def _sse_stream(pedido, on_close=None):
     """Generador que emite eventos SSE hasta que el pedido está en estado final."""
     estados_finales = {"ENTREGADO", "CANCELADO"}
     elapsed = 0
     ultimo_estado = None
 
-    while elapsed < TIMEOUT_MAX:
-        snapshot = _snapshot_pedido(pedido)
-        estado_actual = snapshot["estado"]
+    try:
+        while elapsed < TIMEOUT_MAX:
+            snapshot = _snapshot_pedido(pedido)
+            estado_actual = snapshot["estado"]
 
-        # Solo emitir si hay cambio (o es la primera vez)
-        if snapshot != ultimo_estado:
-            payload = json.dumps(snapshot, ensure_ascii=False)
-            yield f"data: {payload}\n\n"
-            ultimo_estado = snapshot
+            # Solo emitir si hay cambio (o es la primera vez)
+            if snapshot != ultimo_estado:
+                payload = json.dumps(snapshot, ensure_ascii=False)
+                yield f"data: {payload}\n\n"
+                ultimo_estado = snapshot
 
-        if estado_actual in estados_finales:
-            yield "event: fin\ndata: {}\n\n"
-            return
+            if estado_actual in estados_finales:
+                yield "event: fin\ndata: {}\n\n"
+                return
 
-        time.sleep(INTERVALO_POLL)
-        elapsed += INTERVALO_POLL
+            time.sleep(INTERVALO_POLL)
+            elapsed += INTERVALO_POLL
 
-    # Timeout — indica al cliente que reconecte
-    yield "event: timeout\ndata: {}\n\n"
+        # Timeout — indica al cliente que reconecte
+        yield "event: timeout\ndata: {}\n\n"
+    finally:
+        if on_close is not None:
+            on_close()
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -82,28 +98,50 @@ class TrackingSSEPublicoView(View):
     """
 
     def get(self, request):
+        from utils.responses import error_response
+
         numero = request.GET.get("numero", "").strip()
         cedula = request.GET.get("cedula", "").strip()
         if not numero or not cedula:
-            from utils.responses import error_response
             return error_response(
                 "PARAMETROS_REQUERIDOS",
                 "Se requieren 'numero' y 'cedula'.",
                 status_code=400,
             )
+
+        # Límite de conexiones SSE simultáneas por IP (anti-DoS / anti-enumeración)
+        ip = _client_ip(request)
+        lock_key = f"sse_conn_{ip}"
+        actuales = cache.get(lock_key, 0)
+        if actuales >= MAX_SSE_POR_IP:
+            return error_response(
+                "LIMITE_CONEXIONES",
+                "Demasiadas conexiones de seguimiento simultáneas. Intente más tarde.",
+                status_code=429,
+            )
+
         try:
             pedido = Pedido.objects.prefetch_related("tareas").get(
                 numero=numero, cliente__cedula_ruc=cedula
             )
         except Pedido.DoesNotExist:
-            from utils.responses import error_response
             return error_response(
                 "PEDIDO_NO_ENCONTRADO",
                 "No se encontró un pedido con ese número y cédula.",
                 status_code=404,
             )
+
+        cache.set(lock_key, actuales + 1, SSE_LOCK_TTL)
+
+        def _release():
+            restante = cache.get(lock_key, 1) - 1
+            if restante > 0:
+                cache.set(lock_key, restante, SSE_LOCK_TTL)
+            else:
+                cache.delete(lock_key)
+
         response = StreamingHttpResponse(
-            _sse_stream(pedido), content_type="text/event-stream"
+            _sse_stream(pedido, on_close=_release), content_type="text/event-stream"
         )
         response["Cache-Control"] = "no-cache"
         response["X-Accel-Buffering"] = "no"
@@ -116,6 +154,11 @@ class TrackingSSEAdminView(View):
     SSE autenticado (admin/propietario/artesano).
     El cliente pasa el JWT como query param ?token=<access_token>
     porque EventSource del browser no soporta headers personalizados.
+
+    NOTA DE SEGURIDAD: pasar el JWT en la URL puede filtrarlo a logs de acceso,
+    proxies y cabeceras Referer. Mitigación actual: el access token es de vida
+    corta (15 min). Mitigación recomendada a futuro: emitir un "ticket" SSE de un
+    solo uso y corta duración en vez del access token, o usar fetch + ReadableStream.
     """
 
     def get(self, request, pk):

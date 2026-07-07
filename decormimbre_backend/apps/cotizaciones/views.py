@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.shortcuts import get_object_or_404
-from utils.responses import success_response, error_response
+from utils.responses import success_response, error_response, validation_error_response
 from utils.pagination import StandardPagination
 from utils.log_actividad import registrar_actividad
 from apps.authentication.permissions import IsAdminOrPropietario
@@ -41,7 +41,7 @@ class CotizacionListCreateView(ListCreateAPIView):
         if s.is_valid():
             s.save(creado_por=request.user)
             return success_response(data=s.data, message="Cotización creada.", status_code=status.HTTP_201_CREATED)
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class CotizacionDetailView(RetrieveUpdateAPIView):
@@ -63,7 +63,7 @@ class CotizacionDetailView(RetrieveUpdateAPIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Cotización actualizada.")
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class CambiarEstadoCotizacionView(APIView):
@@ -73,7 +73,7 @@ class CambiarEstadoCotizacionView(APIView):
         cot = get_object_or_404(Cotizacion, pk=pk)
         s = CambiarEstadoSerializer(data=request.data)
         if not s.is_valid():
-            return error_response("VALIDACION_ERROR", str(s.errors))
+            return validation_error_response(s)
         nuevo_estado = s.validated_data["nuevo_estado"]
         estado_anterior = cot.estado
         try:
@@ -127,7 +127,7 @@ class ItemCotizacionCreateView(APIView):
         if s.is_valid():
             s.save(cotizacion=cot)
             return success_response(data=s.data, message="Ítem agregado.", status_code=status.HTTP_201_CREATED)
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class ItemCotizacionDetailView(APIView):
@@ -144,7 +144,7 @@ class ItemCotizacionDetailView(APIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Ítem actualizado.")
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
     def delete(self, request, pk, item_id):
         item = self._get_item(pk, item_id)

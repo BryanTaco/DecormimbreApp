@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { ArrowLeft, ArrowRight, CheckCircle, ChevronRight, RotateCcw } from 'lucide-react'
 import Navbar from '@/components/landing/Navbar'
 import AiAssistant from '@/components/AiAssistant'
+import Confetti from '@/components/landing/Confetti'
 import api from '@/api/client'
 
 const Chair3DViewer = lazy(() => import('@/components/chair/Chair3DViewer'))
@@ -73,6 +74,40 @@ const COLORES = [
   { id: 'carbon', label: 'Carbón', hex: '#2D2620' },
 ]
 
+const COJINES = [
+  { id: 'beige', label: 'Beige lino', hex: '#E4D8C4' },
+  { id: 'blanco', label: 'Blanco hueso', hex: '#F1EBE0' },
+  { id: 'gris', label: 'Gris perla', hex: '#B9B4AC' },
+  { id: 'oliva', label: 'Verde oliva', hex: '#7C8360' },
+  { id: 'terracota', label: 'Terracota', hex: '#C08457' },
+  { id: 'grafito', label: 'Grafito', hex: '#4A4640' },
+]
+
+// Selector de color libre (cualquier color que el cliente desee).
+function ColorPersonalizado({ value, activo, onChange }: { value: string; activo: boolean; onChange: (hex: string) => void }) {
+  return (
+    <label
+      title="Elige cualquier color"
+      style={{
+        display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 99, cursor: 'pointer', transition: 'all 180ms',
+        background: activo ? 'rgba(92,64,51,0.09)' : 'white',
+        border: activo ? '1.5px solid rgba(92,64,51,0.6)' : '1px solid rgba(92,64,51,0.12)',
+        boxShadow: activo ? '0 2px 8px rgba(92,64,51,0.12)' : 'none',
+      }}
+    >
+      <span style={{ position: 'relative', width: 16, height: 16, borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: '1.5px solid rgba(0,0,0,0.1)', background: activo ? value : 'conic-gradient(#ef4444,#f59e0b,#22c55e,#3b82f6,#a855f7,#ef4444)' }}>
+        <input
+          type="color"
+          value={/^#[0-9a-fA-F]{6}$/.test(value) ? value : '#C4A882'}
+          onChange={(e) => onChange(e.target.value)}
+          style={{ position: 'absolute', inset: -4, width: 'calc(100% + 8px)', height: 'calc(100% + 8px)', opacity: 0, cursor: 'pointer', border: 'none', padding: 0 }}
+        />
+      </span>
+      <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(92,64,51,0.8)', fontWeight: activo ? 600 : 400 }}>Personalizado</span>
+    </label>
+  )
+}
+
 interface FormData {
   tipo: string
   material: string
@@ -80,6 +115,7 @@ interface FormData {
   alto: string
   profundidad: string
   color: string
+  cojin: string
   descripcion: string
   nombre: string
   email: string
@@ -89,7 +125,7 @@ interface FormData {
 
 const INITIAL: FormData = {
   tipo: '', material: '', ancho: '', alto: '', profundidad: '',
-  color: 'natural', descripcion: '', nombre: '', email: '', telefono: '', ciudad: '',
+  color: 'natural', cojin: 'beige', descripcion: '', nombre: '', email: '', telefono: '', ciudad: '',
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
@@ -111,7 +147,9 @@ export default function PersonalizarPage() {
 
   const set = (k: keyof FormData, v: string) => setForm((f) => ({ ...f, [k]: v }))
 
-  const currentColor = COLORES.find((c) => c.id === form.color)?.hex ?? '#C4A882'
+  // Si el valor guardado empieza con '#', es un color personalizado (hex directo).
+  const currentColor = form.color.startsWith('#') ? form.color : (COLORES.find((c) => c.id === form.color)?.hex ?? '#C4A882')
+  const currentCojin = form.cojin.startsWith('#') ? form.cojin : (COJINES.find((c) => c.id === form.cojin)?.hex ?? '#E4D8C4')
   const currentMaterial = form.material || 'mimbre'
   const currentTipoLabel = TIPOS.find((t) => t.id === form.tipo)?.label?.toLowerCase() ?? 'mueble'
 
@@ -119,13 +157,15 @@ export default function PersonalizarPage() {
     setLoading(true)
     const tipoLabel = TIPOS.find((t) => t.id === form.tipo)?.label ?? form.tipo
     const materialLabel = MATERIALES.find((m) => m.id === form.material)?.label ?? form.material
-    const colorLabel = COLORES.find((c) => c.id === form.color)?.label ?? form.color
+    const colorLabel = form.color.startsWith('#') ? `Personalizado (${form.color})` : (COLORES.find((c) => c.id === form.color)?.label ?? form.color)
+    const cojinLabel = form.cojin.startsWith('#') ? `Personalizado (${form.cojin})` : (COJINES.find((c) => c.id === form.cojin)?.label ?? form.cojin)
 
     const mensaje = [
       `Tipo de mueble: ${tipoLabel}`,
       `Material: ${materialLabel}`,
       form.ancho ? `Dimensiones: ${form.ancho}cm ancho × ${form.alto}cm alto × ${form.profundidad}cm profundidad` : '',
       `Color / acabado: ${colorLabel}`,
+      `Color del cojín: ${cojinLabel}`,
       `Descripción: ${form.descripcion}`,
       form.ciudad ? `Ciudad: ${form.ciudad}` : '',
     ].filter(Boolean).join('\n')
@@ -210,12 +250,18 @@ export default function PersonalizarPage() {
             <AnimatePresence mode="wait">
               {sent ? (
                 <motion.div key="done" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  className="rounded-[2rem] border p-12 flex flex-col items-center text-center"
+                  className="relative rounded-[2rem] border p-12 flex flex-col items-center text-center overflow-hidden"
                   style={{ background: '#fff', borderColor: 'rgba(92,64,51,0.08)' }}
                 >
-                  <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-6">
+                  <Confetti />
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 260, damping: 16, delay: 0.1 }}
+                    className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-6"
+                  >
                     <CheckCircle className="w-8 h-8 text-green-500" />
-                  </div>
+                  </motion.div>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontStyle: 'italic', color: '#3d2215', margin: '0 0 12px' }}>
                     ¡Cotización enviada!
                   </h2>
@@ -223,7 +269,7 @@ export default function PersonalizarPage() {
                     Hola <strong style={{ fontWeight: 600 }}>{form.nombre}</strong>, recibimos tu solicitud. En menos de 24 horas recibirás en <strong style={{ fontWeight: 600 }}>{form.email}</strong> la cotización de tu {currentTipoLabel}.
                   </p>
                   <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(92,64,51,0.4)', margin: '0 0 28px', fontWeight: 400 }}>
-                    También escríbenos a <span style={{ color: 'rgba(92,64,51,0.65)' }}>info@decormimbre.ec</span>
+                    También escríbenos a <span style={{ color: 'rgba(92,64,51,0.65)' }}>decormimbre@yahoo.com</span> o por WhatsApp al 098 057 2561
                   </p>
                   <div className="flex gap-3">
                     <button onClick={() => { setSent(false); setForm(INITIAL); setStep(0) }}
@@ -385,6 +431,36 @@ export default function PersonalizarPage() {
                             <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(92,64,51,0.8)', fontWeight: form.color === c.id ? 600 : 400 }}>{c.label}</span>
                           </button>
                         ))}
+                        <ColorPersonalizado
+                          value={currentColor}
+                          activo={form.color.startsWith('#')}
+                          onChange={(hex) => set('color', hex)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Color del cojín */}
+                    <div>
+                      <Label>Color del cojín</Label>
+                      <div className="flex flex-wrap gap-3 mt-3">
+                        {COJINES.map((c) => (
+                          <button key={c.id} onClick={() => set('cojin', c.id)}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 99, cursor: 'pointer', transition: 'all 180ms',
+                              background: form.cojin === c.id ? 'rgba(92,64,51,0.09)' : 'white',
+                              border: form.cojin === c.id ? '1.5px solid rgba(92,64,51,0.6)' : '1px solid rgba(92,64,51,0.12)',
+                              boxShadow: form.cojin === c.id ? '0 2px 8px rgba(92,64,51,0.12)' : 'none',
+                            }}
+                          >
+                            <span style={{ width: 16, height: 16, borderRadius: '50%', background: c.hex, display: 'inline-block', flexShrink: 0, border: '1.5px solid rgba(0,0,0,0.1)', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }} />
+                            <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(92,64,51,0.8)', fontWeight: form.cojin === c.id ? 600 : 400 }}>{c.label}</span>
+                          </button>
+                        ))}
+                        <ColorPersonalizado
+                          value={currentCojin}
+                          activo={form.cojin.startsWith('#')}
+                          onChange={(hex) => set('cojin', hex)}
+                        />
                       </div>
                     </div>
 
@@ -443,7 +519,7 @@ export default function PersonalizarPage() {
                       {[
                         { k: 'nombre' as const, label: 'Nombre completo', placeholder: 'Tu nombre', required: true, type: 'text' },
                         { k: 'email' as const, label: 'Email', placeholder: 'tu@email.com', required: true, type: 'email' },
-                        { k: 'telefono' as const, label: 'WhatsApp / Teléfono', placeholder: '+593 99 000 0000', required: false, type: 'tel' },
+                        { k: 'telefono' as const, label: 'WhatsApp / Teléfono', placeholder: '098 057 2561', required: false, type: 'tel' },
                         { k: 'ciudad' as const, label: 'Ciudad', placeholder: 'Quito, Guayaquil...', required: false, type: 'text' },
                       ].map(({ k, label, placeholder, required, type }) => (
                         <div key={k}>
@@ -568,6 +644,8 @@ export default function PersonalizarPage() {
                     material={currentMaterial}
                     tipo={form.tipo || 'sofa'}
                     height={360}
+                    autoRotate={autoRotate}
+                    cushionColor={currentCojin}
                   />
                 </Suspense>
 
@@ -595,6 +673,30 @@ export default function PersonalizarPage() {
                       ))}
                       <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'rgba(92,64,51,0.55)', marginLeft: 4, fontWeight: 500 }}>
                         {COLORES.find((c) => c.id === form.color)?.label}
+                      </span>
+                    </div>
+
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(92,64,51,0.4)', margin: '12px 0 8px' }}>Color del cojín</p>
+                    <div className="flex items-center gap-2">
+                      {COJINES.map((c) => (
+                        <button
+                          key={c.id}
+                          onClick={() => set('cojin', c.id)}
+                          title={c.label}
+                          style={{
+                            width: form.cojin === c.id ? 26 : 20,
+                            height: form.cojin === c.id ? 26 : 20,
+                            borderRadius: '50%',
+                            background: c.hex,
+                            border: form.cojin === c.id ? '2.5px solid rgba(92,64,51,0.8)' : '2px solid rgba(0,0,0,0.1)',
+                            cursor: 'pointer',
+                            transition: 'all 200ms',
+                            boxShadow: form.cojin === c.id ? '0 2px 8px rgba(0,0,0,0.2)' : '0 1px 3px rgba(0,0,0,0.12)',
+                          }}
+                        />
+                      ))}
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'rgba(92,64,51,0.55)', marginLeft: 4, fontWeight: 500 }}>
+                        {COJINES.find((c) => c.id === form.cojin)?.label}
                       </span>
                     </div>
                   </div>

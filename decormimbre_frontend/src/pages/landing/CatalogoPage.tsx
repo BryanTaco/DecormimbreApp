@@ -3,23 +3,35 @@ import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { ArrowUpRight, ArrowLeft } from 'lucide-react'
 import Navbar from '@/components/landing/Navbar'
+import AiAssistant from '@/components/AiAssistant'
+import FichaTecnica, { type Producto } from '@/components/landing/FichaTecnica'
 
 const CATEGORIAS = ['Todos', 'Sala', 'Comedor', 'Exterior', 'Dormitorio', 'Accesorios']
 
 const PRODUCTOS = [
-  { img: 'https://images.unsplash.com/photo-1593062096033-9a26b09da705?w=700&q=85&auto=format&fit=crop', category: 'Sala', name: 'Sofá Serena', material: 'Polialuminio & Mimbre', price: 'Desde $620', desc: 'Estructura de polialuminio con tejido artesanal de mimbre. Resistente al exterior.' },
-  { img: 'https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=700&q=85&auto=format&fit=crop', category: 'Sala', name: 'Silla Nido', material: 'Mimbre Natural', price: 'Desde $185', desc: 'Forma oval que abraza el cuerpo. Tejida a mano por artesanos ecuatorianos.' },
-  { img: 'https://images.unsplash.com/photo-1629079447777-1e605162dc8d?w=700&q=85&auto=format&fit=crop', category: 'Exterior', name: 'Set Jardín Pacífico', material: 'Polialuminio', price: 'Desde $890', desc: 'Set completo para exteriores: sofá, 2 sillas y mesa. Tejido resistente al sol y lluvia.' },
-  { img: 'https://images.unsplash.com/photo-1613052440827-2f5a9a48f5b4?w=700&q=85&auto=format&fit=crop', category: 'Comedor', name: 'Silla Sierra', material: 'Polialuminio', price: 'Desde $95', desc: 'Diseño artesanal en polialuminio. Resistente, fácil de mantener. Ideal para comedores.' },
-  { img: 'https://images.unsplash.com/photo-1567538096621-38d2284b23ff?w=700&q=85&auto=format&fit=crop', category: 'Sala', name: 'Butaca Andina', material: 'Mimbre Natural', price: 'Desde $180', desc: 'Silla colgante de mimbre natural. Diseño ecuatoriano, cómoda y elegante.' },
-  { img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=85&auto=format&fit=crop', category: 'Accesorios', name: 'Cestas Artesanales', material: 'Mimbre Natural', price: 'Desde $45', desc: 'Cestas tejidas a mano en mimbre natural. Perfectas para decoración y almacenaje.' },
-  { img: 'https://images.unsplash.com/photo-1629079447777-1e605162dc8d?w=700&q=85&auto=format&fit=crop&crop=bottom', category: 'Exterior', name: 'Hamaca Terraza', material: 'Mimbre & Polialuminio', price: 'Desde $340', desc: 'Hamaca colgante para terrazas y jardines. Combinación de materiales para máxima durabilidad.' },
-  { img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=85&auto=format&fit=crop&crop=top', category: 'Dormitorio', name: 'Cabecera Tejida', material: 'Mimbre Natural', price: 'Desde $260', desc: 'Cabecera artesanal que transforma el dormitorio. Calidez y textura natural única.' },
-  { img: 'https://images.unsplash.com/photo-1593062096033-9a26b09da705?w=700&q=85&auto=format&fit=crop&crop=right', category: 'Comedor', name: 'Sillas Comedor Raíz', material: 'Mimbre & Madera', price: 'Desde $120', desc: 'Sillas de comedor con estructura en madera y respaldo de mimbre artesanal.' },
+  { img: '/products/sala-modular-oscura.jpg', category: 'Sala', name: 'Sofá Serena', material: 'Polialuminio & Mimbre', price: 'Desde $620', desc: 'Sala modular en tejido resistente. Estructura de polialuminio con acabado artesanal.' },
+  { img: '/products/papasan-set.jpg', category: 'Sala', name: 'Silla Nido', material: 'Mimbre Natural', price: 'Desde $185', desc: 'Sillas papasan tejidas a mano. Forma que abraza el cuerpo, diseño ecuatoriano.' },
+  { img: '/products/set-exterior-huevo.jpg', category: 'Exterior', name: 'Set Jardín Pacífico', material: 'Polialuminio', price: 'Desde $890', desc: 'Set completo para exteriores con sillas nido. Tejido resistente al sol y la lluvia.' },
+  { img: '/products/silla-artesanal.jpg', category: 'Comedor', name: 'Silla Sierra', material: 'Polialuminio', price: 'Desde $95', desc: 'Silla artesanal tejida. Resistente y fácil de mantener, ideal para comedores.' },
+  { img: '/products/colgante-huevo-azul.jpg', category: 'Sala', name: 'Butaca Andina', material: 'Mimbre Natural', price: 'Desde $180', desc: 'Silla colgante tipo huevo con cojín. Diseño ecuatoriano, cómoda y elegante.' },
+  { img: '/products/cesta-mantas.jpg', category: 'Accesorios', name: 'Cestas Artesanales', material: 'Mimbre Natural', price: 'Desde $45', desc: 'Cestas tejidas a mano en mimbre natural. Perfectas para decoración y almacenaje.' },
+  { img: '/products/chaise-piscina-real.jpg', category: 'Exterior', name: 'Chaise Terraza', material: 'Polialuminio', price: 'Desde $340', desc: 'Chaise longue para terrazas y piscinas. Polialuminio resistente al sol y la humedad.' },
+  { img: '/products/set-sala-tejido.jpg', category: 'Dormitorio', name: 'Sala Íntima', material: 'Mimbre Natural', price: 'Desde $260', desc: 'Conjunto tejido de textura cálida y natural, perfecto para espacios de descanso.' },
+  { img: '/products/comedor-tejido.jpg', category: 'Comedor', name: 'Sillas Comedor Raíz', material: 'Mimbre & Madera', price: 'Desde $120', desc: 'Juego de comedor con sillas de respaldo tejido y mesa central artesanal.' },
+  { img: '/products/butacas-sunroom.jpg', category: 'Sala', name: 'Butacas Sunroom', material: 'Mimbre Natural', price: 'Desde $320', desc: 'Par de butacas tejidas para espacios luminosos. Comodidad y textura natural.' },
+  { img: '/products/sillones-ventanal.jpg', category: 'Sala', name: 'Sillones Ventanal', material: 'Mimbre Natural', price: 'Desde $360', desc: 'Sillones envolventes de mimbre tejido, perfectos junto a grandes ventanales.' },
+  { img: '/products/loveseat-riviera.jpg', category: 'Exterior', name: 'Loveseat Riviera', material: 'Mimbre Natural', price: 'Desde $520', desc: 'Bancada de mimbre con cojín para exteriores. Elegancia clásica y durabilidad.' },
+  { img: '/products/silla-circular.jpg', category: 'Sala', name: 'Silla Orbital', material: 'Mimbre Natural', price: 'Desde $195', desc: 'Silla circular que abraza el cuerpo. Tejida a mano por artesanos ecuatorianos.' },
+  { img: '/products/sala-ebano.jpg', category: 'Sala', name: 'Set Sala Ébano', material: 'Polialuminio', price: 'Desde $780', desc: 'Set de sala en polialuminio oscuro con cojines premium para interiores exigentes.' },
+  { img: '/products/set-comedor.jpg', category: 'Comedor', name: 'Set Comedor Redondo', material: 'Polialuminio', price: 'Desde $890', desc: 'Mesa redonda con sillas tejidas. Ideal para comedores y terrazas techadas.' },
+  { img: '/products/silla-nido.jpg', category: 'Sala', name: 'Silla Nido Tejida', material: 'Mimbre Natural', price: 'Desde $185', desc: 'Silla nido de mimbre natural con forma oval envolvente.' },
+  { img: '/products/hamaca-jardin.jpg', category: 'Exterior', name: 'Hamaca Jardín', material: 'Mimbre & Polialuminio', price: 'Desde $340', desc: 'Silla colgante para terrazas y jardines. Descanso al aire libre con estilo.' },
+  { img: '/products/daybeds-igloo.jpg', category: 'Dormitorio', name: 'Daybed Iglú', material: 'Mimbre Natural', price: 'Desde $760', desc: 'Daybed tejido tipo iglú con cojines. Un refugio de descanso para dormitorio o terraza.' },
 ]
 
 export default function CatalogoPage() {
   const [catActiva, setCatActiva] = useState('Todos')
+  const [ficha, setFicha] = useState<Producto | null>(null)
 
   const filtrados = catActiva === 'Todos'
     ? PRODUCTOS
@@ -109,6 +121,8 @@ export default function CatalogoPage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: i * 0.06 }}
+              onClick={() => setFicha(item)}
+              style={{ cursor: 'pointer' }}
               className="group rounded-[1.5rem] overflow-hidden bg-white border border-[rgba(92,64,51,0.07)] hover:shadow-xl transition-shadow duration-400"
             >
               <div className="relative overflow-hidden" style={{ paddingBottom: '68%' }}>
@@ -189,13 +203,12 @@ export default function CatalogoPage() {
                       {item.price}
                     </p>
                   </div>
-                  <Link to="/contacto" style={{ textDecoration: 'none' }}>
-                    <span
-                      className="w-10 h-10 rounded-full bg-[rgba(92,64,51,0.07)] flex items-center justify-center hover:bg-[rgba(92,64,51,0.14)] transition-colors cursor-pointer"
-                    >
-                      <ArrowUpRight className="w-4 h-4 text-[rgba(92,64,51,0.7)]" />
-                    </span>
-                  </Link>
+                  <span
+                    title="Ver ficha técnica"
+                    className="w-10 h-10 rounded-full bg-[rgba(92,64,51,0.07)] flex items-center justify-center group-hover:bg-[rgba(92,64,51,0.14)] transition-colors"
+                  >
+                    <ArrowUpRight className="w-4 h-4 text-[rgba(92,64,51,0.7)]" />
+                  </span>
                 </div>
               </div>
             </motion.div>
@@ -235,6 +248,8 @@ export default function CatalogoPage() {
           </Link>
         </div>
       </div>
+      <AiAssistant />
+      <FichaTecnica producto={ficha} onClose={() => setFicha(null)} />
     </div>
   )
 }

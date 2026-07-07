@@ -2,12 +2,12 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
-from utils.responses import success_response, error_response
+from utils.responses import success_response, error_response, validation_error_response
 from utils.pagination import StandardPagination
 from .models import Usuario, LogActividad, Notificacion
 from .serializers import (
     UsuarioSerializer, UsuarioCreateSerializer,
-    UsuarioUpdateSerializer, LogActividadSerializer,
+    UsuarioUpdateSerializer, PerfilUpdateSerializer, LogActividadSerializer,
     RegistroClienteSerializer, NotificacionSerializer,
 )
 from .permissions import IsAdmin, IsAdminOrPropietario
@@ -39,14 +39,14 @@ class MeView(APIView):
         return success_response(data=UsuarioSerializer(request.user).data)
 
     def put(self, request):
-        serializer = UsuarioUpdateSerializer(request.user, data=request.data, partial=True)
+        serializer = PerfilUpdateSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return success_response(
                 data=UsuarioSerializer(request.user).data,
                 message="Perfil actualizado.",
             )
-        return error_response("VALIDACION_ERROR", str(serializer.errors))
+        return validation_error_response(serializer)
 
 
 class UsuarioListCreateView(APIView):
@@ -65,7 +65,7 @@ class UsuarioListCreateView(APIView):
                 message="Usuario creado.",
                 status_code=status.HTTP_201_CREATED,
             )
-        return error_response("VALIDACION_ERROR", str(serializer.errors))
+        return validation_error_response(serializer)
 
 
 class UsuarioDetailView(APIView):
@@ -85,7 +85,7 @@ class UsuarioDetailView(APIView):
         if serializer.is_valid():
             serializer.save()
             return success_response(data=UsuarioSerializer(usuario).data, message="Usuario actualizado.")
-        return error_response("VALIDACION_ERROR", str(serializer.errors))
+        return validation_error_response(serializer)
 
     def delete(self, request, pk):
         usuario = self._get_user(pk)
@@ -120,7 +120,7 @@ class RegistroClienteView(APIView):
     def post(self, request):
         serializer = RegistroClienteSerializer(data=request.data)
         if not serializer.is_valid():
-            return error_response("VALIDACION_ERROR", str(serializer.errors))
+            return validation_error_response(serializer)
 
         data = serializer.validated_data
 

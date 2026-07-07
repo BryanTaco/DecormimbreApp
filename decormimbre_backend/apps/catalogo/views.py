@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from utils.responses import success_response, error_response
+from utils.responses import success_response, error_response, validation_error_response
 from utils.pagination import StandardPagination
 from apps.authentication.permissions import IsAdminOrPropietario
 from .models import Categoria, Producto, Color
@@ -28,7 +28,7 @@ class CategoriaListCreateView(ListCreateAPIView):
         if serializer.is_valid():
             serializer.save()
             return success_response(data=serializer.data, message="Categoría creada.", status_code=status.HTTP_201_CREATED)
-        return error_response("VALIDACION_ERROR", str(serializer.errors))
+        return validation_error_response(serializer)
 
 
 class CategoriaDetailView(RetrieveUpdateDestroyAPIView):
@@ -44,7 +44,7 @@ class CategoriaDetailView(RetrieveUpdateDestroyAPIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Categoría actualizada.")
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -80,7 +80,7 @@ class ProductoListCreateView(ListCreateAPIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Producto creado.", status_code=status.HTTP_201_CREATED)
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class ProductoDetailView(RetrieveUpdateDestroyAPIView):
@@ -96,7 +96,7 @@ class ProductoDetailView(RetrieveUpdateDestroyAPIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Producto actualizado.")
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -124,7 +124,7 @@ class ColorListCreateView(ListCreateAPIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Color creado.", status_code=status.HTTP_201_CREATED)
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class ColorDetailView(RetrieveUpdateDestroyAPIView):
@@ -137,4 +137,4 @@ class ColorDetailView(RetrieveUpdateDestroyAPIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Color actualizado.")
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)

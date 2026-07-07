@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowLeft, Mail, Phone, MapPin, CheckCircle } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, MapPin, CheckCircle, MessageCircle } from 'lucide-react'
 import Navbar from '@/components/landing/Navbar'
+import MapEmbed from '@/components/landing/MapEmbed'
+import AiAssistant from '@/components/AiAssistant'
+import { EMPRESA, waLink } from '@/lib/empresa'
 import api from '@/api/client'
 
 const TIPOS = ['Sala de estar', 'Comedor', 'Dormitorio', 'Exterior / Jardín', 'Oficina', 'Otro']
@@ -169,7 +172,7 @@ export default function ContactoPage() {
                     <input
                       value={form.telefono}
                       onChange={(e) => set('telefono', e.target.value)}
-                      placeholder="+593 99 000 0000"
+                      placeholder="098 057 2561"
                       className="w-full rounded-xl border border-[rgba(92,64,51,0.15)] bg-[#faf7f4] px-4 py-2.5 text-sm outline-none focus:border-[rgba(92,64,51,0.4)] transition-colors"
                       style={{ fontFamily: 'var(--font-body)', color: 'rgba(92,64,51,0.9)' }}
                     />
@@ -285,21 +288,50 @@ export default function ContactoPage() {
                 Contáctanos directo
               </h3>
               {[
-                { Icon: Mail, label: 'info@decormimbre.ec' },
-                { Icon: Phone, label: '+593 99 000 0000' },
-                { Icon: MapPin, label: 'Quito, Ecuador' },
-              ].map(({ Icon, label }) => (
-                <div key={label} className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[rgba(92,64,51,0.07)] flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-4 h-4 text-[rgba(92,64,51,0.6)]" />
-                  </div>
-                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'rgba(92,64,51,0.75)' }}>{label}</span>
-                </div>
-              ))}
+                { Icon: Mail, label: EMPRESA.email, href: `mailto:${EMPRESA.email}` },
+                { Icon: Phone, label: EMPRESA.telefonoFijo, href: `tel:+593${'22564256'}` },
+                { Icon: MapPin, label: `${EMPRESA.direccion} — ${EMPRESA.ciudad}`, href: undefined },
+              ].map(({ Icon, label, href }) => {
+                const inner = (
+                  <>
+                    <div className="w-9 h-9 rounded-xl bg-[rgba(92,64,51,0.07)] flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-4 h-4 text-[rgba(92,64,51,0.6)]" />
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'rgba(92,64,51,0.75)', lineHeight: 1.4 }}>{label}</span>
+                  </>
+                )
+                return href ? (
+                  <a key={label} href={href} className="flex items-center gap-3 no-underline">{inner}</a>
+                ) : (
+                  <div key={label} className="flex items-center gap-3">{inner}</div>
+                )
+              })}
+
+              {/* Botón WhatsApp */}
+              <a
+                href={waLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-full mt-2 no-underline"
+                style={{
+                  background: '#25D366',
+                  color: '#fff',
+                  padding: '12px 20px',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                }}
+              >
+                <MessageCircle className="w-4 h-4" /> Escríbenos por WhatsApp
+              </a>
             </div>
+
+            {/* Mapa de ubicación */}
+            <MapEmbed height={300} />
           </motion.div>
         </div>
       </div>
+      <AiAssistant />
     </div>
   )
 }

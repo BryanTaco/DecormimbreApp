@@ -1,4 +1,5 @@
-import { motion } from 'motion/react'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 
 const CHOICE_ICON_STYLE = {
   width: 20,
@@ -32,6 +33,7 @@ const MATERIALS = [
   {
     name: 'Mimbre',
     subtitle: 'La fibra de la naturaleza',
+    image: '/materials/mimbre.png',
     description:
       'El mimbre es una planta de la familia del sauce (género Salix) cuyas ramas jóvenes y flexibles se han tejido artesanalmente durante siglos. En Ecuador, los artesanos seleccionan a mano las varas más resistentes, las curan con técnicas tradicionales y las tejen en formas que combinan funcionalidad y arte.',
     properties: [
@@ -55,6 +57,7 @@ const MATERIALS = [
   {
     name: 'Polialuminio',
     subtitle: 'Innovación para el exterior',
+    image: '/materials/polialuminio.png',
     description:
       'El polialuminio es un material técnico de alto rendimiento: una fibra sintética de polietileno de alta densidad (HDPE) tejida sobre un alma de aluminio. Esta combinación le otorga la apariencia y textura del mimbre natural, pero con resistencia extrema a la lluvia, rayos UV y temperatura. Ideal para exteriores exigentes.',
     properties: [
@@ -81,6 +84,9 @@ const MATERIALS = [
 ]
 
 export default function MaterialsSection() {
+  const [activo, setActivo] = useState(0)
+  const mat = MATERIALS[activo]
+
   return (
     <section className="bg-[#f5f0eb] py-24 px-6 md:px-10">
       <div className="max-w-6xl mx-auto">
@@ -90,7 +96,7 @@ export default function MaterialsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-16 max-w-2xl"
+          className="mb-10 max-w-2xl"
         >
           <span
             className="text-[10px] font-medium uppercase tracking-[0.22em] text-[rgba(92,64,51,0.55)]"
@@ -121,116 +127,148 @@ export default function MaterialsSection() {
             }}
           >
             Usamos dos materiales con propiedades distintas pero igual calidad artesanal.
-            Entiende cuál es el ideal para tu espacio y estilo de vida.
+            Toca cada material para conocer de qué está hecho y cuál es el ideal para tu espacio.
           </p>
         </motion.div>
 
-        {/* Grid de materiales */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {MATERIALS.map((mat, i) => (
-            <motion.div
-              key={mat.name}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.02, y: -2 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.15 }}
-              className="rounded-[2rem] overflow-hidden border"
-              style={{ borderColor: `${mat.color}18`, background: mat.lightBg }}
-            >
-              {/* Header */}
-              <div
-                className="p-8 pb-6"
-                style={{ borderBottom: `1px solid ${mat.color}12` }}
+        {/* Selector dinámico de material */}
+        <div className="flex gap-3 mb-8">
+          {MATERIALS.map((m, i) => {
+            const on = i === activo
+            return (
+              <button
+                key={m.name}
+                onClick={() => setActivo(i)}
+                aria-pressed={on}
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '14px',
+                  fontWeight: on ? 600 : 400,
+                  padding: '10px 24px',
+                  borderRadius: 999,
+                  border: `1px solid ${on ? m.color : 'rgba(92,64,51,0.18)'}`,
+                  background: on ? m.color : 'white',
+                  color: on ? '#fff' : 'rgba(92,64,51,0.7)',
+                  cursor: 'pointer',
+                  transition: 'all 220ms',
+                  letterSpacing: '0.02em',
+                }}
               >
-                <div className="flex items-start justify-between mb-5">
-                  <div>
+                {m.name}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Panel dinámico: imagen + descripción + propiedades */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={mat.name}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.4 }}
+            className="rounded-[2rem] overflow-hidden border"
+            style={{ borderColor: `${mat.color}18`, background: mat.lightBg }}
+          >
+            {/* Infografía del material (imagen completa) */}
+            <div className="relative w-full" style={{ background: '#fff' }}>
+              <motion.img
+                key={mat.image}
+                src={mat.image}
+                alt={`¿Qué es el ${mat.name}? — infografía Decormimbre`}
+                initial={{ opacity: 0, scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+                className="w-full h-auto block"
+              />
+            </div>
+
+            {/* Texto */}
+            <div className="p-8 lg:p-10 flex flex-col justify-center">
+              <div className="flex items-center gap-3 mb-2">
+                <span
+                  className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${mat.color}0f` }}
+                >
+                  {mat.icon}
+                </span>
+                <div>
+                  <p
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '10px',
+                  color: mat.accent,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.2em',
+                  margin: '0 0 6px',
+                  fontWeight: 500,
+                }}
+              >
+                {mat.subtitle}
+              </p>
+              <h3
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '40px',
+                  fontWeight: 400,
+                  fontStyle: 'italic',
+                  color: mat.color,
+                  margin: 0,
+                  lineHeight: 1,
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                {mat.name}
+              </h3>
+                </div>
+              </div>
+              <p
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '14px',
+                  color: `${mat.color}aa`,
+                  lineHeight: 1.7,
+                  margin: '0 0 24px',
+                  fontWeight: 300,
+                }}
+              >
+                {mat.description}
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                {mat.properties.map((prop) => (
+                  <div key={prop.label}>
                     <p
                       style={{
                         fontFamily: 'var(--font-body)',
                         fontSize: '10px',
-                        color: mat.accent,
+                        color: `${mat.color}66`,
                         textTransform: 'uppercase',
-                        letterSpacing: '0.2em',
-                        margin: '0 0 6px',
+                        letterSpacing: '0.14em',
+                        margin: '0 0 3px',
                         fontWeight: 500,
                       }}
                     >
-                      {mat.subtitle}
+                      {prop.label}
                     </p>
-                    <h3
+                    <p
                       style={{
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '42px',
-                        fontWeight: 400,
-                        fontStyle: 'italic',
-                        color: mat.color,
+                        fontFamily: 'var(--font-body)',
+                        fontSize: '13px',
+                        color: `${mat.color}cc`,
                         margin: 0,
-                        lineHeight: 1,
-                        letterSpacing: '-0.02em',
+                        lineHeight: 1.4,
+                        fontWeight: 400,
                       }}
                     >
-                      {mat.name}
-                    </h3>
+                      {prop.value}
+                    </p>
                   </div>
-                  <div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: `${mat.color}0f` }}
-                  >
-                    {mat.icon}
-                  </div>
-                </div>
-                <p
-                  style={{
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '14px',
-                    color: `${mat.color}99`,
-                    lineHeight: 1.7,
-                    margin: 0,
-                    fontWeight: 300,
-                  }}
-                >
-                  {mat.description}
-                </p>
+                ))}
               </div>
-
-              {/* Propiedades */}
-              <div className="p-8 pt-6">
-                <div className="grid grid-cols-2 gap-4">
-                  {mat.properties.map((prop) => (
-                    <div key={prop.label}>
-                      <p
-                        style={{
-                          fontFamily: 'var(--font-body)',
-                          fontSize: '10px',
-                          color: `${mat.color}66`,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.14em',
-                          margin: '0 0 3px',
-                          fontWeight: 500,
-                        }}
-                      >
-                        {prop.label}
-                      </p>
-                      <p
-                        style={{
-                          fontFamily: 'var(--font-body)',
-                          fontSize: '13px',
-                          color: `${mat.color}cc`,
-                          margin: 0,
-                          lineHeight: 1.4,
-                          fontWeight: 400,
-                        }}
-                      >
-                        {prop.value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Comparativa de uso */}
         <motion.div

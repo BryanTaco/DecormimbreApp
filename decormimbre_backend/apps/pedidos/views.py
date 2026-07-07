@@ -3,9 +3,10 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.shortcuts import get_object_or_404
-from utils.responses import success_response, error_response
+from utils.responses import success_response, error_response, validation_error_response
 from utils.pagination import StandardPagination
 from utils.log_actividad import registrar_actividad
 from utils.notificaciones import (
@@ -49,7 +50,7 @@ class PedidoListCreateView(ListCreateAPIView):
         if s.is_valid():
             s.save(creado_por=request.user)
             return success_response(data=s.data, message="Pedido creado.", status_code=status.HTTP_201_CREATED)
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class PedidoDetailView(RetrieveUpdateAPIView):
@@ -71,7 +72,7 @@ class PedidoDetailView(RetrieveUpdateAPIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Pedido actualizado.")
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class CambiarEstadoPedidoView(APIView):
@@ -82,7 +83,7 @@ class CambiarEstadoPedidoView(APIView):
         pedido = get_object_or_404(Pedido, pk=pk)
         s = CambiarEstadoPedidoSerializer(data=request.data)
         if not s.is_valid():
-            return error_response("VALIDACION_ERROR", str(s.errors))
+            return validation_error_response(s)
         nuevo_estado = s.validated_data["nuevo_estado"]
         estado_anterior = pedido.estado
         try:
@@ -194,7 +195,7 @@ class ItemPedidoCreateView(APIView):
             s.save(pedido=pedido)
             pedido.calcular_totales()
             return success_response(data=s.data, message="Ítem agregado.", status_code=status.HTTP_201_CREATED)
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class ItemPedidoDetailView(APIView):
@@ -212,7 +213,7 @@ class ItemPedidoDetailView(APIView):
             s.save()
             item.pedido.calcular_totales()
             return success_response(data=s.data, message="Ítem actualizado.")
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
     def delete(self, request, pk, item_id):
         item = self._get_item(pk, item_id)
@@ -246,10 +247,15 @@ class AlertaEntregaRevisarView(APIView):
 
 
 class TrackingPublicoView(APIView):
-    """Endpoint público — sin autenticación. Consulta por número de pedido."""
+    """Endpoint público — sin autenticación. Consulta por número de pedido.
+
+    Throttled por IP para prevenir enumeración de cédulas/RUC (fuga de PII).
+    """
     permission_classes = [AllowAny]
     authentication_classes = []
     versioning_class = None
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "tracking"
 
     def get(self, request):
         numero = request.query_params.get("numero", "").strip()
@@ -348,7 +354,7 @@ class CompletarTareaView(APIView):
 
         s = CompletarTareaSerializer(data=request.data)
         if not s.is_valid():
-            return error_response("VALIDACION_ERROR", str(s.errors))
+            return validation_error_response(s)
 
         try:
             tarea.completar(request.user, notas=s.validated_data.get("notas", ""))
@@ -398,7 +404,7 @@ class TareasPedidoView(APIView):
 
         s = AgregarTareaSerializer(data=request.data, context={"pedido": pedido})
         if not s.is_valid():
-            return error_response("VALIDACION_ERROR", str(s.errors))
+            return validation_error_response(s)
 
         tipo = s.validated_data["tipo"]
         artesano_id = s.validated_data.get("artesano")

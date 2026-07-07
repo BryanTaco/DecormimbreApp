@@ -1,6 +1,6 @@
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView
-from utils.responses import success_response, error_response
+from utils.responses import success_response, error_response, validation_error_response
 from utils.pagination import StandardPagination
 from apps.authentication.permissions import IsAdminOrPropietario
 from .models import Proveedor, OrdenTrabajo
@@ -32,7 +32,7 @@ class ProveedorListCreateView(ListCreateAPIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Proveedor creado.", status_code=status.HTTP_201_CREATED)
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class ProveedorDetailView(RetrieveUpdateAPIView):
@@ -53,7 +53,7 @@ class ProveedorDetailView(RetrieveUpdateAPIView):
                 return success_response(data=s.data, message="Proveedor desactivado.")
             s.save()
             return success_response(data=s.data, message="Proveedor actualizado.")
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class OrdenTrabajoListCreateView(ListCreateAPIView):
@@ -81,7 +81,7 @@ class OrdenTrabajoListCreateView(ListCreateAPIView):
         if s.is_valid():
             s.save(creado_por=request.user)
             return success_response(data=s.data, message="Orden de trabajo creada.", status_code=status.HTTP_201_CREATED)
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)
 
 
 class OrdenTrabajoDetailView(RetrieveUpdateAPIView):
@@ -98,4 +98,4 @@ class OrdenTrabajoDetailView(RetrieveUpdateAPIView):
         if s.is_valid():
             s.save()
             return success_response(data=s.data, message="Orden de trabajo actualizada.")
-        return error_response("VALIDACION_ERROR", str(s.errors))
+        return validation_error_response(s)

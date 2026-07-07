@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { FileText, ExternalLink, Search, Filter } from 'lucide-react'
+import { FileText, Search } from 'lucide-react'
 import { getMisCotizaciones } from '@/api/authApi'
 
 const ESTADO_COLOR: Record<string, string> = {

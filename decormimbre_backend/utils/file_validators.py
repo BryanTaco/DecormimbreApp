@@ -31,13 +31,20 @@ def validate_image_file(file):
         mime_type = magic.from_buffer(file.read(2048), mime=True)
         file.seek(0)
     except ImportError:
-        # Fallback si python-magic no está disponible (Windows sin libmagic)
-        import imghdr
-        header = file.read(2048)
-        file.seek(0)
-        img_type = imghdr.what(None, header)
-        _mime_map = {"jpeg": "image/jpeg", "png": "image/png", "webp": "image/webp"}
-        mime_type = _mime_map.get(img_type, "application/octet-stream")
+        # Fallback si python-magic/libmagic no está disponible (p. ej. Windows).
+        # Usamos Pillow para identificar el formato real por su contenido.
+        # (imghdr fue eliminado en Python 3.13, por eso no se usa.)
+        from PIL import Image, UnidentifiedImageError
+        _pil_to_mime = {"JPEG": "image/jpeg", "PNG": "image/png", "WEBP": "image/webp"}
+        try:
+            file.seek(0)
+            with Image.open(file) as img:
+                pil_format = img.format
+            mime_type = _pil_to_mime.get(pil_format, "application/octet-stream")
+        except (UnidentifiedImageError, OSError):
+            mime_type = "application/octet-stream"
+        finally:
+            file.seek(0)
 
     if mime_type not in ALLOWED_MIME_TYPES:
         raise ValidationError(
