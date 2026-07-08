@@ -3,12 +3,15 @@ import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import {
   LayoutDashboard, FileText, ShoppingBag, Package,
-  Users, Truck, BarChart2, Leaf, LogOut, Menu, X,
+  Users, Truck, BarChart2, LogOut, Menu, X, Target, CheckSquare,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/auth'
+import BrandLogo from '@/components/BrandLogo'
 
 const NAV = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/admin/pipeline', label: 'Embudo', icon: Target },
+  { to: '/admin/tareas', label: 'Tareas', icon: CheckSquare },
   { to: '/admin/cotizaciones', label: 'Cotizaciones', icon: FileText },
   { to: '/admin/pedidos', label: 'Pedidos', icon: ShoppingBag },
   { to: '/admin/inventario', label: 'Inventario', icon: Package },
@@ -20,9 +23,7 @@ const NAV = [
 function Brand() {
   return (
     <div className="flex items-center gap-2 px-2">
-      <div className="w-8 h-8 rounded-full bg-[rgba(92,64,51,0.1)] flex items-center justify-center">
-        <Leaf className="w-4 h-4 text-[rgba(92,64,51,0.8)]" />
-      </div>
+      <BrandLogo size={30} />
       <span className="text-[rgba(92,64,51,0.9)] font-normal tracking-tighter text-base">
         DECORMIMBRE
       </span>

@@ -2,7 +2,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { LayoutDashboard, FileText, Package, LogOut } from 'lucide-react'
 import { useAuthStore } from '@/store/auth'
-import Logo from '@/components/landing/Logo'
+import BrandLogo from '@/components/BrandLogo'
 import { useEffect } from 'react'
 
 const MENU = [
@@ -34,7 +34,7 @@ export default function CuentaLayout() {
       <aside style={{ width: 240, background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)', borderRight: '1px solid rgba(196,168,130,0.2)', display: 'flex', flexDirection: 'column', position: 'sticky', top: 0, height: '100vh', flexShrink: 0 }}>
         <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid rgba(196,168,130,0.15)' }}>
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Logo color="#5C4033" size={24} />
+            <BrandLogo size={30} />
             <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 500, letterSpacing: '0.08em', color: '#5C4033', textTransform: 'uppercase' }}>Decormimbre</span>
           </Link>
         </div>

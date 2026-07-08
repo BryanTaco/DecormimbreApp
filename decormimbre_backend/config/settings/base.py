@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "apps.pedidos",
     "apps.proveedores",
     "apps.reportes",
+    "apps.crm",
 ]
 
 MIDDLEWARE = [

@@ -35,7 +35,10 @@ export const router = createBrowserRouter([
     lazy: () => lazy(() => import('@/pages/admin/AdminLayout')),
     children: [
       { index: true, lazy: () => lazy(() => import('@/pages/admin/Dashboard')) },
+      { path: 'pipeline', lazy: () => lazy(() => import('@/pages/admin/crm/PipelinePage')) },
+      { path: 'tareas', lazy: () => lazy(() => import('@/pages/admin/crm/TareasPage')) },
       { path: 'clientes', lazy: () => lazy(() => import('@/pages/admin/clientes/ClientesPage')) },
+      { path: 'clientes/:id', lazy: () => lazy(() => import('@/pages/admin/clientes/ClienteDetalle')) },
       { path: 'cotizaciones', lazy: () => lazy(() => import('@/pages/admin/cotizaciones/CotizacionesPage')) },
       { path: 'cotizaciones/:id', lazy: () => lazy(() => import('@/pages/admin/cotizaciones/CotizacionDetalle')) },
       { path: 'pedidos', lazy: () => lazy(() => import('@/pages/admin/pedidos/PedidosPage')) },

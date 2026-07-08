@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { Leaf, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import api from '@/api/client'
 import { useAuthStore } from '@/store/auth'
+import BrandLogo from '@/components/BrandLogo'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -39,9 +40,7 @@ export default function Login() {
       >
         {/* Logo */}
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-9 h-9 rounded-full bg-[rgba(92,64,51,0.1)] flex items-center justify-center">
-            <Leaf className="w-5 h-5 text-[rgba(92,64,51,0.8)]" />
-          </div>
+          <BrandLogo size={34} />
           <span className="text-[rgba(92,64,51,0.9)] font-normal tracking-tighter text-lg">
             DECORMIMBRE
           </span>

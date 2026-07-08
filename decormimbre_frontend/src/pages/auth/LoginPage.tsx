@@ -4,7 +4,7 @@ import { Eye, EyeOff, ArrowLeft, LogIn } from 'lucide-react'
 import { motion } from 'motion/react'
 import { loginCliente } from '@/api/authApi'
 import { useAuthStore } from '@/store/auth'
-import Logo from '@/components/landing/Logo'
+import BrandLogo from '@/components/BrandLogo'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -58,7 +58,7 @@ export default function LoginPage() {
           Volver al inicio
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Logo color="#5C4033" size={28} />
+          <BrandLogo size={32} />
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 500, letterSpacing: '0.08em', color: '#5C4033', textTransform: 'uppercase' }}>Decormimbre</span>
         </div>
       </div>
