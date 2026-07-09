@@ -19,9 +19,19 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
+      // 1) Obtener tokens
       const { data } = await api.post('/auth/token/', form)
-      const payload = data.data ?? data
-      setAuth(payload.user, payload.access, payload.refresh)
+      const tokens = data.data ?? data
+      localStorage.setItem('access_token', tokens.access)
+      localStorage.setItem('refresh_token', tokens.refresh)
+      // 2) El endpoint de token no incluye el usuario: lo pedimos aparte
+      const meRes = await api.get('/auth/me/')
+      const me = meRes.data?.data ?? meRes.data
+      if (me?.rol === 'CLIENTE') {
+        setError('Esta cuenta es de cliente. Ingresa desde el portal de clientes.')
+        return
+      }
+      setAuth(me, tokens.access, tokens.refresh)
       navigate('/admin')
     } catch {
       setError('Credenciales incorrectas. Intenta de nuevo.')
