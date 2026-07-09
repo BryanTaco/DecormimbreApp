@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Package, Plus, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Package, Plus, AlertTriangle, CheckCircle, DollarSign } from 'lucide-react'
 import { inventarioApi, type MateriaPrima, type AlertaStock } from '@/api/inventario'
 import PageHeader from '@/components/ui/PageHeader'
+import StatCard from '@/components/ui/StatCard'
 import Spinner from '@/components/ui/Spinner'
 import EmptyState from '@/components/ui/EmptyState'
 import Modal from '@/components/ui/Modal'
@@ -81,6 +82,7 @@ export default function InventarioPage() {
   return (
     <div className="p-6 md:p-8">
       <PageHeader
+        eyebrow="Almacén"
         title="Inventario"
         subtitle="Materias primas y stock"
         action={
@@ -94,6 +96,13 @@ export default function InventarioPage() {
           </div>
         }
       />
+
+      {/* KPIs */}
+      <div className="grid grid-cols-3 gap-4 mb-6 max-w-2xl">
+        <StatCard label="Materias primas" value={materias.length} icon={Package} color="#5C4033" delay={0} onClick={() => setTab('Materias primas')} />
+        <StatCard label="En stock crítico" value={materias.filter((m) => m.en_stock_critico).length} icon={AlertTriangle} color="#ef4444" delay={0.06} onClick={() => setTab('Alertas')} />
+        <StatCard label="Valor inventario" value={'$' + materias.reduce((s, m) => s + Number(m.stock_actual || 0) * Number(m.costo_unitario || 0), 0).toLocaleString('es-EC', { maximumFractionDigits: 0 })} icon={DollarSign} color="#C4A882" delay={0.12} />
+      </div>
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-white/50 rounded-xl p-1 w-fit">
@@ -109,7 +118,7 @@ export default function InventarioPage() {
         loadingMaterias ? <Spinner /> : materias.length === 0 ? (
           <EmptyState icon={Package} title="Sin materias primas" />
         ) : (
-          <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] overflow-hidden">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[rgba(92,64,51,0.07)]">
@@ -148,7 +157,7 @@ export default function InventarioPage() {
         loadingLotes ? <Spinner /> : lotes.length === 0 ? (
           <EmptyState icon={Package} title="Sin lotes registrados" action={<Btn onClick={() => setModalLote(true)}><Plus className="w-4 h-4" /> Nuevo lote</Btn>} />
         ) : (
-          <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] overflow-hidden">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[rgba(92,64,51,0.07)]">
@@ -180,7 +189,7 @@ export default function InventarioPage() {
         ) : (
           <div className="flex flex-col gap-3">
             {alertas.map((a) => (
-              <div key={a.id} className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-red-100 p-5 flex items-center justify-between gap-4">
+              <div key={a.id} className="bg-white rounded-[1.5rem] border border-red-100 p-5 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center">
                     <AlertTriangle className="w-4 h-4 text-red-500" />

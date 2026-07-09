@@ -105,7 +105,7 @@ export default function PedidoDetalle() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Tareas de producción */}
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] overflow-hidden">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
             <div className="px-5 py-4 border-b border-[rgba(92,64,51,0.07)]">
               <span className="text-sm font-normal text-[rgba(92,64,51,0.8)]">Etapas de producción</span>
             </div>
@@ -149,7 +149,7 @@ export default function PedidoDetalle() {
           </div>
 
           {/* Ítems del pedido */}
-          <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] overflow-hidden">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
             <div className="px-5 py-4 border-b border-[rgba(92,64,51,0.07)]">
               <span className="text-sm font-normal text-[rgba(92,64,51,0.8)]">Ítems ({pedido.items?.length ?? 0})</span>
             </div>
@@ -179,7 +179,7 @@ export default function PedidoDetalle() {
 
         {/* Sidebar resumen */}
         <div className="flex flex-col gap-4">
-          <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] p-5 flex flex-col gap-3">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] p-5 flex flex-col gap-3">
             <h3 className="text-sm font-normal text-[rgba(92,64,51,0.7)]">Resumen</h3>
             {[
               { label: 'Subtotal', val: `$${pedido.subtotal}` },
@@ -193,7 +193,7 @@ export default function PedidoDetalle() {
             ))}
           </div>
 
-          <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] p-5 flex flex-col gap-2">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] p-5 flex flex-col gap-2">
             <h3 className="text-sm font-normal text-[rgba(92,64,51,0.7)] mb-1">Fichas técnicas</h3>
             {[{ rol: 'TEJIDO', label: 'Ficha Tejedor' }, { rol: 'ESTRUCTURA', label: 'Ficha Estructurista' }].map((f) => (
               <a key={f.rol} href={pedidosApi.fichaUrl(id!, f.rol)} target="_blank" rel="noreferrer"
@@ -204,7 +204,7 @@ export default function PedidoDetalle() {
           </div>
 
           {pedido.fecha_promesa_entrega && (
-            <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] p-5">
+            <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] p-5">
               <h3 className="text-sm font-normal text-[rgba(92,64,51,0.7)] mb-2">Fecha de entrega</h3>
               <p className="text-sm text-[rgba(92,64,51,0.9)]">{new Date(pedido.fecha_promesa_entrega).toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
             </div>

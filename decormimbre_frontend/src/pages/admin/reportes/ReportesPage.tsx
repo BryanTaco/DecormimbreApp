@@ -42,10 +42,10 @@ export default function ReportesPage() {
 
   return (
     <div className="p-6 md:p-8 max-w-3xl">
-      <PageHeader title="Reportes" subtitle="Exporta datos del sistema en formato Excel" />
+      <PageHeader eyebrow="Datos" title="Reportes" subtitle="Exporta datos del sistema en formato Excel" />
 
       {/* Filtro de fechas */}
-      <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] p-5 mb-6 flex flex-wrap gap-4 items-end">
+      <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] p-5 mb-6 flex flex-wrap gap-4 items-end">
         <Input label="Desde" type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="w-40" />
         <Input label="Hasta" type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="w-40" />
         <p className="text-xs text-[rgba(92,64,51,0.5)] self-center">Deja vacío para incluir todo el historial</p>
@@ -54,7 +54,7 @@ export default function ReportesPage() {
       {/* Cards de reportes */}
       <div className="flex flex-col gap-4">
         {REPORTES.map((r) => (
-          <div key={r.key} className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] p-5 flex items-center justify-between gap-4">
+          <div key={r.key} className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] p-5 flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="w-11 h-11 rounded-xl bg-[rgba(92,64,51,0.07)] flex items-center justify-center flex-shrink-0">
                 <r.icon className="w-5 h-5 text-[rgba(92,64,51,0.7)]" />

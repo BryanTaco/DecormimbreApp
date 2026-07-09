@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Users, Plus, Search } from 'lucide-react'
+import { Users, Plus, Search, Mail, Phone } from 'lucide-react'
 import { clientesApi, type Cliente } from '@/api/clientes'
 import PageHeader from '@/components/ui/PageHeader'
+import StatCard from '@/components/ui/StatCard'
 import Spinner from '@/components/ui/Spinner'
 import EmptyState from '@/components/ui/EmptyState'
 import Modal from '@/components/ui/Modal'
@@ -39,10 +40,18 @@ export default function ClientesPage() {
   return (
     <div className="p-6 md:p-8">
       <PageHeader
+        eyebrow="Directorio"
         title="Clientes"
         subtitle={`${clientes.length} registrados`}
         action={<Btn onClick={openCreate}><Plus className="w-4 h-4" /> Nuevo cliente</Btn>}
       />
+
+      {/* KPIs */}
+      <div className="grid grid-cols-3 gap-4 mb-6 max-w-2xl">
+        <StatCard label="Clientes" value={clientes.length} icon={Users} color="#5C4033" delay={0} />
+        <StatCard label="Con correo" value={clientes.filter((c) => c.email).length} icon={Mail} color="#3b82f6" delay={0.06} />
+        <StatCard label="Con teléfono" value={clientes.filter((c) => c.telefono).length} icon={Phone} color="#16a34a" delay={0.12} />
+      </div>
 
       {/* Búsqueda */}
       <div className="relative mb-6 max-w-xs">
@@ -58,7 +67,7 @@ export default function ClientesPage() {
       {isLoading ? <Spinner /> : clientes.length === 0 ? (
         <EmptyState icon={Users} title="Sin clientes aún" action={<Btn onClick={openCreate}><Plus className="w-4 h-4" /> Agregar cliente</Btn>} />
       ) : (
-        <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] overflow-hidden">
+        <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[rgba(92,64,51,0.07)]">

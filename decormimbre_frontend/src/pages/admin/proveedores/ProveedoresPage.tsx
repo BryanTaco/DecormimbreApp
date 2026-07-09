@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Truck, Plus } from 'lucide-react'
+import { Truck, Plus, CheckCircle2, ClipboardList } from 'lucide-react'
 import { proveedoresApi, type Proveedor, type OrdenTrabajo } from '@/api/proveedores'
 import PageHeader from '@/components/ui/PageHeader'
+import StatCard from '@/components/ui/StatCard'
 import Badge from '@/components/ui/Badge'
 import Spinner from '@/components/ui/Spinner'
 import EmptyState from '@/components/ui/EmptyState'
@@ -69,7 +70,9 @@ export default function ProveedoresPage() {
   return (
     <div className="p-6 md:p-8">
       <PageHeader
+        eyebrow="Compras"
         title="Proveedores"
+        subtitle={`${proveedores.length} registrados`}
         action={
           <div className="flex gap-2">
             {tab === 'Proveedores' && <Btn onClick={() => { setFormProv(EMPTY_PROV); setEditando(null); setModalProv(true) }}><Plus className="w-4 h-4" /> Nuevo proveedor</Btn>}
@@ -77,6 +80,13 @@ export default function ProveedoresPage() {
           </div>
         }
       />
+
+      {/* KPIs */}
+      <div className="grid grid-cols-3 gap-4 mb-6 max-w-2xl">
+        <StatCard label="Proveedores" value={proveedores.length} icon={Truck} color="#5C4033" delay={0} onClick={() => setTab('Proveedores')} />
+        <StatCard label="Activos" value={proveedores.filter((p) => p.activo).length} icon={CheckCircle2} color="#16a34a" delay={0.06} />
+        <StatCard label="Órdenes de trabajo" value={ordenes.length} icon={ClipboardList} color="#3b82f6" delay={0.12} onClick={() => setTab('Órdenes de trabajo')} />
+      </div>
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-white/50 rounded-xl p-1 w-fit">
@@ -92,7 +102,7 @@ export default function ProveedoresPage() {
         loadingProv ? <Spinner /> : proveedores.length === 0 ? (
           <EmptyState icon={Truck} title="Sin proveedores" />
         ) : (
-          <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] overflow-hidden">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[rgba(92,64,51,0.07)]">
@@ -123,7 +133,7 @@ export default function ProveedoresPage() {
         loadingOrdenes ? <Spinner /> : ordenes.length === 0 ? (
           <EmptyState icon={Truck} title="Sin órdenes de trabajo" action={<Btn onClick={() => setModalOrden(true)}><Plus className="w-4 h-4" /> Nueva orden</Btn>} />
         ) : (
-          <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] overflow-hidden">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[rgba(92,64,51,0.07)]">

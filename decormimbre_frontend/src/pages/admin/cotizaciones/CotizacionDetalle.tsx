@@ -98,7 +98,7 @@ export default function CotizacionDetalle() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Ítems */}
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] overflow-hidden">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(92,64,51,0.07)]">
               <span className="text-sm font-normal text-[rgba(92,64,51,0.8)]">Ítems ({cot.items?.length ?? 0})</span>
               {esBorrador && (
@@ -140,7 +140,7 @@ export default function CotizacionDetalle() {
 
         {/* Resumen */}
         <div className="flex flex-col gap-4">
-          <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] p-5 flex flex-col gap-3">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] p-5 flex flex-col gap-3">
             <h3 className="text-sm font-normal text-[rgba(92,64,51,0.7)] mb-1">Resumen</h3>
             {[
               { label: 'Subtotal', val: `$${cot.subtotal}` },
@@ -154,7 +154,7 @@ export default function CotizacionDetalle() {
             ))}
           </div>
 
-          <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] p-5 flex flex-col gap-2">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] p-5 flex flex-col gap-2">
             <h3 className="text-sm font-normal text-[rgba(92,64,51,0.7)] mb-1">Detalles</h3>
             <p className="text-[12px] text-[rgba(92,64,51,0.55)]">Forma de pago</p>
             <p className="text-sm text-[rgba(92,64,51,0.85)]">{cot.forma_pago?.replace('_', ' ')}</p>
@@ -166,7 +166,7 @@ export default function CotizacionDetalle() {
             )}
           </div>
 
-          <div className="bg-white/70 backdrop-blur-sm rounded-[1.5rem] border border-[rgba(92,64,51,0.08)] p-5 flex flex-col gap-2">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] p-5 flex flex-col gap-2">
             <h3 className="text-sm font-normal text-[rgba(92,64,51,0.7)] mb-1">Cliente</h3>
             {(() => {
               const cl = clientes.find((c: { id: string }) => c.id === cot.cliente)
