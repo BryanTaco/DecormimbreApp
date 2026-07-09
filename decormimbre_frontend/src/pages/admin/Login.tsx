@@ -33,8 +33,13 @@ export default function Login() {
       }
       setAuth(me, tokens.access, tokens.refresh)
       navigate('/admin')
-    } catch {
-      setError('Credenciales incorrectas. Intenta de nuevo.')
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status
+      if (status === 429) {
+        setError('Demasiados intentos. Espera unos minutos e intenta de nuevo.')
+      } else {
+        setError('Credenciales incorrectas. Intenta de nuevo.')
+      }
     } finally {
       setLoading(false)
     }
