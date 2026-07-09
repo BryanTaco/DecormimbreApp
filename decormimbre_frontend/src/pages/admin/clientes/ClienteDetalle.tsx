@@ -40,7 +40,7 @@ export default function ClienteDetalle() {
   })
 
   if (isLoading) return <div className="p-8"><Spinner /></div>
-  const d = data?.data?.data
+  const d = data?.data
   if (!d) return <div className="p-8 text-sm text-[rgba(92,64,51,0.5)]">Cliente no encontrado.</div>
 
   const c = d.cliente

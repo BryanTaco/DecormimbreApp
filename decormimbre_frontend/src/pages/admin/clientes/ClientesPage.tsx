@@ -9,7 +9,7 @@ import Modal from '@/components/ui/Modal'
 import Input from '@/components/ui/Input'
 import Btn from '@/components/ui/Btn'
 
-const EMPTY: Partial<Cliente> = { nombre: '', apellido: '', cedula_ruc: '', email: '', telefono: '', direccion: '' }
+const EMPTY: Partial<Cliente> = { nombre_completo: '', cedula_ruc: '', email: '', telefono: '', direccion: '' }
 
 export default function ClientesPage() {
   const qc = useQueryClient()
@@ -70,7 +70,7 @@ export default function ClientesPage() {
             <tbody>
               {clientes.map((c) => (
                 <tr key={c.id} className="border-b border-[rgba(92,64,51,0.05)] hover:bg-[rgba(92,64,51,0.02)] transition-colors">
-                  <td className="px-5 py-3 text-[rgba(92,64,51,0.9)] font-normal">{c.nombre} {c.apellido}</td>
+                  <td className="px-5 py-3 text-[rgba(92,64,51,0.9)] font-normal">{c.nombre_completo || `${c.nombre ?? ''} ${c.apellido ?? ''}`.trim() || '—'}</td>
                   <td className="px-5 py-3 text-[rgba(92,64,51,0.6)]">{c.cedula_ruc}</td>
                   <td className="px-5 py-3 text-[rgba(92,64,51,0.6)]">{c.email}</td>
                   <td className="px-5 py-3 text-[rgba(92,64,51,0.6)]">{c.telefono}</td>
@@ -86,10 +86,7 @@ export default function ClientesPage() {
 
       <Modal open={modal} onClose={closeModal} title={editing ? 'Editar cliente' : 'Nuevo cliente'}>
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-3">
-            <Input label="Nombre" value={form.nombre ?? ''} onChange={(e) => set('nombre', e.target.value)} />
-            <Input label="Apellido" value={form.apellido ?? ''} onChange={(e) => set('apellido', e.target.value)} />
-          </div>
+          <Input label="Nombre completo" value={form.nombre_completo ?? ''} onChange={(e) => set('nombre_completo', e.target.value)} />
           <Input label="Cédula / RUC" value={form.cedula_ruc ?? ''} onChange={(e) => set('cedula_ruc', e.target.value)} />
           <Input label="Email" type="email" value={form.email ?? ''} onChange={(e) => set('email', e.target.value)} />
           <Input label="Teléfono" value={form.telefono ?? ''} onChange={(e) => set('telefono', e.target.value)} />

@@ -2,8 +2,12 @@ import api from './client'
 
 export interface Cliente {
   id: string
-  nombre: string
-  apellido: string
+  nombre_completo: string
+  // compat con formularios antiguos
+  nombre?: string
+  apellido?: string
+  tipo?: string
+  notas?: string
   cedula_ruc: string
   email: string
   telefono: string

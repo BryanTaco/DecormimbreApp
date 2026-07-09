@@ -13,7 +13,16 @@ api.interceptors.request.use((config) => {
 })
 
 api.interceptors.response.use(
-  (r) => r,
+  (r) => {
+    // El backend envuelve todo en { success, data, meta }. Lo desenvolvemos
+    // aquí para que las páginas lean el contenido directo en `response.data`.
+    const body = r.data
+    if (body && typeof body === 'object' && !Array.isArray(body) && 'success' in body && 'data' in body) {
+      if ('meta' in body) (r as unknown as { meta: unknown }).meta = body.meta
+      r.data = body.data
+    }
+    return r
+  },
   async (error) => {
     const original = error.config
     if (error.response?.status === 401 && !original._retry) {

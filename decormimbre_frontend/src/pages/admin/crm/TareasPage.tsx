@@ -23,9 +23,9 @@ export default function TareasPage() {
     queryFn: () => crmApi.tareas.list(filtro === 'todas' ? {} : { estado: filtro }),
   })
   const { data: cliData } = useQuery({ queryKey: ['crm-clientes'], queryFn: () => clientesApi.list() })
-  const clientes = cliData?.data?.data ?? cliData?.data ?? []
+  const clientes = cliData?.data ?? []
 
-  const tareas: Tarea[] = data?.data?.data ?? []
+  const tareas: Tarea[] = data?.data ?? []
 
   const crear = useMutation({
     mutationFn: () => crmApi.tareas.create({
