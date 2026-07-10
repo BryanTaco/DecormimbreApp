@@ -15,6 +15,7 @@ TIEMPO_PRODUCCION = "15 a 25 días hábiles"
 PRODUCTOS_BASE = {
     "columpio": {
         "nombre": "Columpio colgante",
+        "imagen": "/products/colgante-nube.jpg",
         "categoria": "Exterior",
         "precio_base": 480,
         "material_base": "mimbre",
@@ -24,6 +25,7 @@ PRODUCTOS_BASE = {
     },
     "papasan": {
         "nombre": "Silla Papasan (Nido)",
+        "imagen": "/products/papasan-set.jpg",
         "categoria": "Sala",
         "precio_base": 260,
         "material_base": "mimbre",
@@ -33,6 +35,7 @@ PRODUCTOS_BASE = {
     },
     "sofa": {
         "nombre": "Sofá Serena",
+        "imagen": "/products/sala-modular-oscura.jpg",
         "categoria": "Sala",
         "precio_base": 620,
         "material_base": "polialuminio",
@@ -42,6 +45,7 @@ PRODUCTOS_BASE = {
     },
     "mesa": {
         "nombre": "Mesa tejida",
+        "imagen": "/products/comedor-tejido.jpg",
         "categoria": "Comedor",
         "precio_base": 340,
         "material_base": "mimbre",
@@ -51,6 +55,7 @@ PRODUCTOS_BASE = {
     },
     "colgante_huevo": {
         "nombre": "Butaca colgante huevo",
+        "imagen": "/products/set-exterior-huevo.jpg",
         "categoria": "Exterior",
         "precio_base": 520,
         "material_base": "polialuminio",
@@ -60,6 +65,7 @@ PRODUCTOS_BASE = {
     },
     "silla": {
         "nombre": "Silla artesanal",
+        "imagen": "/products/silla-artesanal.jpg",
         "categoria": "Comedor",
         "precio_base": 145,
         "material_base": "mimbre",
@@ -125,6 +131,7 @@ def cotizar(producto: str, material: str = "", tamano: str = "estandar",
 
     return {
         "producto": base["nombre"],
+        "imagen": base.get("imagen", ""),
         "categoria": base["categoria"],
         "material": material,
         "tamano": TAMANO_LABEL[tamano],

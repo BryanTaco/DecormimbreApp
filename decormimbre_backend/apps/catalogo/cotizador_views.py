@@ -18,6 +18,7 @@ class CotizadorProductosView(APIView):
             {
                 "clave": k,
                 "nombre": v["nombre"],
+                "imagen": v.get("imagen", ""),
                 "categoria": v["categoria"],
                 "material_base": v["material_base"],
                 "precio_base": v["precio_base"],

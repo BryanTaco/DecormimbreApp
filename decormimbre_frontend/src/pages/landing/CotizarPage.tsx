@@ -73,10 +73,17 @@ export default function CotizarPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {productos.map((p) => (
                   <button key={p.clave} onClick={() => { setProducto(p.clave); if (!material) setMaterial(p.material_base) }}
-                    className={`text-left rounded-2xl border p-4 transition-all ${producto === p.clave ? 'border-[#5C4033] bg-white shadow-[0_10px_24px_rgba(92,64,51,0.12)]' : 'border-[rgba(92,64,51,0.12)] bg-white/70 hover:bg-white'}`}>
-                    <p className="text-[14px] font-medium text-[#3d2215] leading-tight">{p.nombre}</p>
-                    <p className="text-[11px] uppercase tracking-wide text-[rgba(92,64,51,0.45)] mt-0.5">{p.categoria}</p>
-                    <p className="text-[13px] text-[rgba(92,64,51,0.7)] mt-2">desde {money(p.precio_base)}</p>
+                    className={`text-left rounded-2xl border overflow-hidden transition-all ${producto === p.clave ? 'border-[#5C4033] bg-white shadow-[0_10px_24px_rgba(92,64,51,0.12)]' : 'border-[rgba(92,64,51,0.12)] bg-white/70 hover:bg-white'}`}>
+                    {p.imagen && (
+                      <div className="w-full aspect-[4/3] overflow-hidden bg-[#faf7f4]">
+                        <img src={p.imagen} alt={p.nombre} loading="lazy" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="p-3">
+                      <p className="text-[14px] font-medium text-[#3d2215] leading-tight">{p.nombre}</p>
+                      <p className="text-[11px] uppercase tracking-wide text-[rgba(92,64,51,0.45)] mt-0.5">{p.categoria}</p>
+                      <p className="text-[13px] text-[rgba(92,64,51,0.7)] mt-1.5">desde {money(p.precio_base)}</p>
+                    </div>
                   </button>
                 ))}
               </div>
@@ -146,6 +153,12 @@ export default function CotizarPage() {
                 <div className="p-10 flex justify-center"><Loader className="w-6 h-6 animate-spin text-[rgba(92,64,51,0.4)]" /></div>
               ) : cot ? (
                 <div>
+                  {cot.imagen && (
+                    <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#faf7f4]">
+                      <img src={cot.imagen} alt={cot.producto} className="w-full h-full object-cover" />
+                      <span className="absolute top-3 left-3 text-[10px] uppercase tracking-[0.14em] bg-black/45 text-white px-2.5 py-1 rounded-full backdrop-blur-sm">Imagen de referencia</span>
+                    </div>
+                  )}
                   <div className="p-6 pb-5 bg-gradient-to-br from-[#3d2215] to-[#5C4033] text-white">
                     <p className="text-[11px] uppercase tracking-[0.16em] text-white/60">{cot.categoria}</p>
                     <h3 className="text-[20px] font-normal italic mt-0.5" style={{ fontFamily: 'var(--font-display)' }}>{cot.producto}</h3>

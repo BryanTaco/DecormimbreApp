@@ -3,6 +3,7 @@ import api from './client'
 export interface ProductoBase {
   clave: string
   nombre: string
+  imagen: string
   categoria: string
   material_base: string
   precio_base: number
@@ -12,6 +13,7 @@ export interface ProductoBase {
 
 export interface Cotizacion {
   producto: string
+  imagen: string
   categoria: string
   material: string
   tamano: string
