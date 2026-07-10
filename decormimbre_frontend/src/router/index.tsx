@@ -36,6 +36,9 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // Taller (artesano)
+  { path: '/taller', lazy: () => lazy(() => import('@/pages/taller/TallerPage')) },
+
   // Admin
   { path: '/admin/login', lazy: () => lazy(() => import('@/pages/admin/Login')) },
   {

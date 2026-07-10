@@ -283,6 +283,43 @@ class TrackingPublicoView(APIView):
 # VISTAS DE ARTESANO
 # ──────────────────────────────────────────────
 
+def _estado_produccion_tarea(tarea):
+    """Info de espera (etapas previas incompletas) y verificación de materiales/inventario."""
+    from decimal import Decimal
+    from apps.inventario.models import ProductoMateria
+    pedido = tarea.pedido
+
+    previa = (TareaProduccion.objects
+              .filter(pedido=pedido, orden__lt=tarea.orden)
+              .exclude(estado="COMPLETADA")
+              .order_by("orden").first())
+
+    req = {}
+    for item in pedido.items.select_related("producto").all():
+        for pm in ProductoMateria.objects.filter(producto=item.producto).select_related("materia_prima"):
+            m = pm.materia_prima
+            e = req.setdefault(str(m.id), {"nombre": m.nombre, "unidad": m.get_unidad_display(),
+                                           "requerido": Decimal("0"), "disponible": m.stock_actual})
+            e["requerido"] += pm.cantidad_por_unidad * item.cantidad
+
+    materiales, requiere_pedido = [], False
+    for e in req.values():
+        suficiente = e["disponible"] >= e["requerido"]
+        requiere_pedido = requiere_pedido or not suficiente
+        materiales.append({
+            "nombre": e["nombre"], "unidad": e["unidad"],
+            "requerido": str(e["requerido"].normalize()), "disponible": str(e["disponible"].normalize()),
+            "faltante": str((e["requerido"] - e["disponible"]).normalize()) if not suficiente else "0",
+            "suficiente": suficiente,
+        })
+    return {
+        "esperando": previa.get_tipo_display() if previa else None,
+        "bloqueada": previa is not None,
+        "materiales": materiales,
+        "requiere_pedido": requiere_pedido,
+    }
+
+
 class MisTareasView(APIView):
     """GET: artesano ve sus tareas activas y pendientes."""
     permission_classes = [IsAdminOrPropietarioOrArtesano]
@@ -328,6 +365,7 @@ class MisTareasView(APIView):
                 ],
                 "iniciada_en": tarea.iniciada_en.isoformat() if tarea.iniciada_en else None,
                 "notas": tarea.notas,
+                **_estado_produccion_tarea(tarea),
             })
         return success_response(data=data)
 
@@ -376,6 +414,43 @@ class CompletarTareaView(APIView):
         return success_response(
             data=TareaProduccionSerializer(tarea).data,
             message=f"Tarea '{tarea.get_tipo_display()}' marcada como completada.",
+        )
+
+
+class SolicitarMaterialView(APIView):
+    """POST: el artesano avisa a administración que falta material/color para pedir al proveedor."""
+    permission_classes = [IsAdminOrPropietarioOrArtesano]
+
+    def post(self, request, tarea_id):
+        from apps.authentication.models import Usuario, Notificacion
+        tarea = get_object_or_404(TareaProduccion, pk=tarea_id)
+        if request.user.is_artesano and tarea.artesano != request.user:
+            return error_response("ACCESO_DENEGADO", "Esta tarea no te pertenece.", status_code=403)
+
+        info = _estado_produccion_tarea(tarea)
+        faltantes = [m for m in info["materiales"] if not m["suficiente"]]
+        pedido = tarea.pedido
+        colores = ", ".join(sorted({i.color.nombre for i in pedido.items.select_related("color").all() if i.color}))
+        nota = (request.data.get("nota") or "").strip()
+
+        detalle = "; ".join(f"{m['nombre']} (faltan {m['faltante']} {m['unidad']})" for m in faltantes) or "material para el tejido"
+        titulo = f"Solicitud de material — {pedido.numero}"
+        mensaje = (
+            f"{request.user.nombre} (tejido) solicita material para {pedido.numero}. "
+            f"Faltante: {detalle}. Color pedido: {colores or 'a definir'}. "
+            f"Revisar inventario y pedir al proveedor." + (f" Nota: {nota}" if nota else "")
+        )
+        objetivos = Usuario.objects.filter(rol__in=["ADMIN", "PROPIETARIO"], activo=True)
+        creadas = 0
+        for u in objetivos:
+            Notificacion.objects.create(
+                destinatario=u, tipo="ALERTA_INVENTARIO", titulo=titulo, mensaje=mensaje,
+                para_propietario=True, entidad_tipo="pedido", entidad_id=str(pedido.id),
+            )
+            creadas += 1
+        return success_response(
+            data={"faltantes": faltantes, "color": colores, "avisos_enviados": creadas},
+            message="Solicitud enviada a administración para pedir al proveedor.",
         )
 
 
