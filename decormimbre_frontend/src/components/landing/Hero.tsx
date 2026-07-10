@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { ArrowRight } from 'lucide-react'
 import Navbar from './Navbar'
+import { EMPRESA } from '@/lib/empresa'
 
 const BG_IMAGES = [
   '/products/hero-sala-quito.jpg',
@@ -225,7 +226,7 @@ export default function Hero() {
             style={{ zIndex: 20 }}
           >
             {[
-              { num: '+25', label: 'años de experiencia' },
+              { num: `+${new Date().getFullYear() - EMPRESA.fundacion}`, label: 'años de experiencia' },
               { num: '+2000', label: 'piezas entregadas' },
               { num: '100%', label: 'artesanía ecuatoriana' },
             ].map((s) => (
