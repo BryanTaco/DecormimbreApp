@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowLeft, Mail, Phone, MapPin, CheckCircle, MessageCircle } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, MapPin, CheckCircle, MessageCircle, Sparkles, ArrowUpRight } from 'lucide-react'
 import Navbar from '@/components/landing/Navbar'
 import MapEmbed from '@/components/landing/MapEmbed'
 import AiAssistant from '@/components/AiAssistant'
@@ -80,8 +80,12 @@ export default function ContactoPage() {
               lineHeight: 1.05,
             }}
           >
-            Solicita tu cotización
+            Contáctanos
           </h1>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'rgba(92,64,51,0.6)', margin: '14px 0 0', maxWidth: 540, lineHeight: 1.6, fontWeight: 300 }}>
+            Escríbenos para consultas, visitas o proyectos a medida. ¿Solo quieres un precio? Usa la{' '}
+            <Link to="/cotizar" style={{ color: '#5C4033', fontWeight: 600 }}>cotización rápida</Link>.
+          </p>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
@@ -119,8 +123,8 @@ export default function ContactoPage() {
                     fontWeight: 300,
                   }}
                 >
-                  Nos pondremos en contacto contigo en menos de 24 horas con tu
-                  cotización personalizada.
+                  Gracias por escribirnos. Te responderemos lo antes posible,
+                  normalmente en menos de 24 horas.
                 </p>
                 <button
                   onClick={() => setSent(false)}
@@ -222,7 +226,7 @@ export default function ContactoPage() {
                     cursor: loading ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  {loading ? 'Enviando...' : 'Solicitar cotización gratuita'}
+                  {loading ? 'Enviando...' : 'Enviar mensaje'}
                 </motion.button>
               </form>
             )}
@@ -235,45 +239,19 @@ export default function ContactoPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="lg:col-span-2 flex flex-col gap-5"
           >
-            <div className="rounded-[2rem] p-7 bg-white border border-[rgba(92,64,51,0.07)]">
-              <h3
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '22px',
-                  fontStyle: 'italic',
-                  color: '#3d2215',
-                  margin: '0 0 16px',
-                }}
-              >
-                ¿Cómo funciona?
-              </h3>
-              {[
-                { n: '01', t: 'Nos cuentas tu idea', d: 'Cuéntanos qué mueble necesitas, el espacio y el estilo.' },
-                { n: '02', t: 'Preparamos tu cotización', d: 'En menos de 24 horas recibes precios, materiales y tiempos.' },
-                { n: '03', t: 'Aprobamos y producimos', d: 'Con el 50% de anticipo, tus artesanos comienzan a tejer.' },
-                { n: '04', t: 'Entrega y montaje', d: 'Entregamos en Quito y principales ciudades del Ecuador.' },
-              ].map((s) => (
-                <div key={s.n} className="flex gap-4 mb-5 last:mb-0">
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '13px',
-                      fontStyle: 'italic',
-                      color: 'rgba(92,64,51,0.35)',
-                      flexShrink: 0,
-                      width: 24,
-                      marginTop: 2,
-                    }}
-                  >
-                    {s.n}
-                  </span>
-                  <div>
-                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 500, color: 'rgba(92,64,51,0.85)', margin: '0 0 2px' }}>{s.t}</p>
-                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'rgba(92,64,51,0.55)', margin: 0, lineHeight: 1.5, fontWeight: 300 }}>{s.d}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Link to="/cotizar" className="rounded-[2rem] p-7 no-underline block" style={{ background: 'linear-gradient(135deg, #3d2215 0%, #5C4033 100%)', color: '#fff' }}>
+              <div className="flex items-center gap-2 mb-2" style={{ opacity: 0.75 }}>
+                <Sparkles className="w-4 h-4" />
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.16em' }}>Cotización rápida</span>
+              </div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontStyle: 'italic', margin: '0 0 8px' }}>Tu precio al instante</h3>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', lineHeight: 1.6, margin: '0 0 16px', color: 'rgba(255,255,255,0.8)', fontWeight: 300 }}>
+                Elige un mueble, material y color, y obtén el precio y las especificaciones sin esperar.
+              </p>
+              <span className="inline-flex items-center gap-1.5" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600 }}>
+                Cotizar ahora <ArrowUpRight className="w-4 h-4" />
+              </span>
+            </Link>
 
             <div className="rounded-[2rem] p-7 bg-white border border-[rgba(92,64,51,0.07)] flex flex-col gap-4">
               <h3
