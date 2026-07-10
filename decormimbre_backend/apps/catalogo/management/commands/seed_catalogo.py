@@ -31,6 +31,19 @@ PRODUCTOS = [
     ("Silla Nido Tejida", "Sala", "MIMBRE", 185, "silla-nido.jpg", "Silla nido de mimbre natural con forma oval envolvente."),
     ("Hamaca Jardín", "Exterior", "COMBINADO", 340, "hamaca-jardin.jpg", "Silla colgante para terrazas y jardines. Descanso al aire libre con estilo."),
     ("Daybed Iglú", "Dormitorio", "MIMBRE", 760, "daybeds-igloo.jpg", "Daybed tejido tipo iglú con cojines. Un refugio de descanso para dormitorio o terraza."),
+    # Fotos nuevas
+    ("Butaca Colgante Nube", "Exterior", "MIMBRE", 340, "colgante-nube.jpg", "Silla colgante tipo huevo con cojín envolvente. Descanso suspendido para terraza o interior."),
+    ("Bandejas de Mimbre", "Accesorios", "MIMBRE", 35, "bandejas-mimbre.jpg", "Bandejas artesanales tejidas a mano. Fusión de arte y naturaleza para servir y decorar."),
+    ("Comedor Terraza", "Comedor", "COMBINADO", 780, "comedor-terraza.jpg", "Juego de comedor para terraza con sillas tejidas y mesa resistente al exterior."),
+    ("Set Jardín Real", "Exterior", "MIMBRE", 920, "set-jardin-real.jpg", "Set de jardín con sillas tipo pavo real y mesa redonda. Tejido natural de alto detalle."),
+    ("Sala Curva Marfil", "Sala", "MIMBRE", 690, "sala-curva-marfil.jpg", "Conjunto de sala curvo en tonos marfil. Sofá y butacas tejidas de líneas suaves."),
+    ("Butacas Cromía", "Sala", "MIMBRE", 360, "butacas-cromia.jpg", "Butacas tejidas en colores a elección (mostaza, azul y más). Carácter y comodidad."),
+    ("Set Modular Olivo", "Exterior", "POLIALUMINIO", 980, "set-modular-olivo.jpg", "Set modular redondo para exterior con cojines verde olivo. Polialuminio resistente."),
+    ("Taburete Terraza", "Exterior", "POLIALUMINIO", 160, "taburete-terraza.jpg", "Taburete alto tejido para barras y terrazas. Resistente al sol y la humedad."),
+    ("Set Terraza Cobre", "Exterior", "POLIALUMINIO", 850, "set-terraza-cobre.jpg", "Set de terraza en tonos cobre para azoteas. Sillones tejidos con cojines premium."),
+    ("Búhos Decorativos", "Accesorios", "MIMBRE", 55, "buhos-decorativos.jpg", "Figuras decorativas de búho tejidas a mano. Pieza artesanal única para tu hogar."),
+    ("Dúo Papasan", "Sala", "MIMBRE", 370, "duo-papasan.jpg", "Par de sillas papasan tejidas en mimbre natural. Forma envolvente y acogedora."),
+    ("Comedor Alameda", "Comedor", "COMBINADO", 820, "comedor-alameda.jpg", "Comedor de líneas cálidas con sillas de respaldo tejido y mesa amplia."),
 ]
 
 
