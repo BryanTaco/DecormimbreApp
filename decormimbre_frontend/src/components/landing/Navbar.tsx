@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/auth'
 const NAV_LINKS = [
   { label: 'Inicio', to: '/' },
   { label: 'Catálogo', to: '/catalogo' },
+  { label: 'Cotizar', to: '/cotizar' },
   { label: 'Nosotros', to: '/nosotros' },
   { label: 'Contacto', to: '/contacto' },
 ]
