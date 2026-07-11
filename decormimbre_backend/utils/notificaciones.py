@@ -194,3 +194,42 @@ def notificar_tarea_completada_a_admin(tarea, administradores) -> int:
             [admin.email],
         ))
     return _enviar_masivo(mensajes)
+
+
+# ── Notificaciones in-app + avance de etapa al cliente ─────────────────────────
+
+def notificacion_app_cliente(pedido, tipo, titulo, mensaje) -> bool:
+    """Crea una notificación in-app para la cuenta del cliente (si tiene usuario)."""
+    try:
+        from apps.authentication.models import Notificacion
+        destinatario = getattr(pedido.cliente, "usuario_cuenta", None)
+        if not destinatario:
+            return False
+        Notificacion.objects.create(
+            destinatario=destinatario, tipo=tipo, titulo=titulo, mensaje=mensaje,
+            entidad_tipo="pedido", entidad_id=str(pedido.id),
+        )
+        return True
+    except Exception:
+        return False
+
+
+def notificar_avance_etapa(pedido, etapa_display) -> None:
+    """Cliente: su pedido avanzó a una nueva etapa de producción (in-app + email)."""
+    titulo = f"Pedido {pedido.numero}: {etapa_display}"
+    mensaje = f"Tu pedido avanzó. Etapa actual: {etapa_display} ({pedido.porcentaje_completado()}%)."
+    notificacion_app_cliente(pedido, "PEDIDO_EN_PRODUCCION", titulo, mensaje)
+    cliente = pedido.cliente
+    if cliente.email:
+        cuerpo = f"""Estimado/a {cliente.nombre_completo},
+
+Su pedido {pedido.numero} avanzó en la producción.
+
+  Etapa actual : {etapa_display}
+  Progreso     : {pedido.porcentaje_completado()}%
+
+Puede seguir el avance con el enlace de seguimiento que le compartimos.
+
+{EMPRESA}
+"""
+        _enviar(cliente.email, f"Pedido {pedido.numero}: {etapa_display}", cuerpo)

@@ -7,8 +7,6 @@ export interface ProductoBase {
   categoria: string
   material_base: string
   precio_base: number
-  dimensiones: string
-  incluye_cojin: boolean
 }
 
 export interface Cotizacion {

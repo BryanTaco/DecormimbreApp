@@ -27,9 +27,17 @@ export default function CotizarPage() {
   const [colorTipo, setColorTipo] = useState<'estandar' | 'personalizado'>('estandar')
   const [colorHex, setColorHex] = useState('#7db4d8')
   const [cantidad, setCantidad] = useState(1)
+  const [cat, setCat] = useState('Todos')
+  const [q, setQ] = useState('')
 
   const { data: prodData } = useQuery({ queryKey: ['cotizador-productos'], queryFn: () => cotizadorApi.productos() })
   const productos: ProductoBase[] = prodData?.data ?? []
+  const categorias = ['Todos', ...Array.from(new Set(productos.map((p) => p.categoria)))]
+  const filtrados = productos.filter((p) =>
+    (cat === 'Todos' || p.categoria === cat) &&
+    (q === '' || p.nombre.toLowerCase().includes(q.toLowerCase()))
+  )
+  const baseMat = (m: string) => (m || '').toUpperCase() === 'POLIALUMINIO' ? 'polialuminio' : 'mimbre'
 
   const { data: cotData, isFetching } = useQuery({
     queryKey: ['cotizar', producto, material, tamano, colorTipo, colorHex, cantidad],
@@ -61,7 +69,7 @@ export default function CotizarPage() {
             <Sparkles className="w-3.5 h-3.5" /> Cotización rápida
           </p>
           <h1 className="text-[clamp(30px,5vw,52px)] font-normal italic text-[#3d2215] leading-[1.05]" style={{ fontFamily: 'var(--font-display)' }}>Tu precio al instante</h1>
-          <p className="text-[rgba(92,64,51,0.6)] mt-3 max-w-xl">Elige un mueble base y ajústalo. Te damos el precio referencial y las especificaciones sin esperas ni formularios largos.</p>
+          <p className="text-[rgba(92,64,51,0.6)] mt-3 max-w-xl">Elige cualquier mueble de nuestro catálogo, ajústalo a tu gusto y obtén el precio y las especificaciones al instante — sin esperas ni formularios largos.</p>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -69,10 +77,24 @@ export default function CotizarPage() {
           <div className="lg:col-span-3 flex flex-col gap-7">
             {/* Producto */}
             <div>
-              <h2 className="text-[13px] font-semibold uppercase tracking-wider text-[rgba(92,64,51,0.55)] mb-3">1 · Elige el mueble</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {productos.map((p) => (
-                  <button key={p.clave} onClick={() => { setProducto(p.clave); if (!material) setMaterial(p.material_base) }}
+              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <h2 className="text-[13px] font-semibold uppercase tracking-wider text-[rgba(92,64,51,0.55)]">1 · Elige el mueble</h2>
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar mueble…"
+                  className="text-[13px] rounded-full border border-[rgba(92,64,51,0.15)] bg-white px-4 py-1.5 outline-none focus:border-[rgba(92,64,51,0.4)] w-44" />
+              </div>
+              {/* Filtro por categoría */}
+              <div className="flex gap-2 flex-wrap mb-3">
+                {categorias.map((c) => (
+                  <button key={c} onClick={() => setCat(c)}
+                    className={`px-3 py-1 rounded-full text-[12px] border transition-colors ${cat === c ? 'bg-[#5C4033] text-white border-transparent' : 'bg-white text-[rgba(92,64,51,0.6)] border-[rgba(92,64,51,0.12)] hover:bg-[rgba(92,64,51,0.04)]'}`}>
+                    {c}
+                  </button>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[440px] overflow-y-auto pr-1">
+                {filtrados.length === 0 && <p className="col-span-full text-[13px] text-[rgba(92,64,51,0.4)] py-6 text-center">Sin resultados.</p>}
+                {filtrados.map((p) => (
+                  <button key={p.clave} onClick={() => { setProducto(p.clave); setMaterial(baseMat(p.material_base)) }}
                     className={`text-left rounded-2xl border overflow-hidden transition-all ${producto === p.clave ? 'border-[#5C4033] bg-white shadow-[0_10px_24px_rgba(92,64,51,0.12)]' : 'border-[rgba(92,64,51,0.12)] bg-white/70 hover:bg-white'}`}>
                     {p.imagen && (
                       <div className="w-full aspect-[4/3] overflow-hidden bg-[#faf7f4]">

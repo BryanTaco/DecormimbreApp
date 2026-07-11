@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { LayoutDashboard, FileText, Package, LogOut, Menu, X } from 'lucide-react'
 import { useAuthStore } from '@/store/auth'
 import BrandLogo from '@/components/BrandLogo'
+import NotificationsBell from '@/components/admin/NotificationsBell'
 import { useEffect, useState } from 'react'
 
 const MENU = [
@@ -68,10 +69,13 @@ export default function CuentaLayout() {
       </nav>
 
       <div style={{ padding: '16px 12px 24px', borderTop: '1px solid rgba(196,168,130,0.12)' }}>
-        <button onClick={logout} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderRadius: 10, background: 'none', border: 'none', color: 'rgba(92,64,51,0.55)', fontFamily: 'var(--font-body)', fontSize: 13.5, cursor: 'pointer' }}>
-          <LogOut size={16} />
-          Cerrar sesión
-        </button>
+        <div className="flex items-center gap-1">
+          <NotificationsBell placement="up" />
+          <button onClick={logout} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderRadius: 10, background: 'none', border: 'none', color: 'rgba(92,64,51,0.55)', fontFamily: 'var(--font-body)', fontSize: 13.5, cursor: 'pointer' }}>
+            <LogOut size={16} />
+            Cerrar sesión
+          </button>
+        </div>
       </div>
     </>
   )
@@ -89,9 +93,12 @@ export default function CuentaLayout() {
           <BrandLogo size={26} />
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 500, letterSpacing: '0.08em', color: '#5C4033', textTransform: 'uppercase' }}>Decormimbre</span>
         </Link>
-        <button onClick={() => setOpen(true)} aria-label="Abrir menú" style={{ background: 'none', border: 'none', color: '#5C4033', cursor: 'pointer', padding: 4 }}>
-          <Menu size={24} />
-        </button>
+        <div className="flex items-center gap-1">
+          <NotificationsBell placement="down" />
+          <button onClick={() => setOpen(true)} aria-label="Abrir menú" style={{ background: 'none', border: 'none', color: '#5C4033', cursor: 'pointer', padding: 4 }}>
+            <Menu size={24} />
+          </button>
+        </div>
       </header>
 
       {/* Drawer móvil */}

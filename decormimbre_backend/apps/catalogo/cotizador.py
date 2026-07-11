@@ -167,3 +167,88 @@ def detectar_cotizacion(texto: str) -> dict | None:
     tamano = "grande" if "grande" in t else ("pequeno" if any(w in t for w in ["pequeñ", "pequen", "chico"]) else "estandar")
     color = "personalizado" if any(w in t for w in ["azul", "verde", "rojo", "negro", "blanco", "gris", "color", "personaliz"]) else "estandar"
     return cotizar(clave, material=material, tamano=tamano, color=color)
+
+
+# ── Cotización del catálogo completo (productos de la base) ─────────────────────
+DIM_POR_CATEGORIA = {
+    "Sala": "180 × 85 × 75 cm",
+    "Comedor": "120 × 75 × 75 cm",
+    "Exterior": "120 × 100 × 90 cm",
+    "Dormitorio": "200 × 100 × 40 cm",
+    "Accesorios": "45 × 40 × 35 cm",
+}
+ESTRUCTURA_POR_MATERIAL = {
+    "MIMBRE": "Tejido a mano en mimbre natural sobre bastidor de madera/aluminio",
+    "POLIALUMINIO": "Estructura de aluminio con tejido de polialuminio, resistente al exterior",
+    "COMBINADO": "Estructura mixta: aluminio con tejido de mimbre y polialuminio",
+}
+COJIN_POR_CATEGORIA = {"Sala": True, "Exterior": True, "Dormitorio": True, "Comedor": False, "Accesorios": False}
+MATERIAL_LABEL = {"MIMBRE": "mimbre", "POLIALUMINIO": "polialuminio", "COMBINADO": "combinado"}
+
+
+def _material_delta(chosen_key, base_material):
+    from decimal import Decimal
+    base = (base_material or "MIMBRE").upper()
+    if base == "COMBINADO":
+        return Decimal("1.0")
+    if chosen_key == "polialuminio" and base == "MIMBRE":
+        return Decimal("1.08")
+    if chosen_key == "mimbre" and base == "POLIALUMINIO":
+        return Decimal("0.92")
+    return Decimal("1.0")
+
+
+def cotizar_catalogo(*, nombre, categoria, material_base, precio_base, imagen,
+                     material="", tamano="estandar", color="estandar", cantidad=1):
+    """Cotiza cualquier producto del catálogo con specs genéricas por categoría/material."""
+    from decimal import Decimal
+    chosen = (material or "").strip().lower()
+    mat_key = "polialuminio" if "poli" in chosen else ("mimbre" if "mimbre" in chosen else MATERIAL_LABEL.get((material_base or "MIMBRE").upper(), "mimbre"))
+    tamano = (tamano or "estandar").strip().lower()
+    if tamano not in TAMANO_FACTOR:
+        tamano = "estandar"
+    color_key = "personalizado" if (color or "").strip().lower() not in ("", "estandar", "estándar") else "estandar"
+    cantidad = max(1, int(cantidad or 1))
+
+    base = Decimal(str(precio_base))
+    tf = Decimal(str(TAMANO_FACTOR[tamano]))
+    cr = Decimal(str(COLOR_RECARGO[color_key]))
+    md = _material_delta(mat_key, material_base)
+    precio_unitario = (base * tf * (1 + cr) * md).quantize(Decimal("0.01"))
+    subtotal = (precio_unitario * cantidad).quantize(Decimal("0.01"))
+    iva = (subtotal * Decimal(str(IVA))).quantize(Decimal("0.01"))
+    total = (subtotal + iva).quantize(Decimal("0.01"))
+
+    desglose = [{"concepto": f"{nombre} — base", "valor": float(base)}]
+    if md != 1:
+        signo = "+" if md > 1 else "−"
+        desglose.append({"concepto": f"Material {mat_key} ({signo}{abs(round((float(md)-1)*100))}%)", "valor": float((base * (md - 1)).quantize(Decimal("0.01")))})
+    if tf != 1:
+        signo = "+" if tf > 1 else "−"
+        desglose.append({"concepto": f"Tamaño {TAMANO_LABEL[tamano].lower()} ({signo}{abs(round((float(tf)-1)*100))}%)", "valor": float((base * md * (tf - 1)).quantize(Decimal("0.01")))})
+    if cr:
+        desglose.append({"concepto": "Color personalizado (+6%)", "valor": float((base * md * tf * cr).quantize(Decimal("0.01")))})
+
+    cat = categoria or "Sala"
+    return {
+        "producto": nombre,
+        "imagen": imagen or "",
+        "categoria": cat,
+        "material": mat_key,
+        "tamano": TAMANO_LABEL[tamano],
+        "color": "Personalizado" if color_key == "personalizado" else "Estándar",
+        "cantidad": cantidad,
+        "precio_unitario": float(precio_unitario),
+        "subtotal": float(subtotal),
+        "iva": float(iva),
+        "total": float(total),
+        "moneda": "USD",
+        "especificaciones": {
+            "dimensiones": DIM_POR_CATEGORIA.get(cat, "A medida según diseño"),
+            "estructura": ESTRUCTURA_POR_MATERIAL.get((material_base or "MIMBRE").upper(), ESTRUCTURA_POR_MATERIAL["MIMBRE"]),
+            "incluye_cojin": COJIN_POR_CATEGORIA.get(cat, False),
+            "tiempo_produccion": TIEMPO_PRODUCCION,
+        },
+        "desglose": desglose,
+        "nota": "Precio referencial. La cotización final se confirma según medidas exactas y acabados.",
+    }

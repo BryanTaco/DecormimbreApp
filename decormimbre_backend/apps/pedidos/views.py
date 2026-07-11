@@ -12,6 +12,7 @@ from utils.log_actividad import registrar_actividad
 from utils.notificaciones import (
     notificar_pedido_listo, notificar_pedido_confirmado, notificar_pedido_cancelado,
     notificar_inicio_produccion, notificar_tarea_asignada, notificar_tarea_completada_a_admin,
+    notificacion_app_cliente, notificar_avance_etapa,
 )
 from apps.authentication.permissions import (
     IsAdminOrPropietario, IsArtesano, IsAdminOrPropietarioOrArtesano,
@@ -99,12 +100,16 @@ class CambiarEstadoPedidoView(APIView):
             descripcion=f"Pedido {pedido.numero}: {estado_anterior} → {pedido.estado}",
             request=request,
         )
-        # Notificaciones al cliente y artesanos según estado
+        # Notificaciones al cliente (in-app + email) y artesanos según estado
         if nuevo_estado == "EN_PRODUCCION":
             notificar_pedido_confirmado(pedido)
             notificar_inicio_produccion(pedido)
+            notificacion_app_cliente(pedido, "PEDIDO_EN_PRODUCCION", f"Pedido {pedido.numero} en producción", "Tu pedido fue confirmado y entró en producción.")
         elif nuevo_estado == "LISTO_ENTREGA":
             notificar_pedido_listo(pedido)
+            notificacion_app_cliente(pedido, "PEDIDO_LISTO", f"Pedido {pedido.numero} listo", "Tu pedido está listo para entrega o retiro.")
+        elif nuevo_estado == "ENTREGADO":
+            notificacion_app_cliente(pedido, "PEDIDO_ENTREGADO", f"Pedido {pedido.numero} entregado", "Tu pedido fue entregado. ¡Gracias por confiar en Decormimbre!")
         elif nuevo_estado == "CANCELADO":
             notificar_pedido_cancelado(pedido)
 
@@ -428,6 +433,16 @@ class CompletarTareaView(APIView):
         from apps.authentication.models import Usuario
         admins = list(Usuario.objects.filter(rol__in=["ADMIN", "PROPIETARIO"], activo=True))
         notificar_tarea_completada_a_admin(tarea, admins)
+
+        # Notificar al cliente el avance (o el "listo" si fue la última etapa)
+        pedido = tarea.pedido
+        pedido.refresh_from_db()
+        if pedido.estado == "LISTO_ENTREGA":
+            notificar_pedido_listo(pedido)
+            notificacion_app_cliente(pedido, "PEDIDO_LISTO", f"Pedido {pedido.numero} listo", "Tu pedido está listo para entrega o retiro.")
+        else:
+            etapa = pedido.get_etapa_produccion_display() if pedido.etapa_produccion else "En producción"
+            notificar_avance_etapa(pedido, etapa)
 
         return success_response(
             data=TareaProduccionSerializer(tarea).data,

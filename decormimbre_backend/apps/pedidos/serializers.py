@@ -119,12 +119,7 @@ class PedidoPublicoSerializer(serializers.ModelSerializer):
     def get_etapa_produccion_display(self, obj):
         if not obj.etapa_produccion:
             return None
-        return dict(obj.ETAPA_PRODUCCION_CHOICES).get(obj.etapa_produccion, obj.etapa_produccion)
-
-    @property
-    def ETAPA_PRODUCCION_CHOICES(self):
-        from .models import ETAPA_PRODUCCION_CHOICES
-        return ETAPA_PRODUCCION_CHOICES
+        return obj.get_etapa_produccion_display()
 
 
 class CambiarEstadoPedidoSerializer(serializers.Serializer):
