@@ -54,6 +54,9 @@ class PedidoSerializer(serializers.ModelSerializer):
     logs_estado = LogEstadoPedidoSerializer(many=True, read_only=True)
     tareas = TareaProduccionSerializer(many=True, read_only=True)
     porcentaje_completado = serializers.SerializerMethodField()
+    costo_real = serializers.SerializerMethodField()
+    margen = serializers.SerializerMethodField()
+    margen_porcentaje = serializers.SerializerMethodField()
     artesano_estructura_nombre = serializers.CharField(
         source="artesano_estructura.nombre", read_only=True, default=None
     )
@@ -64,13 +67,14 @@ class PedidoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pedido
         fields = [
-            "id", "numero", "cotizacion", "cliente", "cliente_nombre", "estado",
+            "id", "numero", "tracking_token", "cotizacion", "cliente", "cliente_nombre", "estado",
             "etapa_produccion",
             "artesano_estructura", "artesano_estructura_nombre",
             "artesano_tejido", "artesano_tejido_nombre",
             "forma_pago",
             "fecha_promesa_entrega", "fecha_entrega_real",
             "subtotal", "iva", "total", "anticipo", "saldo_pendiente",
+            "costo_real", "margen", "margen_porcentaje",
             "observaciones", "items", "logs_estado", "tareas",
             "porcentaje_completado", "fecha_creacion",
         ]
@@ -81,6 +85,15 @@ class PedidoSerializer(serializers.ModelSerializer):
 
     def get_porcentaje_completado(self, obj):
         return obj.porcentaje_completado()
+
+    def get_costo_real(self, obj):
+        return str(obj.costo_real)
+
+    def get_margen(self, obj):
+        return str(obj.margen)
+
+    def get_margen_porcentaje(self, obj):
+        return str(obj.margen_porcentaje)
 
 
 class PedidoPublicoSerializer(serializers.ModelSerializer):

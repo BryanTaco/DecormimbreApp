@@ -20,6 +20,7 @@ export const router = createBrowserRouter([
   { path: '/contacto', lazy: () => lazy(() => import('@/pages/landing/ContactoPage')) },
   { path: '/personalizar', lazy: () => lazy(() => import('@/pages/landing/PersonalizarPage')) },
   { path: '/cotizar', lazy: () => lazy(() => import('@/pages/landing/CotizarPage')) },
+  { path: '/seguimiento/:token', lazy: () => lazy(() => import('@/pages/seguimiento/SeguimientoPage')) },
 
   // Client auth
   { path: '/login', lazy: () => lazy(() => import('@/pages/auth/LoginPage')) },

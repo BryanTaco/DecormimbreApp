@@ -44,6 +44,8 @@ class Pedido(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     numero = models.CharField(max_length=20, unique=True)
+    # Token opaco para el enlace público de seguimiento /seguimiento/<token>
+    tracking_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     cotizacion = models.OneToOneField(
         "cotizaciones.Cotizacion",
         on_delete=models.PROTECT,
@@ -178,6 +180,33 @@ class Pedido(models.Model):
             return 0
         completadas = tareas.filter(estado="COMPLETADA").count()
         return int((completadas / tareas.count()) * 100)
+
+    @property
+    def costo_real(self):
+        """Costo real de materiales del pedido. Usa el consumo registrado
+        (SALIDA_PRODUCCION); si aún no hay consumos, lo estima con la lista de
+        materiales (BOM)."""
+        consumos = list(self.consumos_inventario.filter(tipo="SALIDA_PRODUCCION").select_related("materia_prima"))
+        if consumos:
+            total = sum((c.cantidad * c.materia_prima.costo_unitario for c in consumos), Decimal("0.00"))
+            return total.quantize(Decimal("0.01"))
+        from apps.inventario.models import ProductoMateria
+        total = Decimal("0.00")
+        for item in self.items.select_related("producto").all():
+            for pm in ProductoMateria.objects.filter(producto=item.producto).select_related("materia_prima"):
+                total += pm.cantidad_por_unidad * item.cantidad * pm.materia_prima.costo_unitario
+        return total.quantize(Decimal("0.01"))
+
+    @property
+    def margen(self):
+        """Margen = total cotizado − costo real de materiales."""
+        return (self.total - self.costo_real).quantize(Decimal("0.01"))
+
+    @property
+    def margen_porcentaje(self):
+        if not self.total:
+            return Decimal("0.0")
+        return ((self.margen / self.total) * 100).quantize(Decimal("0.1"))
 
     def _descontar_inventario(self):
         """Descuenta stock de materias primas con transacción atómica y validación de stock."""

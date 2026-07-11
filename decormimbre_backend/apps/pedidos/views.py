@@ -279,6 +279,24 @@ class TrackingPublicoView(APIView):
         return success_response(data=PedidoPublicoSerializer(pedido).data)
 
 
+class SeguimientoTokenView(APIView):
+    """Endpoint público — seguimiento por token opaco: /seguimiento/<tracking_token>."""
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    versioning_class = None
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "tracking"
+
+    def get(self, request, token):
+        try:
+            pedido = Pedido.objects.select_related("cliente").prefetch_related(
+                "items__producto", "items__color", "tareas"
+            ).get(tracking_token=token)
+        except Pedido.DoesNotExist:
+            return error_response("PEDIDO_NO_ENCONTRADO", "Enlace de seguimiento no válido.", status_code=404)
+        return success_response(data=PedidoPublicoSerializer(pedido).data)
+
+
 # ──────────────────────────────────────────────
 # VISTAS DE ARTESANO
 # ──────────────────────────────────────────────
