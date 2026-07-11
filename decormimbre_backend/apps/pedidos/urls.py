@@ -4,6 +4,7 @@ from .views import (
     PedidoFichaTecnicaView, TareaFichaView, ItemPedidoCreateView, ItemPedidoDetailView,
     AlertaEntregaListView, AlertaEntregaRevisarView,
     MisTareasView, CompletarTareaView, TareasPedidoView, AsignarArtesanoTareaView,
+    SolicitarMaterialView, SeguimientoTokenView,
 )
 from .sse import TrackingSSEAdminView
 
@@ -26,7 +27,11 @@ urlpatterns = [
     path("<uuid:pk>/tareas/", TareasPedidoView.as_view(), name="pedidos_tareas"),
     path("tareas/<uuid:tarea_id>/asignar/", AsignarArtesanoTareaView.as_view(), name="tareas_asignar"),
     path("tareas/<uuid:tarea_id>/completar/", CompletarTareaView.as_view(), name="tareas_completar"),
+    path("tareas/<uuid:tarea_id>/solicitar-material/", SolicitarMaterialView.as_view(), name="tareas_solicitar_material"),
     path("tareas/<uuid:tarea_id>/ficha/", TareaFichaView.as_view(), name="tareas_ficha"),
+
+    # Seguimiento público por token opaco
+    path("seguimiento/<uuid:token>/", SeguimientoTokenView.as_view(), name="seguimiento_token"),
 
     # Vista de artesano
     path("artesano/mis-tareas/", MisTareasView.as_view(), name="mis_tareas"),

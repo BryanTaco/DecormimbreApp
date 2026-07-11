@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { ArrowUpRight, Menu, X, User, LogIn } from 'lucide-react'
@@ -7,6 +8,7 @@ import { useAuthStore } from '@/store/auth'
 const NAV_LINKS = [
   { label: 'Inicio', to: '/' },
   { label: 'Catálogo', to: '/catalogo' },
+  { label: 'Cotizar', to: '/cotizar' },
   { label: 'Nosotros', to: '/nosotros' },
   { label: 'Contacto', to: '/contacto' },
 ]
@@ -57,6 +59,15 @@ export default function Navbar({ theme = 'dark' }: NavbarProps) {
   const [open, setOpen] = useState(false)
   const location = useLocation()
   const user = useAuthStore((s) => s.user)
+
+  // Bloquea el scroll del fondo mientras el menú móvil está abierto
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [open])
+
+  // Cierra el menú al cambiar de ruta
+  useEffect(() => { setOpen(false) }, [location.pathname])
 
   const isDark = theme === 'dark'
   const textColor = isDark ? 'rgba(255,255,255,0.85)' : 'rgba(92,64,51,0.88)'
@@ -179,8 +190,9 @@ export default function Navbar({ theme = 'dark' }: NavbarProps) {
         </div>
       </nav>
 
-      {/* Mobile menu */}
-      <AnimatePresence>
+      {/* Mobile menu — portal a body para cubrir toda la pantalla en cualquier página */}
+      {createPortal(
+        <AnimatePresence>
         {open && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
@@ -190,7 +202,7 @@ export default function Navbar({ theme = 'dark' }: NavbarProps) {
             style={{
               position: 'fixed',
               top: 0, left: 0, right: 0, bottom: 0,
-              zIndex: 90,
+              zIndex: 9999,
               background: isDark ? 'rgba(28,16,8,0.97)' : '#f5f0eb',
               display: 'flex',
               flexDirection: 'column',
@@ -243,7 +255,9 @@ export default function Navbar({ theme = 'dark' }: NavbarProps) {
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body,
+      )}
     </>
   )
 }

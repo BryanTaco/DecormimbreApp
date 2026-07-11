@@ -1,14 +1,17 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { ArrowUpRight, ArrowLeft } from 'lucide-react'
 import Navbar from '@/components/landing/Navbar'
 import AiAssistant from '@/components/AiAssistant'
 import FichaTecnica, { type Producto } from '@/components/landing/FichaTecnica'
+import { catalogoPublicoApi, type ProductoWeb } from '@/api/catalogo'
 
 const CATEGORIAS = ['Todos', 'Sala', 'Comedor', 'Exterior', 'Dormitorio', 'Accesorios']
 
-const PRODUCTOS = [
+// Respaldo si la API no responde (mantiene el catálogo visible siempre)
+const PRODUCTOS_FALLBACK = [
   { img: '/products/sala-modular-oscura.jpg', category: 'Sala', name: 'Sofá Serena', material: 'Polialuminio & Mimbre', price: 'Desde $620', desc: 'Sala modular en tejido resistente. Estructura de polialuminio con acabado artesanal.' },
   { img: '/products/papasan-set.jpg', category: 'Sala', name: 'Silla Nido', material: 'Mimbre Natural', price: 'Desde $185', desc: 'Sillas papasan tejidas a mano. Forma que abraza el cuerpo, diseño ecuatoriano.' },
   { img: '/products/set-exterior-huevo.jpg', category: 'Exterior', name: 'Set Jardín Pacífico', material: 'Polialuminio', price: 'Desde $890', desc: 'Set completo para exteriores con sillas nido. Tejido resistente al sol y la lluvia.' },
@@ -32,6 +35,11 @@ const PRODUCTOS = [
 export default function CatalogoPage() {
   const [catActiva, setCatActiva] = useState('Todos')
   const [ficha, setFicha] = useState<Producto | null>(null)
+
+  // Catálogo desde la base (con respaldo a la lista fija si no hay respuesta)
+  const { data } = useQuery({ queryKey: ['catalogo-publico'], queryFn: () => catalogoPublicoApi.productos() })
+  const apiProductos: ProductoWeb[] = data?.data ?? []
+  const PRODUCTOS = apiProductos.length > 0 ? apiProductos : PRODUCTOS_FALLBACK
 
   const filtrados = catActiva === 'Todos'
     ? PRODUCTOS

@@ -82,7 +82,8 @@ export default function AiAssistant() {
     setTyping(true)
     try {
       const { data } = await api.post('/public/asistente/', { mensaje: t, historial })
-      const respuesta = data?.data?.respuesta ?? 'Perdona, no pude procesar eso. Escríbenos por WhatsApp y te ayudamos enseguida.'
+      // El interceptor ya desenvuelve el envelope: data = { respuesta, ia }
+      const respuesta = data?.respuesta ?? data?.data?.respuesta ?? 'Perdona, no pude procesar eso. Escríbenos por WhatsApp y te ayudamos enseguida.'
       setMessages((m) => [...m, { id: nextId(), from: 'bot', text: respuesta }])
     } catch {
       setMessages((m) => [...m, { id: nextId(), from: 'bot', text: 'Estoy teniendo problemas para responder ahora. Escríbenos por WhatsApp al 098 057 2561 y te atendemos de inmediato.' }])

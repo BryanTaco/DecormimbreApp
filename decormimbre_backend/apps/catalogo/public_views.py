@@ -82,3 +82,34 @@ class CotizacionRapidaView(APIView):
             message="Su solicitud de cotización fue recibida. Nos pondremos en contacto pronto.",
             status_code=status.HTTP_201_CREATED,
         )
+
+
+# ── Catálogo público (para el sitio) ───────────────────────────────────────────
+class ProductosPublicosView(APIView):
+    """GET /api/v1/public/productos/ — catálogo activo con el formato del sitio."""
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    versioning_class = None
+
+    MATERIAL_LABEL = {
+        "MIMBRE": "Mimbre Natural",
+        "POLIALUMINIO": "Polialuminio",
+        "COMBINADO": "Polialuminio & Mimbre",
+    }
+
+    def get(self, request):
+        from apps.catalogo.models import Producto
+        qs = Producto.objects.filter(activo=True).select_related("categoria").order_by("categoria__nombre", "nombre")
+        data = [
+            {
+                "id": str(p.id),
+                "name": p.nombre,
+                "category": p.categoria.nombre if p.categoria else "Otros",
+                "material": self.MATERIAL_LABEL.get(p.material, p.get_material_display()),
+                "price": f"Desde ${int(p.precio_base)}",
+                "img": p.imagen_url or "",
+                "desc": p.descripcion,
+            }
+            for p in qs
+        ]
+        return success_response(data=data)

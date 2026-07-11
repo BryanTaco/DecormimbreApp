@@ -15,6 +15,20 @@ from rest_framework.throttling import ScopedRateThrottle
 from django.conf import settings
 
 from utils.responses import success_response, error_response, validation_error_response
+from .cotizador import detectar_cotizacion
+
+
+def _formatear_cotizacion(c: dict) -> str:
+    esp = c["especificaciones"]
+    cojin = "con cojín incluido" if esp["incluye_cojin"] else "sin cojín"
+    return (
+        f"{c['producto']} en {c['material']}, tamaño {c['tamano'].lower()}, color {c['color'].lower()}.\n\n"
+        f"Total: ${c['total']} (IVA incluido) — unitario ${c['precio_unitario']}\n"
+        f"Medidas: {esp['dimensiones']}\n"
+        f"Estructura: {esp['estructura']} ({cojin})\n"
+        f"Producción: {esp['tiempo_produccion']}\n\n"
+        f"Es un precio referencial. ¿Te la enviamos formal por WhatsApp (098 057 2561) o la personalizas en 3D?"
+    )
 
 
 # ── Base de conocimiento de la empresa (fuente del prompt y del fallback) ───────
@@ -164,6 +178,12 @@ class AsistenteView(APIView):
         historial = serializer.validated_data.get("historial", [])
         if not mensaje:
             return error_response("MENSAJE_VACIO", "Escribe una pregunta.", status_code=400)
+
+        # Híbrido: si el mensaje pide un mueble concreto, el precio lo fija el
+        # motor de reglas (nunca lo inventa la IA) y se responde al instante.
+        cot = detectar_cotizacion(mensaje)
+        if cot:
+            return success_response(data={"respuesta": _formatear_cotizacion(cot), "ia": False, "cotizacion": cot})
 
         texto = _responder_con_claude(mensaje, historial)
         con_ia = texto is not None

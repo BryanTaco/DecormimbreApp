@@ -193,6 +193,33 @@ export default function PedidoDetalle() {
             ))}
           </div>
 
+          {/* Rentabilidad: costo real vs cotizado */}
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] p-5 flex flex-col gap-3">
+            <h3 className="text-sm font-normal text-[rgba(92,64,51,0.7)]">Rentabilidad</h3>
+            <div className="flex justify-between"><span className="text-sm text-[rgba(92,64,51,0.55)]">Total cotizado</span><span className="text-sm text-[rgba(92,64,51,0.7)]">${pedido.total}</span></div>
+            <div className="flex justify-between"><span className="text-sm text-[rgba(92,64,51,0.55)]">Costo real (materiales)</span><span className="text-sm text-[rgba(92,64,51,0.7)]">${pedido.costo_real ?? '—'}</span></div>
+            <div className="flex justify-between items-center pt-2 border-t border-[rgba(92,64,51,0.07)]">
+              <span className="text-sm font-medium text-[rgba(92,64,51,0.9)]">Margen</span>
+              <span className="text-right">
+                <span className="text-[16px] font-medium text-green-600">${pedido.margen ?? '—'}</span>
+                {pedido.margen_porcentaje && <span className="block text-[11px] text-[rgba(92,64,51,0.5)]">{pedido.margen_porcentaje}% de margen</span>}
+              </span>
+            </div>
+          </div>
+
+          {/* Enlace público de seguimiento para el cliente */}
+          {pedido.tracking_token && (
+            <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] p-5">
+              <h3 className="text-sm font-normal text-[rgba(92,64,51,0.7)] mb-1">Seguimiento del cliente</h3>
+              <p className="text-[12px] text-[rgba(92,64,51,0.5)] mb-3">Comparte este enlace para que el cliente vea el avance de su pedido.</p>
+              <div className="flex gap-2">
+                <input readOnly value={`${window.location.origin}/seguimiento/${pedido.tracking_token}`}
+                  className="flex-1 min-w-0 text-[12px] rounded-xl border border-[rgba(92,64,51,0.15)] bg-[#faf7f4] px-3 py-2 text-[rgba(92,64,51,0.7)] outline-none" />
+                <Btn size="sm" onClick={() => navigator.clipboard?.writeText(`${window.location.origin}/seguimiento/${pedido.tracking_token}`)}>Copiar</Btn>
+              </div>
+            </div>
+          )}
+
           <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] p-5 flex flex-col gap-2">
             <h3 className="text-sm font-normal text-[rgba(92,64,51,0.7)] mb-1">Fichas técnicas</h3>
             {[{ rol: 'TEJIDO', label: 'Ficha Tejedor' }, { rol: 'ESTRUCTURA', label: 'Ficha Estructurista' }].map((f) => (

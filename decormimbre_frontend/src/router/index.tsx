@@ -19,6 +19,8 @@ export const router = createBrowserRouter([
   { path: '/nosotros', lazy: () => lazy(() => import('@/pages/landing/NosotrosPage')) },
   { path: '/contacto', lazy: () => lazy(() => import('@/pages/landing/ContactoPage')) },
   { path: '/personalizar', lazy: () => lazy(() => import('@/pages/landing/PersonalizarPage')) },
+  { path: '/cotizar', lazy: () => lazy(() => import('@/pages/landing/CotizarPage')) },
+  { path: '/seguimiento/:token', lazy: () => lazy(() => import('@/pages/seguimiento/SeguimientoPage')) },
 
   // Client auth
   { path: '/login', lazy: () => lazy(() => import('@/pages/auth/LoginPage')) },
@@ -35,6 +37,9 @@ export const router = createBrowserRouter([
       { path: 'pedidos/:id', lazy: () => lazy(() => import('@/pages/cuenta/PedidoDetalle')) },
     ],
   },
+
+  // Taller (artesano)
+  { path: '/taller', lazy: () => lazy(() => import('@/pages/taller/TallerPage')) },
 
   // Admin
   { path: '/admin/login', lazy: () => lazy(() => import('@/pages/admin/Login')) },

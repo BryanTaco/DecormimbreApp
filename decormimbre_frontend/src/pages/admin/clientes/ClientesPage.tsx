@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Users, Plus, Search, Mail, Phone } from 'lucide-react'
+import { Users, Plus, Search, Mail, Phone, Check } from 'lucide-react'
 import { clientesApi, type Cliente } from '@/api/clientes'
+import { validarCedulaORuc } from '@/lib/cedula'
 import PageHeader from '@/components/ui/PageHeader'
 import StatCard from '@/components/ui/StatCard'
 import Spinner from '@/components/ui/Spinner'
@@ -36,6 +37,11 @@ export default function ClientesPage() {
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
 
   const clientes: Cliente[] = data?.data ?? []
+
+  // Validación de cédula/RUC en tiempo real (Módulo 10) — el backend re-valida por seguridad
+  const cedulaVal = form.cedula_ruc ?? ''
+  const cedulaTocada = cedulaVal.length > 0
+  const cedulaCheck = validarCedulaORuc(cedulaVal)
 
   return (
     <div className="p-6 md:p-8">
@@ -96,13 +102,20 @@ export default function ClientesPage() {
       <Modal open={modal} onClose={closeModal} title={editing ? 'Editar cliente' : 'Nuevo cliente'}>
         <div className="flex flex-col gap-4">
           <Input label="Nombre completo" value={form.nombre_completo ?? ''} onChange={(e) => set('nombre_completo', e.target.value)} />
-          <Input label="Cédula / RUC" value={form.cedula_ruc ?? ''} onChange={(e) => set('cedula_ruc', e.target.value)} />
+          <div>
+            <Input label="Cédula / RUC" value={form.cedula_ruc ?? ''} inputMode="numeric"
+              onChange={(e) => set('cedula_ruc', e.target.value.replace(/\D/g, ''))}
+              error={cedulaTocada && !cedulaCheck.valido ? cedulaCheck.mensaje : undefined} />
+            {cedulaTocada && cedulaCheck.valido && (
+              <p className="mt-1 text-[11px] text-green-600 flex items-center gap-1"><Check className="w-3 h-3" /> {cedulaCheck.mensaje}</p>
+            )}
+          </div>
           <Input label="Email" type="email" value={form.email ?? ''} onChange={(e) => set('email', e.target.value)} />
           <Input label="Teléfono" value={form.telefono ?? ''} onChange={(e) => set('telefono', e.target.value)} />
           <Input label="Dirección" value={form.direccion ?? ''} onChange={(e) => set('direccion', e.target.value)} />
           <div className="flex justify-end gap-3 mt-2">
             <Btn variant="secondary" onClick={closeModal}>Cancelar</Btn>
-            <Btn onClick={() => save.mutate()} disabled={save.isPending}>
+            <Btn onClick={() => save.mutate()} disabled={save.isPending || (cedulaTocada && !cedulaCheck.valido)}>
               {save.isPending ? 'Guardando…' : 'Guardar'}
             </Btn>
           </div>

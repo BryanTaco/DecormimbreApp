@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '@/store/auth'
 import BrandLogo from '@/components/BrandLogo'
+import NotificationsBell from '@/components/admin/NotificationsBell'
 
 const NAV = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -68,6 +69,8 @@ export default function AdminLayout() {
 
   // Cerrar el drawer al cambiar de ruta
   useEffect(() => { setMenuOpen(false) }, [location.pathname])
+  // Bloquear el scroll de fondo con el drawer abierto
+  useEffect(() => { document.body.style.overflow = menuOpen ? 'hidden' : ''; return () => { document.body.style.overflow = '' } }, [menuOpen])
 
   if (!user) return null
 
@@ -76,9 +79,16 @@ export default function AdminLayout() {
   const logout = () => { clearAuth(); navigate('/admin/login') }
 
   return (
-    <div className="flex min-h-screen bg-[#f5f0eb]">
+    <div className="relative flex min-h-screen">
+      {/* Fondo cinematográfico */}
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <img src="/products/set-sala-tejido.jpg" alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-[#f5f0eb]/[0.88] backdrop-blur-[3px]" />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(130% 100% at 15% -10%, rgba(61,34,21,0.12), transparent 55%)' }} />
+      </div>
+
       {/* Sidebar escritorio */}
-      <aside className="hidden md:flex flex-col w-56 shrink-0 bg-white/60 backdrop-blur-sm border-r border-[rgba(92,64,51,0.08)] py-6 px-4 gap-2">
+      <aside className="hidden md:flex flex-col w-56 shrink-0 bg-white/55 backdrop-blur-md border-r border-[rgba(92,64,51,0.1)] py-6 px-4 gap-2">
         <div className="mb-6"><Brand /></div>
         <NavItems />
         <div className="mt-auto">
@@ -86,13 +96,16 @@ export default function AdminLayout() {
             <p className="text-[11px] text-[rgba(92,64,51,0.5)] truncate">{user.email}</p>
             <p className="text-[11px] font-semibold text-[rgba(92,64,51,0.7)] uppercase tracking-wider">{user.rol}</p>
           </div>
-          <button
-            onClick={logout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-[rgba(92,64,51,0.55)] hover:bg-red-50 hover:text-red-500 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Cerrar sesión
-          </button>
+          <div className="flex items-center gap-1">
+            <NotificationsBell placement="up" />
+            <button
+              onClick={logout}
+              className="flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[rgba(92,64,51,0.55)] hover:bg-red-50 hover:text-red-500 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -151,9 +164,12 @@ export default function AdminLayout() {
             <Menu className="w-5 h-5" />
           </button>
           <span className="text-sm font-medium text-[rgba(92,64,51,0.85)]">{tituloActual}</span>
-          <button onClick={logout} aria-label="Cerrar sesión" className="p-1.5 rounded-lg text-[rgba(92,64,51,0.6)] hover:bg-red-50 hover:text-red-500">
-            <LogOut className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-0.5">
+            <NotificationsBell placement="down" />
+            <button onClick={logout} aria-label="Cerrar sesión" className="p-1.5 rounded-lg text-[rgba(92,64,51,0.6)] hover:bg-red-50 hover:text-red-500">
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
         </header>
 
         <main className="flex-1 overflow-auto">

@@ -5,9 +5,10 @@ import Navbar from '@/components/landing/Navbar'
 import MaterialsSection from '@/components/landing/MaterialsSection'
 import MapEmbed from '@/components/landing/MapEmbed'
 import AiAssistant from '@/components/AiAssistant'
+import { EMPRESA } from '@/lib/empresa'
 
 const VALORES = [
-  { num: '+25', label: 'Años de experiencia', desc: 'Tejiendo muebles artesanales desde 1999 en el Ecuador.' },
+  { num: `+${new Date().getFullYear() - EMPRESA.fundacion}`, label: 'Años de experiencia', desc: 'Tejiendo muebles artesanales desde 1999 en el Ecuador.' },
   { num: '+2000', label: 'Piezas entregadas', desc: 'Cada una única, diseñada y tejida para un cliente específico.' },
   { num: '100%', label: 'Artesanía manual', desc: 'Ningún mueble sale de una máquina. Todo pasa por manos expertas.' },
   { num: '0', label: 'Piezas en stock', desc: 'Producimos bajo pedido. Tu mueble es exclusivo, no seriado.' },

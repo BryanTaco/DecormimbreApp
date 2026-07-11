@@ -32,7 +32,7 @@ export default function Login() {
         return
       }
       setAuth(me, tokens.access, tokens.refresh)
-      navigate('/admin')
+      navigate(me?.rol === 'ARTESANO' ? '/taller' : '/admin')
     } catch (err) {
       const status = (err as { response?: { status?: number } })?.response?.status
       if (status === 429) {

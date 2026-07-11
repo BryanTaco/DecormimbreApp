@@ -30,6 +30,7 @@ export interface ItemPedido {
 export interface Pedido {
   id: string
   numero: string
+  tracking_token?: string
   cliente: string
   cliente_nombre: string
   estado: string
@@ -38,6 +39,9 @@ export interface Pedido {
   subtotal: string
   iva: string
   total: string
+  costo_real?: string
+  margen?: string
+  margen_porcentaje?: string
   fecha_promesa_entrega: string | null
   creado_en: string
   items: ItemPedido[]
