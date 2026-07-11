@@ -96,11 +96,11 @@ export default function CotizarPage() {
                 {filtrados.map((p) => (
                   <button key={p.clave} onClick={() => { setProducto(p.clave); setMaterial(baseMat(p.material_base)) }}
                     className={`text-left rounded-2xl border overflow-hidden transition-all ${producto === p.clave ? 'border-[#5C4033] bg-white shadow-[0_10px_24px_rgba(92,64,51,0.12)]' : 'border-[rgba(92,64,51,0.12)] bg-white/70 hover:bg-white'}`}>
-                    {p.imagen && (
-                      <div className="w-full aspect-[4/3] overflow-hidden bg-[#faf7f4]">
-                        <img src={p.imagen} alt={p.nombre} loading="lazy" className="w-full h-full object-cover" />
-                      </div>
-                    )}
+                    <div className="w-full aspect-[4/3] overflow-hidden bg-[#faf7f4] flex items-center justify-center">
+                      {p.imagen
+                        ? <img src={p.imagen} alt={p.nombre} loading="lazy" className="w-full h-full object-cover" />
+                        : <Sparkles className="w-6 h-6 text-[rgba(92,64,51,0.2)]" />}
+                    </div>
                     <div className="p-3">
                       <p className="text-[14px] font-medium text-[#3d2215] leading-tight">{p.nombre}</p>
                       <p className="text-[11px] uppercase tracking-wide text-[rgba(92,64,51,0.45)] mt-0.5">{p.categoria}</p>

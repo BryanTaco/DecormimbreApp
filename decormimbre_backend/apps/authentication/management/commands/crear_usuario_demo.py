@@ -69,8 +69,11 @@ class Command(BaseCommand):
                 categoria, _ = Categoria.objects.get_or_create(nombre="Exterior")
                 producto, _ = Producto.objects.get_or_create(
                     nombre="Columpio colgante",
-                    defaults=dict(descripcion="Columpio tejido para exterior.", precio_base=Decimal("480.00"), categoria=categoria),
+                    defaults=dict(descripcion="Columpio tejido para exterior.", precio_base=Decimal("480.00"), categoria=categoria, imagen_url="/products/colgante-nube.jpg"),
                 )
+                if not producto.imagen_url:
+                    producto.imagen_url = "/products/colgante-nube.jpg"
+                    producto.save(update_fields=["imagen_url"])
                 color, _ = Color.objects.get_or_create(nombre="Azul cielo", defaults={"r": 125, "g": 180, "b": 216})
 
                 # Materia prima con bajo stock + lista de materiales (para la verificación de inventario del tejedor)
