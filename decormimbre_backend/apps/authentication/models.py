@@ -150,3 +150,20 @@ class Notificacion(models.Model):
 
     def __str__(self):
         return f"{self.tipo} — {self.titulo}"
+
+
+class PushSubscription(models.Model):
+    """Suscripción Web Push del navegador de un usuario (para notificaciones al celular)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="push_subscriptions")
+    endpoint = models.TextField(unique=True)
+    p256dh = models.CharField(max_length=200)
+    auth = models.CharField(max_length=100)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "push_subscriptions"
+        ordering = ["-fecha_creacion"]
+
+    def __str__(self):
+        return f"Push[{self.usuario_id}] {self.endpoint[:40]}"

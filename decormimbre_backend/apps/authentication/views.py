@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
 from utils.responses import success_response, error_response, validation_error_response
 from utils.pagination import StandardPagination
-from .models import Usuario, LogActividad, Notificacion
+from .models import Usuario, LogActividad, Notificacion, PushSubscription
 from .serializers import (
     UsuarioSerializer, UsuarioCreateSerializer,
     UsuarioUpdateSerializer, PerfilUpdateSerializer, LogActividadSerializer,
@@ -176,3 +176,41 @@ class MarcarNotificacionLeidaView(APIView):
         notificacion.leida = True
         notificacion.save(update_fields=["leida"])
         return success_response(message="Notificación marcada como leída.")
+
+
+# ── Web Push ───────────────────────────────────────────────────────────────────
+class VapidPublicKeyView(APIView):
+    """GET público: clave pública VAPID para suscribirse desde el navegador."""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        from django.conf import settings
+        return success_response(data={"publicKey": getattr(settings, "VAPID_PUBLIC_KEY", "")})
+
+
+class PushSubscribeView(APIView):
+    """POST: guarda la suscripción Web Push del usuario autenticado."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        endpoint = request.data.get("endpoint")
+        keys = request.data.get("keys") or {}
+        p256dh, auth = keys.get("p256dh"), keys.get("auth")
+        if not endpoint or not p256dh or not auth:
+            return error_response("DATOS_INVALIDOS", "Suscripción incompleta.", status_code=400)
+        PushSubscription.objects.update_or_create(
+            endpoint=endpoint,
+            defaults={"usuario": request.user, "p256dh": p256dh, "auth": auth},
+        )
+        return success_response(message="Notificaciones activadas.")
+
+
+class PushUnsubscribeView(APIView):
+    """POST: elimina la suscripción del usuario."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        endpoint = request.data.get("endpoint")
+        if endpoint:
+            PushSubscription.objects.filter(endpoint=endpoint, usuario=request.user).delete()
+        return success_response(message="Notificaciones desactivadas.")

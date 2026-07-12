@@ -209,6 +209,12 @@ def notificacion_app_cliente(pedido, tipo, titulo, mensaje) -> bool:
             destinatario=destinatario, tipo=tipo, titulo=titulo, mensaje=mensaje,
             entidad_tipo="pedido", entidad_id=str(pedido.id),
         )
+        # Web Push al celular/navegador del cliente
+        try:
+            from utils.push import enviar_push
+            enviar_push(destinatario, titulo, mensaje, url="/cuenta")
+        except Exception:
+            pass
         return True
     except Exception:
         return False

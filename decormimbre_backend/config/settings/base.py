@@ -165,6 +165,14 @@ IVA_PORCENTAJE = Decimal("0.15")
 ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
 ASISTENTE_MODEL = env("ASISTENTE_MODEL", default="claude-opus-4-8")
 
+# ── Web Push (VAPID) ───────────────────────────────────────────────────────────
+# Si VAPID_PUBLIC_KEY está vacío, el push queda deshabilitado (email + in-app siguen).
+import base64 as _b64
+VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", default="")
+_vapid_priv_b64 = env("VAPID_PRIVATE_KEY_B64", default="")
+VAPID_PRIVATE_KEY = _b64.b64decode(_vapid_priv_b64).decode() if _vapid_priv_b64 else ""
+VAPID_SUBJECT = env("VAPID_SUBJECT", default="mailto:decormimbre@yahoo.com")
+
 # ── Internacionalización ───────────────────────────────────────────────────────
 LANGUAGE_CODE = "es-ec"
 TIME_ZONE = "America/Guayaquil"

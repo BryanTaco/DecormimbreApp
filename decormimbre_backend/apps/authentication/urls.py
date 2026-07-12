@@ -4,6 +4,7 @@ from .views import (
     CustomTokenObtainPairView, MeView,
     UsuarioListCreateView, UsuarioDetailView,
     RegistroClienteView, MisNotificacionesView, MarcarNotificacionLeidaView,
+    VapidPublicKeyView, PushSubscribeView, PushUnsubscribeView,
 )
 
 urlpatterns = [
@@ -16,4 +17,8 @@ urlpatterns = [
     path("registro/", RegistroClienteView.as_view(), name="registro_cliente"),
     path("notificaciones/", MisNotificacionesView.as_view(), name="mis_notificaciones"),
     path("notificaciones/<uuid:pk>/leer/", MarcarNotificacionLeidaView.as_view(), name="leer_notificacion"),
+    # Web Push
+    path("push/public-key/", VapidPublicKeyView.as_view(), name="push_public_key"),
+    path("push/subscribe/", PushSubscribeView.as_view(), name="push_subscribe"),
+    path("push/unsubscribe/", PushUnsubscribeView.as_view(), name="push_unsubscribe"),
 ]

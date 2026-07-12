@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth'
 import { getMisCotizaciones, getMisPedidos } from '@/api/authApi'
 import { waLink } from '@/lib/empresa'
 import BrandLogo from '@/components/BrandLogo'
+import PushToggle from '@/components/PushToggle'
 
 const ESTADO_COLOR: Record<string, string> = {
   APROBADA: '#22c55e', PENDIENTE: '#f59e0b', RECHAZADA: '#ef4444',
@@ -195,6 +196,9 @@ export default function CuentaDashboard() {
           ))}
         </div>
       </motion.div>
+
+      {/* Avisos push al celular */}
+      <div style={{ marginBottom: 16 }}><PushToggle /></div>
 
       {/* Ayuda / soporte */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.35 }}
