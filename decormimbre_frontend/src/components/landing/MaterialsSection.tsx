@@ -33,7 +33,7 @@ const MATERIALS = [
   {
     name: 'Mimbre',
     subtitle: 'La fibra de la naturaleza',
-    image: '/materials/mimbre.png',
+    image: '/materials/mimbre.webp',
     description:
       'El mimbre es una planta de la familia del sauce (género Salix) cuyas ramas jóvenes y flexibles se han tejido artesanalmente durante siglos. En Ecuador, los artesanos seleccionan a mano las varas más resistentes, las curan con técnicas tradicionales y las tejen en formas que combinan funcionalidad y arte.',
     properties: [
@@ -57,7 +57,7 @@ const MATERIALS = [
   {
     name: 'Polialuminio',
     subtitle: 'Innovación para el exterior',
-    image: '/materials/polialuminio.png',
+    image: '/materials/polialuminio.webp',
     description:
       'El polialuminio es un material técnico de alto rendimiento: una fibra sintética de polietileno de alta densidad (HDPE) tejida sobre un alma de aluminio. Esta combinación le otorga la apariencia y textura del mimbre natural, pero con resistencia extrema a la lluvia, rayos UV y temperatura. Ideal para exteriores exigentes.',
     properties: [
