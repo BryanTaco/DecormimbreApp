@@ -79,7 +79,9 @@ function makeWickerTexture(hex: string, material: string): THREE.CanvasTexture {
   const tex = new THREE.CanvasTexture(canvas)
   tex.wrapS = THREE.RepeatWrapping
   tex.wrapT = THREE.RepeatWrapping
-  const rep = poly ? 5 : 5
+  tex.colorSpace = THREE.SRGBColorSpace
+  tex.anisotropy = 8
+  const rep = poly ? 4 : 5
   tex.repeat.set(rep, rep)
   return tex
 }
@@ -106,338 +108,110 @@ function toneForMaterial(hex: string, poly: boolean): string {
 type WP = { map: THREE.CanvasTexture; color: string; roughness: number; metalness: number }
 type FP = { color: string; roughness: number; metalness: number }
 
-// ── SILLA PAPASAN ─────────────────────────────────────────────────────────────
-// Silla de mimbre tipo papasan: cuenco abierto e inclinado hacia atrás (asiento
-// donde te sientas) + cojín redondo + base de tambor tejido. Se lee como silla.
-function SillaOrbital({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
-  const R = 0.72
-  const tilt = -0.42 // inclina la boca del cuenco hacia el frente/arriba
+// ── SILLA — respaldo circular tipo abanico (ref: silla-circular.jpg) ──────────
+// Aro exterior grande con radios que salen del centro (como rueda), aros
+// concéntricos, asiento tejido en la parte baja y patas dobladas tipo trineo.
+function SillaModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
+  const R = 0.78
+  const spokes = Array.from({ length: 22 })
 
   return (
-    <group position={[0, 0.05, 0]}>
-      {/* Cuenco (media esfera abierta arriba) — asiento tejido */}
-      <group rotation={[tilt, 0, 0]}>
-        <mesh position={[0, 0.16, 0]} castShadow receiveShadow>
-          <sphereGeometry args={[R, 44, 32, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5]} />
-          <meshStandardMaterial {...wp} side={THREE.DoubleSide} />
-        </mesh>
-        {/* Aro grueso del borde (la "boca" del cuenco donde te sientas) */}
-        <mesh position={[0, 0.16, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[R, 0.055, 16, 72]} />
+    <group>
+      <group position={[0, 0.28, 0]} rotation={[-0.14, 0, 0]}>
+        {/* Aro exterior */}
+        <mesh castShadow>
+          <torusGeometry args={[R, 0.042, 14, 80]} />
           <meshStandardMaterial {...fp} />
         </mesh>
-        {/* Costillas horizontales del tejido */}
-        {[0.34, 0.62, 0.86].map((f, i) => {
-          const rr = Math.sqrt(Math.max(0, 1 - f * f)) * R
+        {/* Aros concéntricos */}
+        {[0.58, 0.36].map((f, i) => (
+          <mesh key={i}>
+            <torusGeometry args={[R * f, 0.018, 10, 56]} />
+            <meshStandardMaterial {...fp} />
+          </mesh>
+        ))}
+        {/* Radios del abanico */}
+        {spokes.map((_, i) => {
+          const a = (i / spokes.length) * Math.PI * 2
           return (
-            <mesh key={i} position={[0, 0.16 - f * R, 0]} rotation={[Math.PI / 2, 0, 0]}>
-              <torusGeometry args={[rr, 0.02, 10, 56]} />
+            <mesh key={i} position={[Math.cos(a) * R * 0.5, Math.sin(a) * R * 0.5, 0]} rotation={[0, 0, a + Math.PI / 2]}>
+              <cylinderGeometry args={[0.01, 0.01, R, 6]} />
               <meshStandardMaterial {...fp} />
             </mesh>
           )
         })}
-        {/* Cojín redondo dentro del cuenco */}
-        <mesh position={[0, 0.12, 0]} scale={[1, 0.42, 1]} castShadow>
-          <sphereGeometry args={[R * 0.82, 32, 24]} />
-          <meshStandardMaterial {...cp} />
+        {/* Centro tejido (cubo del abanico) */}
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.1, 0.1, 0.05, 20]} />
+          <meshStandardMaterial {...wp} />
         </mesh>
-        {/* Costura / botón central del cojín */}
-        <mesh position={[0, 0.24, 0]}>
-          <sphereGeometry args={[0.05, 16, 12]} />
-          <meshStandardMaterial color={cp.color} roughness={1} metalness={0} />
+        {/* Asiento tejido (bolsillo en la parte baja del aro) */}
+        <mesh position={[0, -R * 0.56, 0.14]} rotation={[0.45, 0, 0]} scale={[1, 0.45, 0.85]} castShadow>
+          <sphereGeometry args={[0.42, 28, 18, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5]} />
+          <meshStandardMaterial {...wp} side={THREE.DoubleSide} />
         </mesh>
-        {/* Cojín de respaldo apoyado atrás */}
-        <mesh position={[0, 0.34, -0.34]} rotation={[0.5, 0, 0]} scale={[1, 1, 0.4]} castShadow>
-          <sphereGeometry args={[R * 0.62, 28, 20]} />
+        {/* Cojín del asiento */}
+        <mesh position={[0, -R * 0.52, 0.14]} rotation={[0.45, 0, 0]} scale={[1, 0.3, 0.85]} castShadow>
+          <sphereGeometry args={[0.37, 24, 16]} />
           <meshStandardMaterial {...cp} />
         </mesh>
       </group>
 
-      {/* Base tipo tambor tejido */}
-      <mesh position={[0, -0.62, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.34, 0.42, 0.42, 40]} />
-        <meshStandardMaterial {...wp} />
-      </mesh>
-      {/* Aros de la base */}
-      {[-0.42, -0.62, -0.82].map((y, i) => (
-        <mesh key={i} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[i === 0 ? 0.34 : i === 1 ? 0.4 : 0.42, 0.022, 10, 48]} />
-          <meshStandardMaterial {...fp} />
-        </mesh>
-      ))}
-    </group>
-  )
-}
-
-// ── SOFÁ ──────────────────────────────────────────────────────────────────────
-function SofaModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
-  const legPositions: [number, number, number][] = [
-    [-0.76, -0.28, 0.33], [0.76, -0.28, 0.33],
-    [-0.76, -0.28, -0.33], [0.76, -0.28, -0.33],
-  ]
-  const seatX = [-0.42, 0.42]
-  return (
-    <group>
-      {/* Base tejida del asiento */}
-      <mesh position={[0, -0.05, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1.7, 0.2, 0.82]} />
-        <meshStandardMaterial {...wp} />
-      </mesh>
-      {/* Costillas de tejido en el frente de la base */}
-      {[-0.02, -0.09].map((y, i) => (
-        <mesh key={i} position={[0, y, 0.42]}>
-          <boxGeometry args={[1.64, 0.02, 0.02]} />
-          <meshStandardMaterial {...fp} />
-        </mesh>
-      ))}
-      {/* Borde superior del asiento */}
-      <mesh position={[0, 0.06, 0]}>
-        <boxGeometry args={[1.78, 0.04, 0.9]} />
-        <meshStandardMaterial {...fp} />
-      </mesh>
-      {/* Cojines de asiento */}
-      {seatX.map((x, i) => (
-        <mesh key={`s${i}`} position={[x, 0.16, 0.03]} castShadow>
-          <boxGeometry args={[0.78, 0.16, 0.72]} />
-          <meshStandardMaterial {...cp} />
-        </mesh>
-      ))}
-      {/* Cojines de respaldo */}
-      {seatX.map((x, i) => (
-        <mesh key={`b${i}`} position={[x, 0.46, -0.3]} rotation={[-0.14, 0, 0]} castShadow>
-          <boxGeometry args={[0.78, 0.5, 0.16]} />
-          <meshStandardMaterial {...cp} />
-        </mesh>
-      ))}
-      {/* Panel de respaldo tejido */}
-      <mesh position={[0, 0.52, -0.4]} rotation={[-0.1, 0, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1.7, 0.7, 0.12]} />
-        <meshStandardMaterial {...wp} />
-      </mesh>
-      {/* Costillas verticales del respaldo */}
-      {[-0.6, -0.3, 0, 0.3, 0.6].map((x, i) => (
-        <mesh key={i} position={[x, 0.52, -0.34]} rotation={[-0.1, 0, 0]}>
-          <boxGeometry args={[0.02, 0.66, 0.02]} />
-          <meshStandardMaterial {...fp} />
-        </mesh>
-      ))}
-      {/* Riel superior */}
-      <mesh position={[0, 0.9, -0.41]} rotation={[-0.1, 0, 0]}>
-        <boxGeometry args={[1.72, 0.07, 0.14]} />
-        <meshStandardMaterial {...fp} />
-      </mesh>
-      {/* Reposabrazos tejidos con remate */}
-      {([-0.9, 0.9] as number[]).map((x, i) => (
-        <group key={i}>
-          <mesh position={[x, 0.24, -0.02]} castShadow>
-            <boxGeometry args={[0.16, 0.56, 0.8]} />
-            <meshStandardMaterial {...wp} />
-          </mesh>
-          <mesh position={[x, 0.53, -0.02]}>
-            <boxGeometry args={[0.2, 0.05, 0.88]} />
+      {/* Patas dobladas tipo trineo */}
+      {([-1, 1] as number[]).map((s) => (
+        <group key={s}>
+          {[-0.5, 0.5].map((z, i) => (
+            <mesh key={i} position={[s * 0.42, -0.64, z * 0.5]} rotation={[z > 0 ? -0.4 : 0.4, 0, s * 0.1]} castShadow>
+              <cylinderGeometry args={[0.024, 0.028, 0.56, 10]} />
+              <meshStandardMaterial {...fp} />
+            </mesh>
+          ))}
+          {/* Pie trineo (barra a lo largo del piso) */}
+          <mesh position={[s * 0.46, -0.88, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+            <cylinderGeometry args={[0.026, 0.026, 0.74, 10]} />
             <meshStandardMaterial {...fp} />
           </mesh>
         </group>
       ))}
-      {/* Patas */}
-      {legPositions.map((pos, i) => (
-        <mesh key={i} position={pos} castShadow>
-          <cylinderGeometry args={[0.044, 0.054, 0.38, 10]} />
-          <meshStandardMaterial {...fp} />
-        </mesh>
-      ))}
     </group>
   )
 }
 
-// ── MESA ──────────────────────────────────────────────────────────────────────
-// Mesa de centro TEJIDA con tapa de vidrio (no de madera, sin cojín): base de
-// tambor de mimbre/polialuminio + aro superior + cristal redondo encima.
-function MesaModel({ wp, fp }: { wp: WP; fp: FP }) {
-  const R = 0.62
-  return (
-    <group position={[0, -0.05, 0]}>
-      {/* Base de tambor tejido */}
-      <mesh position={[0, -0.02, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[R * 0.82, R * 0.92, 0.62, 48]} />
-        <meshStandardMaterial {...wp} />
-      </mesh>
-      {/* Aros del tejido (refuerzos) */}
-      {[0.24, 0.02, -0.2].map((y, i) => (
-        <mesh key={i} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[R * (0.82 + i * 0.05), 0.022, 12, 56]} />
-          <meshStandardMaterial {...fp} />
-        </mesh>
-      ))}
-      {/* Base inferior (pie) */}
-      <mesh position={[0, -0.33, 0]} castShadow>
-        <cylinderGeometry args={[R * 0.95, R * 0.98, 0.06, 48]} />
-        <meshStandardMaterial {...fp} />
-      </mesh>
-      {/* Aro superior donde apoya el vidrio */}
-      <mesh position={[0, 0.31, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[R, 0.035, 14, 64]} />
-        <meshStandardMaterial {...fp} />
-      </mesh>
-      {/* Tapa de vidrio redonda */}
-      <mesh position={[0, 0.34, 0]} castShadow>
-        <cylinderGeometry args={[R + 0.06, R + 0.06, 0.03, 64]} />
-        <meshStandardMaterial color="#cfe3e6" roughness={0.08} metalness={0.05} transparent opacity={0.42} />
-      </mesh>
-      {/* Canto del vidrio */}
-      <mesh position={[0, 0.34, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[R + 0.06, 0.012, 10, 64]} />
-        <meshStandardMaterial color="#eef6f7" roughness={0.1} metalness={0.1} transparent opacity={0.6} />
-      </mesh>
-    </group>
-  )
-}
-
-// ── HAMACA / COLUMPIO (Egg Chair) ─────────────────────────────────────────────
-// Hamaca clásica de descanso: soporte de dos postes inclinados sobre una base,
-// con la cama de tela colgando y combada (sag) entre los dos extremos.
-function HamacaModel({ fp, cp }: { fp: FP; cp: FP }) {
-  // Cada poste va de la base (±1.25, -0.85) a la punta alta (±0.98, 0.9)
-  const post = (s: number) => {
-    const ax = 1.25 * s, ay = -0.85
-    const bx = 0.98 * s, by = 0.9
-    const dx = bx - ax, dy = by - ay
-    const len = Math.hypot(dx, dy)
-    const angle = Math.atan2(dx, dy)
-    return { pos: [(ax + bx) / 2, (ay + by) / 2, 0] as [number, number, number], rot: [0, 0, -angle] as [number, number, number], len }
-  }
-
-  return (
-    <group position={[0, 0.05, 0]}>
-      {/* Base: riel inferior a lo largo (eje X) */}
-      <mesh position={[0, -0.88, 0]} castShadow receiveShadow>
-        <boxGeometry args={[2.7, 0.09, 0.09]} />
-        <meshStandardMaterial {...fp} />
-      </mesh>
-      {/* Pies transversales (eje Z) en los extremos */}
-      {([-1.25, 1.25] as number[]).map((x, i) => (
-        <mesh key={i} position={[x, -0.88, 0]} castShadow>
-          <boxGeometry args={[0.1, 0.09, 0.86]} />
-          <meshStandardMaterial {...fp} />
-        </mesh>
-      ))}
-
-      {/* Postes inclinados + punta */}
-      {([1, -1] as number[]).map((s, i) => {
-        const p = post(s)
-        return (
-          <group key={i}>
-            <mesh position={p.pos} rotation={p.rot} castShadow>
-              <cylinderGeometry args={[0.05, 0.06, p.len, 12]} />
-              <meshStandardMaterial {...fp} />
-            </mesh>
-            {/* Punta / gancho */}
-            <mesh position={[0.98 * s, 0.92, 0]} castShadow>
-              <sphereGeometry args={[0.06, 16, 12]} />
-              <meshStandardMaterial {...fp} />
-            </mesh>
-          </group>
-        )
-      })}
-
-      {/* Cuerdas de suspensión (abanico a cada extremo) */}
-      {([1, -1] as number[]).map((s) =>
-        [-0.28, 0, 0.28].map((z, j) => {
-          const ax = 0.98 * s, ay = 0.9
-          const bx = 0.92 * s, by = 0.28
-          const dx = bx - ax, dy = by - ay
-          const len = Math.hypot(dx, dy, z)
-          const angle = Math.atan2(bx - ax, by - ay)
-          return (
-            <mesh key={`${s}-${j}`} position={[(ax + bx) / 2, (ay + by) / 2, z / 2]} rotation={[0, 0, -angle]}>
-              <cylinderGeometry args={[0.01, 0.01, len, 6]} />
-              <meshStandardMaterial {...fp} />
-            </mesh>
-          )
-        }),
-      )}
-
-      {/* Barras esparcidoras (spreader bars) en cada extremo de la cama */}
-      {([0.92, -0.92] as number[]).map((x, i) => (
-        <mesh key={i} position={[x, 0.24, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.028, 0.028, 0.86, 12]} />
-          <meshStandardMaterial {...fp} />
-        </mesh>
-      ))}
-
-      {/* Cama de la hamaca — tela combada (bowl bajo y ancho) */}
-      <mesh position={[0, 0.16, 0]} scale={[1.05, 0.42, 0.7]} castShadow receiveShadow>
-        <sphereGeometry args={[0.9, 40, 24, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5]} />
-        <meshStandardMaterial {...cp} side={THREE.DoubleSide} />
-      </mesh>
-      {/* Hilos de tejido de la cama (a lo largo) */}
-      {[-0.24, -0.08, 0.08, 0.24].map((z, i) => (
-        <mesh key={i} position={[0, -0.02, z]} scale={[1, 0.4, 1]} rotation={[0, 0, 0]}>
-          <torusGeometry args={[0.9, 0.012, 6, 40, Math.PI]} />
-          <meshStandardMaterial {...fp} />
-        </mesh>
-      ))}
-      {/* Almohada en un extremo */}
-      <mesh position={[0.6, 0.12, 0]} rotation={[0, 0, -0.3]} scale={[1, 0.5, 0.72]} castShadow>
-        <sphereGeometry args={[0.24, 20, 16]} />
-        <meshStandardMaterial {...cp} />
-      </mesh>
-    </group>
-  )
-}
-
-// ── CABECERA / DAYBED IGLOO ───────────────────────────────────────────────────
-function DaybedModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
+// ── SOFÁ — loveseat nido redondeado (ref: sala-ebano.jpg) ─────────────────────
+// Cuenco tejido bajo y ancho con respaldo curvo elevado atrás, cojín de asiento
+// corrido y dos cojines de respaldo. Sin patas: el nido se apoya en el piso.
+function SofaModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
   return (
     <group>
-      {/* Igloo dome shell */}
-      <mesh position={[0, 0.06, 0]} scale={[1.08, 0.92, 0.84]} castShadow receiveShadow>
-        <sphereGeometry args={[0.74, 36, 24, 0, Math.PI * 2, 0, Math.PI * 0.58]} />
+      {/* Cuenco tejido (cuerpo) */}
+      <mesh position={[0, -0.06, 0]} scale={[1.45, 1.05, 1]} castShadow receiveShadow>
+        <sphereGeometry args={[0.72, 48, 28, 0, Math.PI * 2, Math.PI * 0.42, Math.PI * 0.58]} />
         <meshStandardMaterial {...wp} side={THREE.DoubleSide} />
       </mesh>
-      {/* Base ring */}
-      <mesh position={[0, 0.06, 0]} scale={[1.08, 1, 0.84]}>
-        <torusGeometry args={[0.74, 0.032, 12, 56]} />
+      {/* Respaldo curvo elevado (banda trasera) */}
+      <mesh position={[0, -0.06, 0]} scale={[1.45, 1.05, 1]} rotation={[0, Math.PI, 0]} castShadow>
+        <sphereGeometry args={[0.72, 48, 20, 0, Math.PI, Math.PI * 0.18, Math.PI * 0.27]} />
+        <meshStandardMaterial {...wp} side={THREE.DoubleSide} />
+      </mesh>
+      {/* Borde del cuenco */}
+      <mesh position={[0, 0.12, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[1.45, 1, 1]}>
+        <torusGeometry args={[0.7, 0.032, 12, 72]} />
         <meshStandardMaterial {...fp} />
       </mesh>
-      {/* Horizontal wicker ribs on dome */}
-      {[0.25, 0.5, 0.68].map((v, i) => {
-        const rv = Math.sqrt(Math.max(0, 1 - v * v)) * 0.74
-        return (
-          <mesh key={i} position={[0, 0.06 + v * 0.74 * 0.92, 0]} scale={[1.08, 1, 0.84]}>
-            <torusGeometry args={[rv, 0.018, 8, 48]} />
-            <meshStandardMaterial {...fp} />
-          </mesh>
-        )
-      })}
-      {/* Vertical wicker ribs (like cage bars) */}
-      {Array.from({ length: 10 }).map((_, i) => {
-        const angle = (i / 10) * Math.PI * 2
-        return (
-          <mesh key={i} position={[
-            Math.sin(angle) * 0.74 * 1.08 * 0.5,
-            0.28,
-            Math.cos(angle) * 0.74 * 0.84 * 0.5
-          ]} rotation={[0, -angle, 0.5]} castShadow>
-            <boxGeometry args={[0.018, 0.52, 0.018]} />
-            <meshStandardMaterial {...fp} />
-          </mesh>
-        )
-      })}
-      {/* Base cylinder platform */}
-      <mesh position={[0, -0.18, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.84, 0.84, 0.24, 36]} />
-        <meshStandardMaterial {...wp} />
+      {/* Remate superior del respaldo (sigue el borde de la banda trasera) */}
+      <mesh position={[0, 0.575, 0]} rotation={[Math.PI / 2, 0, Math.PI]} scale={[1.45, 1, 1]}>
+        <torusGeometry args={[0.39, 0.028, 10, 48, Math.PI]} />
+        <meshStandardMaterial {...fp} />
       </mesh>
-      {/* Colchón inferior */}
-      <mesh position={[0, -0.04, 0.04]} scale={[0.9, 1, 0.74]} castShadow>
-        <cylinderGeometry args={[0.7, 0.7, 0.14, 32]} />
+      {/* Cojín de asiento corrido */}
+      <mesh position={[0, 0.0, 0.05]} scale={[1.4, 0.3, 0.85]} castShadow>
+        <sphereGeometry args={[0.6, 32, 20]} />
         <meshStandardMaterial {...cp} />
       </mesh>
-      {/* Cojines de respaldo dentro de la cúpula */}
-      {[-0.34, 0, 0.34].map((x, i) => (
-        <mesh key={i} position={[x, 0.14, -0.32]} rotation={[0.5, 0, 0]} scale={[1, 1, 0.45]} castShadow>
-          <sphereGeometry args={[0.26, 22, 16]} />
+      {/* Cojines de respaldo */}
+      {[-0.38, 0.38].map((x, i) => (
+        <mesh key={i} position={[x, 0.3, -0.32]} rotation={[0.35, 0, 0]} scale={[1, 1, 0.42]} castShadow>
+          <sphereGeometry args={[0.3, 24, 16]} />
           <meshStandardMaterial {...cp} />
         </mesh>
       ))}
@@ -445,58 +219,195 @@ function DaybedModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
   )
 }
 
-// ── ACCESORIO / CANASTA ───────────────────────────────────────────────────────
-function AccesorioModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
+// ── MESA — comedor cuadrado tejido (ref: set-comedor.jpg) ─────────────────────
+// Faldón piramidal tejido que se ensancha hacia arriba, tapa tejida con marco y
+// superficie interior tipo lino, como el comedor de la foto.
+function MesaModel({ wp, fp }: { wp: WP; fp: FP }) {
   return (
     <group>
-      {/* Basket body */}
-      <mesh position={[0, 0, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.48, 0.34, 0.72, 36]} />
+      {/* Faldón tejido (tronco piramidal de base cuadrada) */}
+      <mesh position={[0, -0.39, 0]} rotation={[0, Math.PI / 4, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.88, 0.66, 1.0, 4, 1]} />
+        <meshStandardMaterial {...wp} flatShading />
+      </mesh>
+      {/* Tapa tejida */}
+      <mesh position={[0, 0.16, 0]} castShadow receiveShadow>
+        <boxGeometry args={[1.52, 0.1, 1.14]} />
         <meshStandardMaterial {...wp} />
       </mesh>
-      {/* Manta doblada dentro de la canasta (usa el color del cojín) */}
-      <mesh position={[0, 0.36, 0]} scale={[1, 0.5, 1]} castShadow>
-        <cylinderGeometry args={[0.42, 0.42, 0.22, 32]} />
-        <meshStandardMaterial {...cp} />
+      {/* Marco del borde de la tapa */}
+      {([-1, 1] as number[]).map((s) => (
+        <group key={s}>
+          <mesh position={[0, 0.215, s * 0.57]}>
+            <boxGeometry args={[1.52, 0.035, 0.05]} />
+            <meshStandardMaterial {...fp} />
+          </mesh>
+          <mesh position={[s * 0.76, 0.215, 0]}>
+            <boxGeometry args={[0.05, 0.035, 1.14]} />
+            <meshStandardMaterial {...fp} />
+          </mesh>
+        </group>
+      ))}
+      {/* Superficie interior (lino) */}
+      <mesh position={[0, 0.213, 0]}>
+        <boxGeometry args={[1.38, 0.016, 1.0]} />
+        <meshStandardMaterial color="#ded3c2" roughness={0.85} metalness={0} />
       </mesh>
-      <mesh position={[0, 0.44, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.4, 0.05, 10, 40]} />
-        <meshStandardMaterial {...cp} />
+    </group>
+  )
+}
+
+// ── HAMACA — silla colgante tipo huevo bajo pérgola (ref: hamaca-jardin.jpg) ──
+// Casco tejido en forma de huevo con abertura frontal, cojín adentro, colgado
+// con cuerda de una viga de pérgola sobre dos postes de madera.
+function HamacaModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
+  const gap = Math.PI * 0.62 // abertura frontal del casco
+  const madera = { color: '#8a6a4c', roughness: 0.8, metalness: 0.05 }
+
+  return (
+    <group>
+      {/* Pérgola: viga superior y postes */}
+      <mesh position={[0, 1.22, 0]} castShadow>
+        <boxGeometry args={[2.3, 0.11, 0.16]} />
+        <meshStandardMaterial {...madera} />
       </mesh>
-      {/* Bottom disc */}
-      <mesh position={[0, -0.37, 0]} castShadow>
-        <cylinderGeometry args={[0.35, 0.34, 0.04, 32]} />
-        <meshStandardMaterial {...wp} />
+      {([-1.08, 1.08] as number[]).map((x, i) => (
+        <mesh key={i} position={[x, 0.17, 0]} castShadow>
+          <boxGeometry args={[0.11, 2.2, 0.13]} />
+          <meshStandardMaterial {...madera} />
+        </mesh>
+      ))}
+
+      {/* Cuerda y argolla */}
+      <mesh position={[0, 0.99, 0]}>
+        <cylinderGeometry args={[0.018, 0.018, 0.38, 8]} />
+        <meshStandardMaterial color="#c9b18c" roughness={1} metalness={0} />
       </mesh>
-      {/* Top rim */}
-      <mesh position={[0, 0.37, 0]}>
-        <torusGeometry args={[0.48, 0.03, 10, 40]} />
+      <mesh position={[0, 0.8, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.055, 0.016, 8, 24]} />
         <meshStandardMaterial {...fp} />
       </mesh>
-      {/* Horizontal weave bands */}
-      {[-0.22, 0, 0.22].map((y, i) => {
-        const r = 0.34 + (y + 0.37) / 0.72 * (0.48 - 0.34)
+
+      {/* Casco huevo tejido con abertura frontal */}
+      <mesh position={[0, 0.1, 0]} scale={[0.95, 1.12, 0.95]} castShadow receiveShadow>
+        <sphereGeometry args={[0.62, 48, 32, Math.PI / 2 + gap / 2, Math.PI * 2 - gap]} />
+        <meshStandardMaterial {...wp} side={THREE.DoubleSide} />
+      </mesh>
+      {/* Aro estructural del casco */}
+      <mesh position={[0, 0.1, 0]} scale={[0.95, 1.12, 0.95]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.62, 0.02, 8, 48]} />
+        <meshStandardMaterial {...fp} />
+      </mesh>
+
+      {/* Cojín interior y almohada */}
+      <mesh position={[0, -0.24, 0.06]} scale={[1, 0.55, 1]} castShadow>
+        <sphereGeometry args={[0.4, 28, 18]} />
+        <meshStandardMaterial {...cp} />
+      </mesh>
+      <mesh position={[0, 0.06, -0.28]} rotation={[0.4, 0, 0]} scale={[1, 1, 0.45]} castShadow>
+        <sphereGeometry args={[0.26, 22, 14]} />
+        <meshStandardMaterial {...cp} />
+      </mesh>
+    </group>
+  )
+}
+
+// ── CABECERA / DAYBED IGLOO — cápsula huevo abierta al frente (ref: daybeds-igloo.jpg)
+function DaybedModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
+  const gap = Math.PI * 0.7 // abertura frontal
+
+  return (
+    <group>
+      {/* Cúpula huevo alta, abierta al frente */}
+      <mesh position={[0, -0.12, 0]} scale={[1.02, 1.35, 0.98]} castShadow receiveShadow>
+        <sphereGeometry args={[0.66, 48, 32, Math.PI / 2 + gap / 2, Math.PI * 2 - gap, 0, Math.PI * 0.62]} />
+        <meshStandardMaterial {...wp} side={THREE.DoubleSide} />
+      </mesh>
+      {/* Remate superior */}
+      <mesh position={[0, 0.78, 0]} castShadow>
+        <sphereGeometry args={[0.07, 16, 12]} />
+        <meshStandardMaterial {...fp} />
+      </mesh>
+      {/* Base de tambor tejido */}
+      <mesh position={[0, -0.63, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.62, 0.68, 0.5, 40]} />
+        <meshStandardMaterial {...wp} />
+      </mesh>
+      {/* Aro entre cúpula y base */}
+      <mesh position={[0, -0.38, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.64, 0.028, 10, 56]} />
+        <meshStandardMaterial {...fp} />
+      </mesh>
+      {/* Colchón redondo */}
+      <mesh position={[0, -0.3, 0.02]} castShadow>
+        <cylinderGeometry args={[0.56, 0.56, 0.16, 36]} />
+        <meshStandardMaterial {...cp} />
+      </mesh>
+      {/* Cojines dentro de la cúpula */}
+      {[-0.28, 0.02, 0.3].map((x, i) => (
+        <mesh key={i} position={[x, -0.08, -0.3]} rotation={[0.35, 0, 0]} scale={[1, 1, 0.42]} castShadow>
+          <sphereGeometry args={[0.22, 20, 14]} />
+          <meshStandardMaterial {...cp} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+// ── ACCESORIO / CESTAS — canasta grande + canasta con tapa (ref: hamaca-nido-oscura.jpg)
+function AccesorioModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
+  return (
+    <group position={[0, -0.48, 0]}>
+      {/* Canasta principal */}
+      <mesh castShadow receiveShadow>
+        <cylinderGeometry args={[0.44, 0.32, 0.78, 36]} />
+        <meshStandardMaterial {...wp} />
+      </mesh>
+      {/* Borde superior */}
+      <mesh position={[0, 0.39, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.44, 0.028, 10, 44]} />
+        <meshStandardMaterial {...fp} />
+      </mesh>
+      {/* Aros del tejido */}
+      {[-0.2, 0.02, 0.24].map((y, i) => {
+        const r = 0.32 + ((y + 0.39) / 0.78) * (0.44 - 0.32)
         return (
-          <mesh key={i} position={[0, y, 0]}>
-            <torusGeometry args={[r, 0.018, 8, 36]} />
+          <mesh key={i} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[r, 0.014, 8, 40]} />
             <meshStandardMaterial {...fp} />
           </mesh>
         )
       })}
-      {/* Handle arch */}
-      <mesh position={[0, 0.68, 0]} rotation={[0, 0, 0]} castShadow>
-        <torusGeometry args={[0.32, 0.028, 10, 32, Math.PI]} />
+      {/* Manta doblada asomando */}
+      <mesh position={[0, 0.4, 0]} scale={[1, 0.4, 1]} castShadow>
+        <sphereGeometry args={[0.34, 24, 16]} />
+        <meshStandardMaterial {...cp} />
+      </mesh>
+      {/* Asa (arco apoyado en el borde) */}
+      <mesh position={[0, 0.39, 0]} castShadow>
+        <torusGeometry args={[0.3, 0.024, 8, 32, Math.PI]} />
         <meshStandardMaterial {...fp} />
       </mesh>
-      {/* Small decorative basket in front */}
-      <mesh position={[0.18, 0.5, 0.38]} scale={[0.45, 0.45, 0.45]} castShadow>
-        <cylinderGeometry args={[0.42, 0.3, 0.6, 24]} />
-        <meshStandardMaterial {...wp} />
-      </mesh>
-      <mesh position={[0.18, 0.72, 0.38]} scale={[0.45, 0.45, 0.45]}>
-        <torusGeometry args={[0.42, 0.04, 8, 24]} />
-        <meshStandardMaterial {...fp} />
-      </mesh>
+
+      {/* Canasta pequeña con tapa, en el piso al lado */}
+      <group position={[0.66, -0.19, 0.18]}>
+        <mesh castShadow receiveShadow>
+          <cylinderGeometry args={[0.2, 0.15, 0.4, 28]} />
+          <meshStandardMaterial {...wp} />
+        </mesh>
+        <mesh position={[0, 0.22, 0]} castShadow>
+          <cylinderGeometry args={[0.22, 0.22, 0.05, 28]} />
+          <meshStandardMaterial {...wp} />
+        </mesh>
+        <mesh position={[0, 0.27, 0]}>
+          <sphereGeometry args={[0.035, 12, 10]} />
+          <meshStandardMaterial {...fp} />
+        </mesh>
+        <mesh position={[0, 0.12, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.19, 0.012, 8, 28]} />
+          <meshStandardMaterial {...fp} />
+        </mesh>
+      </group>
     </group>
   )
 }
@@ -504,24 +415,32 @@ function AccesorioModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
 // ── Model selector ────────────────────────────────────────────────────────────
 function FurnitureModel({ tipo, color, mat, cushion }: { tipo: string; color: string; mat: string; cushion: string }) {
   const isPolyalu = mat === 'polialuminio'
+  const isCombinado = mat === 'combinado'
   const hex = toneForMaterial(safeHex(color), isPolyalu)
   const texture = useMemo(() => makeWickerTexture(hex, mat), [hex, mat])
 
-  // Polialuminio: acabado satinado/plástico (brilla, poco áspero).
-  // Mimbre: fibra natural mate y áspera.
-  const roughness = isPolyalu ? 0.4 : 0.92
-  const metalness = isPolyalu ? 0.3 : 0.0
-
-  const wp: WP = { map: texture, color: hex, roughness, metalness }
-  const fp: FP = { color: hex, roughness: roughness + 0.1, metalness }
+  // La textura ya trae el tono del material: base blanca para no oscurecerla.
+  // Mimbre: fibra natural mate y áspera, estructura del mismo tono.
+  // Polialuminio: tejido sintético satinado sobre ESTRUCTURA DE ALUMINIO gris —
+  // la estructura metálica es la señal visual más clara entre ambos.
+  // Combinado: apariencia cálida del mimbre con acabado satinado y estructura
+  // de aluminio (fibra sintética símil-mimbre sobre alma metálica).
+  const wp: WP = isPolyalu
+    ? { map: texture, color: '#ffffff', roughness: 0.38, metalness: 0.12 }
+    : isCombinado
+      ? { map: texture, color: '#ffffff', roughness: 0.55, metalness: 0.06 }
+      : { map: texture, color: '#ffffff', roughness: 0.93, metalness: 0 }
+  const fp: FP = isPolyalu || isCombinado
+    ? { color: '#aeb4bb', roughness: 0.3, metalness: 0.85 } // aluminio cepillado
+    : { color: hex, roughness: 0.9, metalness: 0 }
   // Material del cojín (tela mate, color independiente del tejido)
   const cp: FP = { color: safeHex(cushion), roughness: 0.97, metalness: 0 }
 
   switch (tipo) {
-    case 'silla':     return <SillaOrbital wp={wp} fp={fp} cp={cp} />
+    case 'silla':     return <SillaModel wp={wp} fp={fp} cp={cp} />
     case 'sofa':      return <SofaModel wp={wp} fp={fp} cp={cp} />
     case 'mesa':      return <MesaModel wp={wp} fp={fp} />
-    case 'hamaca':    return <HamacaModel fp={fp} cp={cp} />
+    case 'hamaca':    return <HamacaModel wp={wp} fp={fp} cp={cp} />
     case 'cabecera':  return <DaybedModel wp={wp} fp={fp} cp={cp} />
     case 'accesorio': return <AccesorioModel wp={wp} fp={fp} cp={cp} />
     default:          return <SofaModel wp={wp} fp={fp} cp={cp} />
@@ -531,7 +450,7 @@ function FurnitureModel({ tipo, color, mat, cushion }: { tipo: string; color: st
 // ── Camera config per tipo ────────────────────────────────────────────────────
 function cameraForTipo(tipo: string): [number, number, number] {
   switch (tipo) {
-    case 'hamaca':   return [2.4, 2.2, 2.4]
+    case 'hamaca':   return [2.9, 1.5, 2.9]
     case 'cabecera': return [2.6, 1.8, 2.6]
     case 'mesa':     return [2.8, 2.2, 2.8]
     default:         return [2.7, 1.8, 2.5]

@@ -9,6 +9,8 @@ export default defineConfig({
     alias: { '@': path.resolve(__dirname, './src') },
   },
   server: {
+    // Permite probar desde el celular vía túnel (ver docs/GUIA_PUSH_VAPID.md)
+    allowedHosts: ['.trycloudflare.com'],
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

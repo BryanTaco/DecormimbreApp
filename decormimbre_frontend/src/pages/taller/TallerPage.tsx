@@ -25,7 +25,7 @@ export default function TallerPage() {
   useEffect(() => {
     if (!user) { navigate('/admin/login'); return }
     if (user.rol === 'CLIENTE') navigate('/cuenta')
-  }, [user])
+  }, [user, navigate])
 
   const { data, isLoading } = useQuery({ queryKey: ['mis-tareas'], queryFn: () => tallerApi.misTareas(), enabled: !!user })
   const tareas: TareaArtesano[] = data?.data ?? []

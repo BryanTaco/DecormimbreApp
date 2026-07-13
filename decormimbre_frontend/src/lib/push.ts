@@ -44,7 +44,7 @@ export async function activarPush(): Promise<{ ok: boolean; mensaje: string }> {
     const json = sub.toJSON() as { endpoint?: string; keys?: { p256dh?: string; auth?: string } }
     await api.post('/auth/push/subscribe/', { endpoint: json.endpoint, keys: json.keys })
     return { ok: true, mensaje: '¡Notificaciones activadas! Te avisaremos del estado de tus pedidos.' }
-  } catch (e) {
+  } catch {
     return { ok: false, mensaje: 'No se pudo activar. Intenta de nuevo.' }
   }
 }

@@ -135,6 +135,7 @@ export default function PersonalizarPage() {
   const [form, setForm] = useState<FormData>(INITIAL)
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [autoRotate, setAutoRotate] = useState(true)
 
   const steps = ['Tipo', 'Material', 'Diseño', 'Contacto']
@@ -170,6 +171,7 @@ export default function PersonalizarPage() {
       form.ciudad ? `Ciudad: ${form.ciudad}` : '',
     ].filter(Boolean).join('\n')
 
+    setError('')
     try {
       await api.post('/public/cotizacion-rapida/', {
         nombre: form.nombre,
@@ -178,11 +180,11 @@ export default function PersonalizarPage() {
         tipo: tipoLabel,
         mensaje,
       })
+      setSent(true)
     } catch {
-      // Mostramos éxito de todas formas (endpoint puede estar pendiente)
+      setError('No se pudo enviar tu solicitud. Revisa tu conexión e intenta de nuevo, o escríbenos por WhatsApp al 098 057 2561.')
     } finally {
       setLoading(false)
-      setSent(true)
     }
   }
 
@@ -542,6 +544,19 @@ export default function PersonalizarPage() {
                 </Step>
               )}
             </AnimatePresence>
+
+            {/* Error de envío */}
+            {error && !sent && (
+              <div
+                role="alert"
+                className="mt-6 rounded-xl border px-4 py-3"
+                style={{ background: '#fdf1f0', borderColor: 'rgba(200,60,40,0.25)' }}
+              >
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#a03a2a', margin: 0, lineHeight: 1.5 }}>
+                  {error}
+                </p>
+              </div>
+            )}
 
             {/* Navegación */}
             {!sent && (

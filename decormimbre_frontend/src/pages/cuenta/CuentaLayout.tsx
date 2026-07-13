@@ -22,7 +22,7 @@ export default function CuentaLayout() {
   useEffect(() => {
     if (!user) { navigate('/login', { state: { from: location.pathname } }); return }
     if (user.rol !== 'CLIENTE') navigate('/admin')
-  }, [user])
+  }, [user, navigate, location.pathname])
 
   // Cerrar drawer al navegar y bloquear scroll de fondo
   useEffect(() => { setOpen(false) }, [location.pathname])

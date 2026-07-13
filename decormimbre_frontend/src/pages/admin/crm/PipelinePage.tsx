@@ -36,7 +36,7 @@ export default function PipelinePage() {
   })
   const { data: cliData } = useQuery({ queryKey: ['crm-clientes'], queryFn: () => clientesApi.list() })
 
-  const oportunidades: Oportunidad[] = oppData?.data ?? []
+  const oportunidades: Oportunidad[] = useMemo(() => oppData?.data ?? [], [oppData])
   const clientes = cliData?.data ?? []
 
   const crear = useMutation({

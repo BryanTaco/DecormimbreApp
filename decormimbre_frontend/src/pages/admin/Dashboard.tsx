@@ -53,8 +53,8 @@ export default function Dashboard() {
   const pedidos: Pedido[] = pedData?.data ?? []
   const alertas = alertasData?.data ?? []
   const clientes = clientesData?.data ?? []
-  const allCot = (ultimasCotData?.data ?? []) as Record<string, unknown>[]
-  const allPed = (ultimasPedData?.data ?? []) as Record<string, unknown>[]
+  const allCot = useMemo(() => (ultimasCotData?.data ?? []) as Record<string, unknown>[], [ultimasCotData])
+  const allPed = useMemo(() => (ultimasPedData?.data ?? []) as Record<string, unknown>[], [ultimasPedData])
   const ultimasCot: Cotizacion[] = (ultimasCotData?.data ?? []).slice(0, 5)
   const ultimasPed: Pedido[] = (ultimasPedData?.data ?? []).slice(0, 5)
   const porEtapa: Record<string, { total: number; valor: string }> = pipeData?.data?.por_etapa ?? {}

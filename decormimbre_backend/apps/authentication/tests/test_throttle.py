@@ -4,12 +4,21 @@ from django.core.cache import cache
 from rest_framework.test import APIClient
 from unittest.mock import patch
 
+from apps.authentication.throttles import LoginRateThrottle
+
 
 @pytest.fixture(autouse=True)
 def clear_cache():
     cache.clear()
     yield
     cache.clear()
+
+
+@pytest.fixture(autouse=True)
+def rate_estricta():
+    # development.py relaja el rate a 100/min; aquí probamos el valor de producción.
+    with patch.object(LoginRateThrottle, "THROTTLE_RATES", {"login": "5/15min"}):
+        yield
 
 
 @pytest.fixture
