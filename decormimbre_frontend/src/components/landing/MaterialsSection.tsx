@@ -33,7 +33,7 @@ const MATERIALS = [
   {
     name: 'Mimbre',
     subtitle: 'La fibra de la naturaleza',
-    image: '/products/silla-circular.jpg',
+    image: '/materials/mimbre.png',
     description:
       'El mimbre es una planta de la familia del sauce (género Salix) cuyas ramas jóvenes y flexibles se han tejido artesanalmente durante siglos. En Ecuador, los artesanos seleccionan a mano las varas más resistentes, las curan con técnicas tradicionales y las tejen en formas que combinan funcionalidad y arte.',
     properties: [
@@ -57,7 +57,7 @@ const MATERIALS = [
   {
     name: 'Polialuminio',
     subtitle: 'Innovación para el exterior',
-    image: '/products/hamaca-doble-polialuminio.jpg',
+    image: '/materials/polialuminio.png',
     description:
       'El polialuminio es un material técnico de alto rendimiento: una fibra sintética de polietileno de alta densidad (HDPE) tejida sobre un alma de aluminio. Esta combinación le otorga la apariencia y textura del mimbre natural, pero con resistencia extrema a la lluvia, rayos UV y temperatura. Ideal para exteriores exigentes.',
     properties: [
@@ -171,17 +171,16 @@ export default function MaterialsSection() {
             className="rounded-[2rem] overflow-hidden border"
             style={{ borderColor: `${mat.color}18`, background: mat.lightBg }}
           >
-            {/* Foto del material */}
+            {/* Infografía del material (imagen completa, sin recortar) */}
             <div className="relative w-full" style={{ background: '#fff' }}>
               <motion.img
                 key={mat.image}
                 src={mat.image}
-                alt={`Mueble de ${mat.name} — Decormimbre`}
+                alt={`¿Qué es el ${mat.name}? — infografía Decormimbre`}
                 initial={{ opacity: 0, scale: 1.02 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, ease: 'easeOut' }}
-                className="w-full block object-cover"
-                style={{ maxHeight: 440, objectPosition: 'center' }}
+                className="w-full h-auto block"
               />
             </div>
 
