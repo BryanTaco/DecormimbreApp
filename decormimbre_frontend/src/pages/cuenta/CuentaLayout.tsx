@@ -89,7 +89,8 @@ export default function CuentaLayout() {
       </aside>
 
       {/* Topbar móvil */}
-      <header className="md:hidden" style={{ position: 'sticky', top: 0, zIndex: 40, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: 'rgba(245,240,235,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(196,168,130,0.2)' }}>
+      {/* display via clases (flex md:hidden): un display inline anularía md:hidden */}
+      <header className="flex md:hidden items-center justify-between" style={{ position: 'sticky', top: 0, zIndex: 40, padding: '14px 18px', background: 'rgba(245,240,235,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(196,168,130,0.2)' }}>
         <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
           <BrandLogo size={26} />
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 500, letterSpacing: '0.08em', color: '#5C4033', textTransform: 'uppercase' }}>Decormimbre</span>
