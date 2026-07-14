@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'motion/react'
 import { Bell, CheckCheck } from 'lucide-react'
@@ -18,6 +19,8 @@ function hace(fecha: string) {
 
 export default function NotificationsBell({ placement = 'up' }: { placement?: 'up' | 'down' }) {
   const qc = useQueryClient()
+  const navigate = useNavigate()
+  const esAdmin = useLocation().pathname.startsWith('/admin')
   const [open, setOpen] = useState(false)
 
   const { data } = useQuery({ queryKey: ['notificaciones'], queryFn: getNotificaciones, refetchInterval: 60000 })
@@ -26,9 +29,32 @@ export default function NotificationsBell({ placement = 'up' }: { placement?: 'u
 
   const marcar = useMutation({
     mutationFn: (id: string) => marcarNotificacionLeida(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['notificaciones'] }),
+    // Actualización optimista: la notificación desaparece de inmediato al clic
+    onMutate: async (id: string) => {
+      await qc.cancelQueries({ queryKey: ['notificaciones'] })
+      const prev = qc.getQueryData(['notificaciones'])
+      qc.setQueryData(['notificaciones'], (old: unknown) =>
+        Array.isArray(old) ? old.filter((n: Noti) => n.id !== id) : old)
+      return { prev }
+    },
+    onError: (_e, _id, ctx) => { if (ctx?.prev) qc.setQueryData(['notificaciones'], ctx.prev) },
+    onSettled: () => qc.invalidateQueries({ queryKey: ['notificaciones'] }),
   })
   const marcarTodas = () => noLeidas.forEach((n) => marcar.mutate(n.id))
+
+  // Al hacer clic, además de marcarla como leída se navega a la sección relacionada.
+  const destinoDe = (n: Noti): string | null => {
+    if (n.tipo.startsWith('PEDIDO')) return esAdmin ? '/admin/pedidos' : '/cuenta/pedidos'
+    if (n.tipo.includes('COTIZACION')) return esAdmin ? '/admin/cotizaciones' : '/cuenta/cotizaciones'
+    if (n.tipo === 'ALERTA_INVENTARIO') return esAdmin ? '/admin/inventario' : null
+    return null
+  }
+  const abrirNotificacion = (n: Noti) => {
+    if (!n.leida) marcar.mutate(n.id)
+    setOpen(false)
+    const destino = destinoDe(n)
+    if (destino) navigate(destino)
+  }
 
   const panelPos = placement === 'down'
     ? 'top-full mt-2 right-0'
@@ -79,7 +105,7 @@ export default function NotificationsBell({ placement = 'up' }: { placement?: 'u
                   notis.map((n) => (
                     <button
                       key={n.id}
-                      onClick={() => !n.leida && marcar.mutate(n.id)}
+                      onClick={() => abrirNotificacion(n)}
                       className={`w-full text-left flex gap-3 px-4 py-3 border-b border-[rgba(92,64,51,0.05)] last:border-0 transition-colors hover:bg-[rgba(196,168,130,0.06)] ${n.leida ? 'opacity-60' : ''}`}
                     >
                       <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${n.leida ? 'bg-transparent' : 'bg-[#C4A882]'}`} />

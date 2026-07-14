@@ -84,7 +84,9 @@ export default function CuentaLayout() {
   return (
     <div style={{ minHeight: '100vh', background: '#f5f0eb' }} className="md:flex">
       {/* Sidebar escritorio */}
-      <aside className="hidden md:flex" style={{ width: 240, background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)', borderRight: '1px solid rgba(196,168,130,0.2)', flexDirection: 'column', position: 'sticky', top: 0, height: '100vh', flexShrink: 0 }}>
+      {/* zIndex: el blur crea un stacking context; sin él, el panel de
+          notificaciones queda pintado debajo de las tarjetas del contenido */}
+      <aside className="hidden md:flex" style={{ width: 240, background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)', borderRight: '1px solid rgba(196,168,130,0.2)', flexDirection: 'column', position: 'sticky', top: 0, height: '100vh', flexShrink: 0, zIndex: 45 }}>
         <SidebarInner />
       </aside>
 

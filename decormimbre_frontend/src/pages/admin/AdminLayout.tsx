@@ -88,7 +88,7 @@ export default function AdminLayout() {
       </div>
 
       {/* Sidebar escritorio */}
-      <aside className="hidden md:flex flex-col w-56 shrink-0 bg-white/55 backdrop-blur-md border-r border-[rgba(92,64,51,0.1)] py-6 px-4 gap-2">
+      <aside className="hidden md:flex flex-col w-56 shrink-0 bg-white/55 backdrop-blur-md border-r border-[rgba(92,64,51,0.1)] py-6 px-4 gap-2 relative z-[45]">
         <div className="mb-6"><Brand /></div>
         <NavItems />
         <div className="mt-auto">
