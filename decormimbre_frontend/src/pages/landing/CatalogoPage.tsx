@@ -137,6 +137,8 @@ export default function CatalogoPage() {
                 <img
                   src={item.img}
                   alt={item.name}
+                  loading="lazy"
+                  decoding="async"
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-600"
                 />
                 <span

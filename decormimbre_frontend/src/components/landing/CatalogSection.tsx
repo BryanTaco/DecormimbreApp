@@ -89,6 +89,8 @@ export default function CatalogSection() {
                     <img
                       src={item.img}
                       alt={item.name}
+                      loading="lazy"
+                      decoding="async"
                       style={{
                         position: 'absolute',
                         inset: 0,

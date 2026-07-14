@@ -32,6 +32,14 @@
   --color-sand:    #C4A882;
 }
 
+/* iOS hace zoom automático cuando un campo enfocado tiene letra < 16px.
+   En pantallas táctiles se fuerza 16px en los controles de formulario. */
+@media (pointer: coarse) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
 body {
   margin: 0;
   overflow-x: hidden;

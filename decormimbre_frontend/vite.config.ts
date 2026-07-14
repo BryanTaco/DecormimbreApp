@@ -16,6 +16,11 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      // Archivos subidos desde el admin (fotos de productos, etc.)
+      '/media': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
     },
   },
 })

@@ -4,6 +4,7 @@ import { LayoutDashboard, FileText, Package, LogOut, Menu, X } from 'lucide-reac
 import { useAuthStore } from '@/store/auth'
 import BrandLogo from '@/components/BrandLogo'
 import NotificationsBell from '@/components/admin/NotificationsBell'
+import PushPrompt from '@/components/PushPrompt'
 import { useEffect, useState } from 'react'
 
 const MENU = [
@@ -122,6 +123,9 @@ export default function CuentaLayout() {
       <main style={{ flex: 1, overflow: 'auto', minWidth: 0 }}>
         <Outlet />
       </main>
+
+      {/* Diálogo de bienvenida para activar avisos push (estilo app nativa) */}
+      <PushPrompt />
     </div>
   )
 }

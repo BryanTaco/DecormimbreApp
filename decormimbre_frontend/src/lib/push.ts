@@ -9,6 +9,14 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return arr
 }
 
+function bufferToBase64Url(buf: ArrayBuffer | null): string {
+  if (!buf) return ''
+  const bytes = new Uint8Array(buf)
+  let bin = ''
+  for (const b of bytes) bin += String.fromCharCode(b)
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
 export function pushSoportado(): boolean {
   return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
 }
@@ -17,8 +25,14 @@ export async function estaSuscrito(): Promise<boolean> {
   if (!pushSoportado()) return false
   try {
     const reg = await navigator.serviceWorker.getRegistration()
-    if (!reg) return false
-    return !!(await reg.pushManager.getSubscription())
+    const sub = reg && (await reg.pushManager.getSubscription())
+    if (!sub) return false
+    // Si el servidor rotó las claves VAPID, la suscripción local ya no sirve:
+    // se reporta como no suscrito para que el usuario pueda reactivar.
+    const { data } = await api.get('/auth/push/public-key/')
+    const serverKey: string = data?.publicKey ?? ''
+    if (serverKey && bufferToBase64Url(sub.options.applicationServerKey) !== serverKey) return false
+    return true
   } catch {
     return false
   }
@@ -36,6 +50,13 @@ export async function activarPush(): Promise<{ ok: boolean; mensaje: string }> {
     const { data } = await api.get('/auth/push/public-key/')
     const publicKey: string = data?.publicKey
     if (!publicKey) return { ok: false, mensaje: 'El servidor no tiene el push configurado.' }
+
+    // Si hay una suscripción previa (p. ej. con claves VAPID anteriores),
+    // se elimina primero: suscribirse con otra clave lanza InvalidStateError.
+    const previa = await reg.pushManager.getSubscription()
+    if (previa && bufferToBase64Url(previa.options.applicationServerKey) !== publicKey) {
+      await previa.unsubscribe()
+    }
 
     const sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,

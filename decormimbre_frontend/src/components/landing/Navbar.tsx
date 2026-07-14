@@ -242,7 +242,29 @@ export default function Navbar({ theme = 'dark' }: NavbarProps) {
               ))}
             </ul>
 
-            <div className="mt-auto">
+            <div className="mt-auto flex flex-col gap-3">
+              {/* Acceder / Mi cuenta (en desktop está en la barra; aquí faltaba) */}
+              {user?.rol === 'CLIENTE' ? (
+                <Link to="/cuenta" onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>
+                  <span
+                    className="flex items-center gap-2 rounded-full py-3.5 px-6 w-fit"
+                    style={{ background: 'transparent', border: `1px solid ${borderColor}`, color: isDark ? 'rgba(255,255,255,0.85)' : '#5C4033', fontSize: 14, fontWeight: 600, fontFamily: 'var(--font-body)' }}
+                  >
+                    <User className="w-4 h-4" />
+                    Mi cuenta · {user.nombre.split(' ')[0]}
+                  </span>
+                </Link>
+              ) : !user ? (
+                <Link to="/login" onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>
+                  <span
+                    className="flex items-center gap-2 rounded-full py-3.5 px-6 w-fit"
+                    style={{ background: 'transparent', border: `1px solid ${borderColor}`, color: isDark ? 'rgba(255,255,255,0.85)' : '#5C4033', fontSize: 14, fontWeight: 600, fontFamily: 'var(--font-body)' }}
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Acceder
+                  </span>
+                </Link>
+              ) : null}
               <Link to="/personalizar" onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>
                 <span
                   className="flex items-center gap-2 rounded-full py-3.5 px-6 w-fit"
