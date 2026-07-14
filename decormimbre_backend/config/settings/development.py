@@ -13,7 +13,11 @@ CACHES = {
     }
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# Sin credenciales SMTP los correos se imprimen en consola; con
+# EMAIL_HOST_PASSWORD configurada en el .env se envían de verdad.
+# (Los tests usan siempre el backend en memoria de Django, nunca SMTP.)
+if not EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # En desarrollo relajamos el límite de intentos de login para no bloquearnos
 # al probar. Producción mantiene el valor estricto de base.py (5/15min).
