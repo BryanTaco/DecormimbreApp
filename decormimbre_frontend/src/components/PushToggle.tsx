@@ -31,9 +31,11 @@ export default function PushToggle() {
           {activo ? <BellRing size={20} color="#16a34a" /> : <Bell size={20} color="#7B5840" />}
         </div>
         <div>
-          <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, color: '#3d2215' }}>Avisos al celular</p>
+          <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, color: '#3d2215' }}>Avisos de tus pedidos</p>
           <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(92,64,51,0.55)' }}>
-            {msg || (activo ? 'Recibirás avisos del estado de tus pedidos.' : 'Actívalos para saber cuándo avanza tu pedido.')}
+            {msg || (activo
+              ? 'Activados en este dispositivo. También te avisamos por correo.'
+              : 'Se activan por dispositivo: hazlo aquí y también en tu celular.')}
           </p>
         </div>
       </div>

@@ -94,6 +94,27 @@ Este es un mensaje automático, por favor no responda a este correo.
     return _enviar(cliente.email, f"Pedido {pedido.numero} en producción", cuerpo)
 
 
+def notificar_pedido_entregado(pedido) -> bool:
+    """Cliente: su pedido fue entregado."""
+    cliente = pedido.cliente
+    if not cliente.email:
+        return False
+
+    cuerpo = f"""Estimado/a {cliente.nombre_completo},
+
+Su pedido {pedido.numero} ha sido entregado.
+
+Esperamos que disfrute su mueble artesanal. Si tiene alguna observación,
+no dude en escribirnos.
+
+¡Gracias por confiar en {EMPRESA}!
+
+---
+Este es un mensaje automático, por favor no responda a este correo.
+"""
+    return _enviar(cliente.email, f"Pedido {pedido.numero} entregado", cuerpo)
+
+
 def notificar_pedido_cancelado(pedido) -> bool:
     """Cliente: su pedido fue cancelado."""
     cliente = pedido.cliente

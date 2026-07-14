@@ -124,6 +124,7 @@ class Notificacion(models.Model):
         ("PEDIDO_EN_PRODUCCION", "Pedido en producción"),
         ("PEDIDO_LISTO", "Pedido listo para entrega"),
         ("PEDIDO_ENTREGADO", "Pedido entregado"),
+        ("PEDIDO_CANCELADO", "Pedido cancelado"),
         ("ALERTA_INVENTARIO", "Alerta de inventario"),
     ]
 

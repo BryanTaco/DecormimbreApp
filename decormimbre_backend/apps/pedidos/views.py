@@ -10,7 +10,7 @@ from utils.responses import success_response, error_response, validation_error_r
 from utils.pagination import StandardPagination
 from utils.log_actividad import registrar_actividad
 from utils.notificaciones import (
-    notificar_pedido_listo, notificar_pedido_confirmado, notificar_pedido_cancelado,
+    notificar_pedido_listo, notificar_pedido_confirmado, notificar_pedido_cancelado, notificar_pedido_entregado,
     notificar_inicio_produccion, notificar_tarea_asignada, notificar_tarea_completada_a_admin,
     notificacion_app_cliente, notificar_avance_etapa,
 )
@@ -109,9 +109,11 @@ class CambiarEstadoPedidoView(APIView):
             notificar_pedido_listo(pedido)
             notificacion_app_cliente(pedido, "PEDIDO_LISTO", f"Pedido {pedido.numero} listo", "Tu pedido está listo para entrega o retiro.")
         elif nuevo_estado == "ENTREGADO":
+            notificar_pedido_entregado(pedido)
             notificacion_app_cliente(pedido, "PEDIDO_ENTREGADO", f"Pedido {pedido.numero} entregado", "Tu pedido fue entregado. ¡Gracias por confiar en Decormimbre!")
         elif nuevo_estado == "CANCELADO":
             notificar_pedido_cancelado(pedido)
+            notificacion_app_cliente(pedido, "PEDIDO_CANCELADO", f"Pedido {pedido.numero} cancelado", "Tu pedido fue cancelado. Escríbenos si tienes dudas.")
 
         return success_response(
             data=PedidoSerializer(pedido).data,
