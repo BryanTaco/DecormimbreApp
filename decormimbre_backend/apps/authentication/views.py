@@ -154,10 +154,10 @@ class MisNotificacionesView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # No leídas primero, luego las leídas recientes (máx. 20 en total).
         qs = Notificacion.objects.filter(
             destinatario=request.user,
-            leida=False,
-        )
+        ).order_by("leida", "-fecha_creacion")[:20]
         return success_response(data=NotificacionSerializer(qs, many=True).data)
 
 

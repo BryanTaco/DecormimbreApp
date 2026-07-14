@@ -29,12 +29,12 @@ export default function NotificationsBell({ placement = 'up' }: { placement?: 'u
 
   const marcar = useMutation({
     mutationFn: (id: string) => marcarNotificacionLeida(id),
-    // Actualización optimista: la notificación desaparece de inmediato al clic
+    // Actualización optimista: al clic queda marcada como leída de inmediato
     onMutate: async (id: string) => {
       await qc.cancelQueries({ queryKey: ['notificaciones'] })
       const prev = qc.getQueryData(['notificaciones'])
       qc.setQueryData(['notificaciones'], (old: unknown) =>
-        Array.isArray(old) ? old.filter((n: Noti) => n.id !== id) : old)
+        Array.isArray(old) ? old.map((n: Noti) => (n.id === id ? { ...n, leida: true } : n)) : old)
       return { prev }
     },
     onError: (_e, _id, ctx) => { if (ctx?.prev) qc.setQueryData(['notificaciones'], ctx.prev) },
