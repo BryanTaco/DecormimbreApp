@@ -21,6 +21,8 @@ class Command(BaseCommand):
 
         creadas = 0
         for pedido in pendientes:
+            if pedido.fecha_promesa_entrega is None:  # el filtro ya lo excluye; guardia para el type checker
+                continue
             dias_restantes = (pedido.fecha_promesa_entrega - hoy).days
             if dias_restantes < 0:
                 tipo = "VENCIDO"

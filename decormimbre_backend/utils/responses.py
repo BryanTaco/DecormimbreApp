@@ -76,7 +76,7 @@ def custom_exception_handler(exc, context):
             status_code=response.status_code,
         )
     if isinstance(exc, Throttled):
-        wait = int(exc.wait) if exc.wait else 900
+        wait = int(exc.wait) if isinstance(exc.wait, (int, float)) else 900
         return error_response(
             "LIMITE_LOGIN_EXCEDIDO",
             f"Demasiados intentos. Intente de nuevo en {wait} segundos.",

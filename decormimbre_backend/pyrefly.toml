@@ -1,0 +1,17 @@
+# Configuración de Pyrefly (analizador de tipos de Python en VS Code / CLI).
+# Sin esto, Pyrefly no resuelve los imports `apps.*` ni encuentra Django en el
+# .venv y marca todo como [missing-import].
+project-includes = ["apps/**", "config/**", "utils/**", "manage.py"]
+project-excludes = ["**/migrations/**", "**/__pycache__/**", ".venv/**"]
+search-path = ["."]
+python-interpreter = ".venv/bin/python"
+
+[errors]
+# Django crea en runtime cosas que un type checker estático no puede ver sin
+# el plugin de mypy de django-stubs (que Pyrefly no ejecuta): managers
+# personalizados (`objects.create_user`), relaciones inversas (`pedido.items`,
+# `cliente.pedidos`), atributos de admin y overrides de campos (pk UUID).
+# Se desactivan solo esas categorías; el resto sigue activo.
+missing-attribute = false
+bad-override = false
+bad-override-mutable-attribute = false

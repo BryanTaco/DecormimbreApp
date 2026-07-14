@@ -13,7 +13,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import (
-    SimpleDocTemplate, Table, TableStyle, Paragraph,
+    Flowable, SimpleDocTemplate, Table, TableStyle, Paragraph,
     Spacer, HRFlowable,
 )
 from reportlab.pdfbase import pdfmetrics
@@ -86,7 +86,7 @@ def generar_ficha_tecnica(pedido) -> bytes:
     buffer = io.BytesIO()
     doc = _doc(buffer)
     e = _estilos(AZUL)
-    story = []
+    story: list[Flowable] = []
 
     story.append(Paragraph("DECORMIMBRE — Ficha Técnica de Producción", e["titulo"]))
     story.append(HRFlowable(width="100%", thickness=2, color=AZUL))
@@ -155,7 +155,7 @@ def generar_ficha_tejedor(pedido) -> bytes:
     buffer = io.BytesIO()
     doc = _doc(buffer)
     e = _estilos(VERDE)
-    story = []
+    story: list[Flowable] = []
 
     story.append(Paragraph("DECORMIMBRE — Orden de Tejido", e["titulo"]))
     story.append(HRFlowable(width="100%", thickness=2, color=VERDE))
@@ -237,7 +237,7 @@ def generar_ficha_estructurista(pedido) -> bytes:
     buffer = io.BytesIO()
     doc = _doc(buffer)
     e = _estilos(NARANJA)
-    story = []
+    story: list[Flowable] = []
 
     story.append(Paragraph("DECORMIMBRE — Orden de Estructura", e["titulo"]))
     story.append(HRFlowable(width="100%", thickness=2, color=NARANJA))
@@ -342,7 +342,7 @@ def _estilo_tabla_base(color_cabecera) -> list:
 
 
 def _footer(pedido, e) -> list:
-    story = [Spacer(1, 0.5 * cm)]
+    story: list[Flowable] = [Spacer(1, 0.5 * cm)]
     if pedido.observaciones:
         story.append(Paragraph(
             "Observaciones generales:",

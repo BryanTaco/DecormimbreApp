@@ -317,7 +317,7 @@ def _estado_produccion_tarea(tarea):
               .exclude(estado="COMPLETADA")
               .order_by("orden").first())
 
-    req = {}
+    req: dict[str, dict] = {}
     for item in pedido.items.select_related("producto").all():
         for pm in ProductoMateria.objects.filter(producto=item.producto).select_related("materia_prima"):
             m = pm.materia_prima

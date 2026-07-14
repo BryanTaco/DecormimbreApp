@@ -12,7 +12,9 @@ IVA = 0.15
 TIEMPO_PRODUCCION = "15 a 25 días hábiles"
 
 # Producto base: precio de referencia para tamaño estándar en su material base.
-PRODUCTOS_BASE = {
+# (anotado como dict[str, dict] para que el type checker no infiera uniones
+# str|int|bool de los valores literales)
+PRODUCTOS_BASE: dict[str, dict] = {
     "columpio": {
         "nombre": "Columpio colgante",
         "imagen": "/products/colgante-nube.jpg",

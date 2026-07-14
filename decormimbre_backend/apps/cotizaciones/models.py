@@ -82,8 +82,8 @@ class Cotizacion(models.Model):
 
     def calcular_totales(self):
         self.subtotal = sum(
-            item.subtotal for item in self.items.all()
-        ) or Decimal("0.00")
+            (item.subtotal for item in self.items.all()), Decimal("0.00")
+        )
         self.iva = (self.subtotal * settings.IVA_PORCENTAJE).quantize(Decimal("0.01"))
         self.total = self.subtotal + self.iva
         self.save(update_fields=["subtotal", "iva", "total"])

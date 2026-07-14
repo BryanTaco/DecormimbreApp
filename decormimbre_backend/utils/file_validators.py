@@ -40,7 +40,7 @@ def validate_image_file(file):
             file.seek(0)
             with Image.open(file) as img:
                 pil_format = img.format
-            mime_type = _pil_to_mime.get(pil_format, "application/octet-stream")
+            mime_type = _pil_to_mime.get(pil_format or "", "application/octet-stream")
         except (UnidentifiedImageError, OSError):
             mime_type = "application/octet-stream"
         finally:

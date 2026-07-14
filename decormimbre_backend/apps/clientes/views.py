@@ -33,7 +33,7 @@ class ClienteListCreateView(ListCreateAPIView):
                 message="Cliente registrado correctamente.",
                 status_code=status.HTTP_201_CREATED,
             )
-        errors = serializer.errors
+        errors = dict(serializer.errors)
         if "cedula_ruc" in errors:
             return error_response(
                 "CEDULA_INVALIDA",
@@ -63,7 +63,7 @@ class ClienteDetailView(RetrieveUpdateDestroyAPIView):
         if serializer.is_valid():
             serializer.save()
             return success_response(data=serializer.data, message="Cliente actualizado.")
-        errors = serializer.errors
+        errors = dict(serializer.errors)
         if "cedula_ruc" in errors:
             return error_response("CEDULA_INVALIDA", str(errors["cedula_ruc"][0]), field="cedula_ruc")
         return error_response("VALIDACION_ERROR", str(errors))

@@ -9,7 +9,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import (
-    SimpleDocTemplate, Table, TableStyle, Paragraph,
+    Flowable, SimpleDocTemplate, Table, TableStyle, Paragraph,
     Spacer, HRFlowable,
 )
 from reportlab.pdfbase import pdfmetrics
@@ -64,7 +64,7 @@ def generar_pdf_cotizacion(cotizacion) -> bytes:
     bold = ParagraphStyle("b", fontName=_f(bold=True), fontSize=9)
     titulo = ParagraphStyle("t", fontName=_f(bold=True), fontSize=18, textColor=AZUL)
 
-    story = []
+    story: list[Flowable] = []
 
     story.append(Paragraph("DECORMIMBRE", titulo))
     story.append(Paragraph("Muebles Artesanales Ecológicos · Quito, Ecuador", normal))

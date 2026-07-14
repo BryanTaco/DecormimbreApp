@@ -9,6 +9,7 @@ class StandardPagination(PageNumberPagination):
     page_query_param = "pagina"
 
     def get_paginated_response(self, data):
+        assert self.request is not None  # DRF lo asigna en paginate_queryset
         return Response({
             "success": True,
             "data": data,

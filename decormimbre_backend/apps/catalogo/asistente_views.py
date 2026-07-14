@@ -131,7 +131,7 @@ def _responder_con_claude(mensaje: str, historial: list) -> str | None:
         return None
 
     # Construir mensajes con historial acotado (últimos 6 turnos)
-    mensajes = []
+    mensajes: list[anthropic.types.MessageParam] = []
     for turno in historial[-6:]:
         rol = turno.get("rol")
         texto = (turno.get("texto") or "").strip()

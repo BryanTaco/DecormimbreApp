@@ -50,6 +50,7 @@ def generar_reporte_excel(fecha_inicio=None, fecha_fin=None) -> bytes:
 
     # ── Hoja 1: Ventas ──────────────────────────────────────────────────
     ws_ventas = wb.active
+    assert ws_ventas is not None  # Workbook() siempre crea una hoja activa
     ws_ventas.title = "Ventas"
     headers_ventas = [
         "Nro Pedido", "Cliente", "Estado", "Fecha Creación",

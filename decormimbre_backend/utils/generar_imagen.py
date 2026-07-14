@@ -21,7 +21,7 @@ CARPETA_DEFAULT = "media/productos"
 
 def generar_imagen(
     descripcion: str,
-    nombre_archivo: str = None,
+    nombre_archivo: str | None = None,
     carpeta: str = CARPETA_DEFAULT,
     ancho: int = 1024,
     alto: int = 1024,

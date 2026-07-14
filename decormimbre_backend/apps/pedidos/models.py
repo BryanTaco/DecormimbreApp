@@ -122,7 +122,7 @@ class Pedido(models.Model):
 
     def calcular_totales(self):
         items = self.items.all()
-        subtotal = sum(i.subtotal for i in items)
+        subtotal = sum((i.subtotal for i in items), Decimal("0.00"))
         iva = (subtotal * settings.IVA_PORCENTAJE).quantize(Decimal("0.01"))
         total = subtotal + iva
         self.subtotal = subtotal
