@@ -112,10 +112,29 @@ class AlertaStockListView(ListAPIView):
     serializer_class = AlertaStockSerializer
     permission_classes = [IsAdminOrPropietario]
 
+    def _sincronizar(self):
+        """Alinea las alertas con el stock real: los movimientos generan alertas
+        por señal, pero el stock también puede cambiar por edición directa o
+        cargas masivas. Crea alertas faltantes y resuelve las obsoletas."""
+        from django.db.models import F
+
+        criticas = MateriaPrima.objects.filter(activo=True, stock_actual__lte=F("stock_minimo"))
+        con_alerta = set(
+            AlertaStock.objects.filter(revisada=False).values_list("materia_prima_id", flat=True)
+        )
+        for m in criticas:
+            if m.id not in con_alerta:
+                AlertaStock.objects.create(materia_prima=m, stock_al_momento=m.stock_actual)
+        # Las alertas de materias que ya se reabastecieron se marcan revisadas
+        AlertaStock.objects.filter(
+            revisada=False, materia_prima__stock_actual__gt=F("materia_prima__stock_minimo")
+        ).update(revisada=True)
+
     def get_queryset(self):
         return AlertaStock.objects.filter(revisada=False).select_related("materia_prima")
 
     def list(self, request, *args, **kwargs):
+        self._sincronizar()
         return success_response(data=self.get_serializer(self.get_queryset(), many=True).data)
 
 

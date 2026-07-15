@@ -38,7 +38,8 @@ export default function InventarioPage() {
 
   const { data: materiasData, isLoading: loadingMaterias } = useQuery({
     queryKey: ['materias'],
-    queryFn: () => inventarioApi.materias.list(),
+    // por_pagina 100: la lista y los KPIs necesitan todas las materias, no solo la primera página
+    queryFn: () => inventarioApi.materias.list({ por_pagina: '100' }),
   })
   const { data: lotesData, isLoading: loadingLotes } = useQuery({
     queryKey: ['lotes'],
