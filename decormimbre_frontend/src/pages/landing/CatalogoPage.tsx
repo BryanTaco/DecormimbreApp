@@ -11,7 +11,7 @@ import { catalogoPublicoApi, type ProductoWeb } from '@/api/catalogo'
 const CATEGORIAS = ['Todos', 'Sala', 'Comedor', 'Exterior', 'Dormitorio', 'Accesorios']
 
 // Respaldo si la API no responde (mantiene el catálogo visible siempre)
-const PRODUCTOS_FALLBACK = [
+const PRODUCTOS_FALLBACK: ProductoWeb[] = [
   { img: '/products/sala-modular-oscura.jpg', category: 'Sala', name: 'Sofá Serena', material: 'Polialuminio & Mimbre', price: 'Desde $620', desc: 'Sala modular en tejido resistente. Estructura de polialuminio con acabado artesanal.' },
   { img: '/products/papasan-set.jpg', category: 'Sala', name: 'Silla Nido', material: 'Mimbre Natural', price: 'Desde $185', desc: 'Sillas papasan tejidas a mano. Forma que abraza el cuerpo, diseño ecuatoriano.' },
   { img: '/products/set-exterior-huevo.jpg', category: 'Exterior', name: 'Set Jardín Pacífico', material: 'Polialuminio', price: 'Desde $890', desc: 'Set completo para exteriores con sillas nido. Tejido resistente al sol y la lluvia.' },
@@ -212,6 +212,25 @@ export default function CatalogoPage() {
                     >
                       {item.price}
                     </p>
+                    {typeof item.stock === 'number' && (
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          marginTop: 6,
+                          fontFamily: 'var(--font-body)',
+                          fontSize: 10,
+                          fontWeight: 600,
+                          letterSpacing: '0.08em',
+                          textTransform: 'uppercase',
+                          padding: '3px 10px',
+                          borderRadius: 99,
+                          background: item.stock > 0 ? 'rgba(22,163,74,0.1)' : 'rgba(196,168,130,0.18)',
+                          color: item.stock > 0 ? '#16a34a' : 'rgba(92,64,51,0.6)',
+                        }}
+                      >
+                        {item.stock > 0 ? `En stock · ${item.stock}` : `Bajo pedido · ${item.dias_produccion ?? 15} días`}
+                      </span>
+                    )}
                   </div>
                   <span
                     title="Ver ficha técnica"

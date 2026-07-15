@@ -109,6 +109,8 @@ class ProductosPublicosView(APIView):
                 "price": f"Desde ${int(p.precio_base)}",
                 "img": p.imagen_url or "",
                 "desc": p.descripcion,
+                "stock": p.stock_actual,
+                "dias_produccion": p.tiempo_produccion_dias,
             }
             for p in qs
         ]

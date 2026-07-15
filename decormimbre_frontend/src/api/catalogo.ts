@@ -8,6 +8,8 @@ export interface ProductoWeb {
   material: string
   price: string
   desc: string
+  stock?: number
+  dias_produccion?: number
 }
 
 export const catalogoPublicoApi = {

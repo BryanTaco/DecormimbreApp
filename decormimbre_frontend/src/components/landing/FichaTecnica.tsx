@@ -14,6 +14,8 @@ export interface Producto {
   color?: string
   dimensiones?: string
   hecho?: string
+  stock?: number
+  dias_produccion?: number
 }
 
 const DIM_POR_CATEGORIA: Record<string, string> = {
@@ -104,6 +106,14 @@ export default function FichaTecnica({ producto, onClose }: { producto: Producto
                   <Fila label="Color" value={specs(producto).color} />
                   <Fila label="Dimensiones" value={specs(producto).dimensiones} />
                   <Fila label="Precio" value={producto.price} />
+                  {typeof producto.stock === 'number' && (
+                    <Fila
+                      label="Disponibilidad"
+                      value={producto.stock > 0
+                        ? `En stock (${producto.stock} unidad${producto.stock === 1 ? '' : 'es'})`
+                        : `Bajo pedido (≈ ${producto.dias_produccion ?? 15} días)`}
+                    />
+                  )}
                 </div>
 
                 <div style={{ borderTop: '1px solid rgba(92,64,51,0.1)', paddingTop: 16 }}>
