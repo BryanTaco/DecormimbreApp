@@ -75,7 +75,14 @@ export default function FichaTecnica({ producto, onClose }: { producto: Producto
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,1fr)', minHeight: 0, flex: 1 }} className="ficha-grid">
               {/* Imagen ampliada */}
               <div style={{ position: 'relative', background: '#000', minHeight: 280 }}>
-                <img src={producto.img} alt={producto.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                {producto.img ? (
+                  <img src={producto.img} alt={producto.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                ) : (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, background: 'linear-gradient(160deg, #efe6da, #e2d5c3)' }}>
+                    <img src="/brand/icon-192.png" alt="" style={{ width: 64, opacity: 0.45, borderRadius: 14 }} />
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(92,64,51,0.5)' }}>Foto próximamente</span>
+                  </div>
+                )}
                 <span style={{ position: 'absolute', top: 14, left: 14, background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(6px)', padding: '5px 12px', borderRadius: 99, fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(92,64,51,0.8)' }}>
                   Ficha técnica
                 </span>

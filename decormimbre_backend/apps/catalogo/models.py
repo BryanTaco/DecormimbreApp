@@ -23,6 +23,7 @@ class Producto(models.Model):
         ("MIMBRE", "Mimbre (natural)"),
         ("POLIALUMINIO", "Polialuminio (Tetrapack reciclado)"),
         ("COMBINADO", "Combinado (mimbre y polialuminio)"),
+        ("TOTORA", "Totora (fibra natural)"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -33,6 +34,10 @@ class Producto(models.Model):
     stock_minimo = models.PositiveIntegerField(default=2)
     imagen_url = models.URLField(blank=True, null=True)
     imagenes_adicionales = models.JSONField(default=list)
+    dimensiones = models.CharField(
+        max_length=200, blank=True,
+        help_text="Medidas reales del mueble, ej: '130 × 100 cm · Soporta 500 lb'.",
+    )
     categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT, related_name="productos")
     material = models.CharField(max_length=20, choices=MATERIAL_CHOICES, default="COMBINADO")
     tiempo_produccion_dias = models.PositiveSmallIntegerField(

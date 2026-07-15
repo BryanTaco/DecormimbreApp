@@ -10,6 +10,7 @@ export interface ProductoWeb {
   desc: string
   stock?: number
   dias_produccion?: number
+  dimensiones?: string
 }
 
 export const catalogoPublicoApi = {

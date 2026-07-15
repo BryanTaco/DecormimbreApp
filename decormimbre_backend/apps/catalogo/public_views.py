@@ -95,6 +95,7 @@ class ProductosPublicosView(APIView):
         "MIMBRE": "Mimbre Natural",
         "POLIALUMINIO": "Polialuminio",
         "COMBINADO": "Polialuminio & Mimbre",
+        "TOTORA": "Totora Natural",
     }
 
     def get(self, request):
@@ -111,6 +112,7 @@ class ProductosPublicosView(APIView):
                 "desc": p.descripcion,
                 "stock": p.stock_actual,
                 "dias_produccion": p.tiempo_produccion_dias,
+                "dimensiones": p.dimensiones or None,
             }
             for p in qs
         ]

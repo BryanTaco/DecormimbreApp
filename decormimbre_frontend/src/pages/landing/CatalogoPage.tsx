@@ -134,13 +134,20 @@ export default function CatalogoPage() {
               className="group rounded-[1.5rem] overflow-hidden bg-white border border-[rgba(92,64,51,0.07)] hover:shadow-xl transition-shadow duration-400"
             >
               <div className="relative overflow-hidden" style={{ paddingBottom: '68%' }}>
-                <img
-                  src={item.img}
-                  alt={item.name}
-                  loading="lazy"
-                  decoding="async"
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-600"
-                />
+                {item.img ? (
+                  <img
+                    src={item.img}
+                    alt={item.name}
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-600"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2" style={{ background: 'linear-gradient(160deg, #efe6da, #e2d5c3)' }}>
+                    <img src="/brand/icon-192.png" alt="" style={{ width: 54, opacity: 0.45, borderRadius: 12 }} />
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'rgba(92,64,51,0.5)', letterSpacing: '0.05em' }}>Foto próximamente</span>
+                  </div>
+                )}
                 <span
                   style={{
                     position: 'absolute',
