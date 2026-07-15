@@ -59,12 +59,12 @@ const MATERIALS = [
     subtitle: 'Innovación para el exterior',
     image: '/materials/polialuminio.webp',
     description:
-      'El polialuminio es un material técnico de alto rendimiento: una fibra sintética de polietileno de alta densidad (HDPE) tejida sobre un alma de aluminio. Esta combinación le otorga la apariencia y textura del mimbre natural, pero con resistencia extrema a la lluvia, rayos UV y temperatura. Ideal para exteriores exigentes.',
+      'El poli-aluminio es un hilo tejible hecho de envases Tetra Pak® reciclados: las capas de polietileno y aluminio del envase se recuperan y transforman en una fibra impermeable y resistente a la intemperie (Ecoyarn). Tiene la apariencia y textura del mimbre natural, con resistencia extrema a la lluvia, rayos UV y temperatura — y cada mueble da una segunda vida a cientos de envases.',
     properties: [
-      { label: 'Composición', value: 'HDPE + alma de aluminio' },
+      { label: 'Composición', value: 'PolyAl reciclado de envases Tetra Pak® (polietileno + aluminio)' },
       { label: 'Durabilidad', value: 'Exterior — 10+ años sin decoloración' },
       { label: 'Cuidado', value: 'Agua y jabón, sin mantenimiento especial' },
-      { label: 'Resistencia', value: 'UV, lluvia, humedad y temperatura' },
+      { label: 'Sostenibilidad', value: '100% reciclado — economía circular ecuatoriana' },
     ],
     color: '#2C4A3E',
     lightBg: '#eef3f1',

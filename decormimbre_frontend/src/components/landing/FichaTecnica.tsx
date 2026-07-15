@@ -35,7 +35,7 @@ function specs(p: Producto) {
       p.hecho ??
       `Tejido artesanal a mano sobre estructura resistente. Material: ${p.material}. ` +
         (poly
-          ? 'Fibra sintética de HDPE con alma de aluminio, apta para exteriores (resiste sol, lluvia y UV).'
+          ? 'Fibra de poli-aluminio reciclado de envases Tetra Pak®, impermeable y apta para exteriores (resiste sol, lluvia y UV).'
           : 'Fibra de mimbre natural, ideal para interiores; textura cálida y biodegradable.') +
         ' Producción bajo pedido; cada pieza es única.',
   }

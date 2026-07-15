@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { motion } from 'motion/react'
 import { ArrowLeft, ArrowUpRight } from 'lucide-react'
 import Navbar from '@/components/landing/Navbar'
@@ -6,15 +7,23 @@ import MaterialsSection from '@/components/landing/MaterialsSection'
 import MapEmbed from '@/components/landing/MapEmbed'
 import AiAssistant from '@/components/AiAssistant'
 import { EMPRESA } from '@/lib/empresa'
-
-const VALORES = [
-  { num: `+${new Date().getFullYear() - EMPRESA.fundacion}`, label: 'Años de experiencia', desc: 'Tejiendo muebles artesanales desde 1999 en el Ecuador.' },
-  { num: '+2000', label: 'Piezas entregadas', desc: 'Cada una única, diseñada y tejida para un cliente específico.' },
-  { num: '100%', label: 'Artesanía manual', desc: 'Ningún mueble sale de una máquina. Todo pasa por manos expertas.' },
-  { num: '0', label: 'Piezas en stock', desc: 'Producimos bajo pedido. Tu mueble es exclusivo, no seriado.' },
-]
+import { catalogoPublicoApi, type ProductoWeb } from '@/api/catalogo'
 
 export default function NosotrosPage() {
+  // Piezas disponibles hoy (suma del stock real del catálogo)
+  const { data } = useQuery({ queryKey: ['catalogo-publico'], queryFn: () => catalogoPublicoApi.productos() })
+  const productos: ProductoWeb[] = data?.data ?? []
+  const enStock = productos.reduce((s, p) => s + (p.stock ?? 0), 0)
+
+  const VALORES = [
+    { num: `+${new Date().getFullYear() - EMPRESA.fundacion}`, label: 'Años de experiencia', desc: 'Tejiendo muebles artesanales desde 1999 en el Ecuador.' },
+    { num: '+2000', label: 'Piezas entregadas', desc: 'Cada una única, diseñada y tejida para un cliente específico.' },
+    { num: '100%', label: 'Artesanía manual', desc: 'Ningún mueble sale de una máquina. Todo pasa por manos expertas.' },
+    enStock > 0
+      ? { num: `${enStock}`, label: 'Piezas listas para entrega', desc: 'Disponibles hoy en nuestro showroom. El resto se teje bajo pedido, exclusivo para ti.' }
+      : { num: '1/1', label: 'Piezas únicas', desc: 'Producimos bajo pedido. Tu mueble es exclusivo, no seriado.' },
+  ]
+
   return (
     <div className="min-h-screen bg-[#f5f0eb]">
       <div className="sticky top-0 z-50 bg-[#f5f0eb]/90 backdrop-blur-md border-b border-[rgba(92,64,51,0.07)]">
@@ -115,11 +124,28 @@ export default function NosotrosPage() {
                 margin: '0 0 16px',
               }}
             >
-              Fundada en 1999, Decormimbre es una empresa quiteña de fabricación, venta y
-              decoración de muebles, especializada en el arte del tejido de mimbre. Con más
-              de dos décadas de trayectoria, desde su taller y showroom en el sector de
+              Fundada en 1999 por el maestro artesano <strong style={{ fontWeight: 500, color: '#3d2215' }}>Galo Ortiz</strong>,
+              Decormimbre es una empresa quiteña de fabricación, venta y decoración de
+              muebles, especializada en el arte del tejido de mimbre. Con más de dos
+              décadas de trayectoria, desde su taller y showroom en el sector de
               Versalles, cerca del Mercado Santa Clara, ofrece muebles de mimbre y madera,
               sofás, salas, comedores y complementos de decoración para el hogar.
+            </p>
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '15px',
+                color: 'rgba(92,64,51,0.68)',
+                lineHeight: 1.75,
+                fontWeight: 300,
+                margin: '0 0 16px',
+              }}
+            >
+              Galo Ortiz es además pionero de la economía circular en el mueble ecuatoriano:
+              colaborador de Tetra Pak® Ecuador, teje muebles con hilo de poli-aluminio
+              (Ecoyarn) elaborado a partir de envases reciclados — un material impermeable
+              y resistente a la intemperie que da una segunda vida a miles de envases. Su
+              trabajo ha sido presentado en eventos de diseño y moda ética como WEYA.
             </p>
             <p
               style={{

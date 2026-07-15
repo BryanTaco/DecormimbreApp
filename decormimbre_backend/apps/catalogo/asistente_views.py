@@ -33,9 +33,12 @@ def _formatear_cotizacion(c: dict) -> str:
 
 # ── Base de conocimiento de la empresa (fuente del prompt y del fallback) ───────
 EMPRESA_INFO = """
-Decormimbre — Decoraciones (Quito, Ecuador). Fundada en 1999.
-Empresa artesanal de fabricación, venta y decoración de muebles, especializada en
-el tejido de mimbre. Más de dos décadas de trayectoria.
+Decormimbre — Decoraciones (Quito, Ecuador). Fundada en 1999 por el maestro
+artesano Galo Ortiz, propietario y fundador. Empresa artesanal de fabricación,
+venta y decoración de muebles, especializada en el tejido de mimbre. Más de dos
+décadas de trayectoria. Galo Ortiz es colaborador de Tetra Pak Ecuador y pionero
+de la economía circular en el mueble ecuatoriano: teje con hilo de poli-aluminio
+reciclado (Ecoyarn) y su trabajo se ha presentado en eventos como WEYA.
 
 Ubicación: Versalles N23-56, entre Mercadillo y Marchena, cerca del Mercado Santa
 Clara — Quito, Ecuador.
@@ -48,9 +51,11 @@ exterior en polialuminio, y decoración para el hogar (cestas, accesorios).
 Materiales:
 - Mimbre: fibra vegetal natural (sauce), tejida a mano. Ideal para interiores.
   Biodegradable, textura orgánica, +20 años de vida útil con cuidado básico.
-- Polialuminio: fibra sintética de HDPE con alma de aluminio. Imita el mimbre pero
-  resiste sol, lluvia, humedad y rayos UV. Ideal para exteriores. +10 años sin
-  decolorarse. Sin mantenimiento especial (agua y jabón).
+- Polialuminio: hilo de poli-aluminio (Ecoyarn) hecho de envases Tetra Pak
+  reciclados (polietileno + aluminio recuperados). Imita el mimbre pero resiste
+  sol, lluvia, humedad y rayos UV. Ideal para exteriores. +10 años sin
+  decolorarse. Sin mantenimiento especial (agua y jabón). 100% reciclado:
+  cada mueble da segunda vida a cientos de envases (economía circular).
 
 Servicios:
 - Personalización: en la página "Personalizar" el cliente arma su mueble (tipo,
