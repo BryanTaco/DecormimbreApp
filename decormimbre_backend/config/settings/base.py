@@ -112,6 +112,7 @@ REST_FRAMEWORK = {
         "login": "5/15min",
         "tracking": "20/min",
         "asistente": "30/hour",
+        "cotizacion_rapida": "5/hour",
     },
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.NamespaceVersioning",
     "DEFAULT_VERSION": "v1",

@@ -1,8 +1,14 @@
 from rest_framework import serializers, status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
+from rest_framework.throttling import AnonRateThrottle
 from utils.responses import success_response, error_response, validation_error_response
 from apps.authentication.models import Notificacion, Usuario
+
+
+class CotizacionRapidaThrottle(AnonRateThrottle):
+    """Máximo 5 cotizaciones rápidas por hora por IP (anti-spam del formulario público)."""
+    scope = "cotizacion_rapida"
 
 
 class CotizacionRapidaSerializer(serializers.Serializer):
@@ -35,6 +41,7 @@ class CotizacionRapidaView(APIView):
     Optionally links the request to an existing usuario account if email matches.
     """
     permission_classes = [AllowAny]
+    throttle_classes = [CotizacionRapidaThrottle]
 
     def post(self, request):
         serializer = CotizacionRapidaSerializer(data=request.data)
@@ -42,6 +49,21 @@ class CotizacionRapidaView(APIView):
             return validation_error_response(serializer)
 
         data = serializer.validated_data
+
+        # Anti-spam: si el mismo email envió el mismo texto en la última hora,
+        # respondemos éxito pero no creamos otra notificación (deduplicación).
+        from django.utils import timezone
+        from datetime import timedelta
+        duplicada = Notificacion.objects.filter(
+            tipo="NUEVA_COTIZACION_RAPIDA",
+            entidad_id=data["email"],
+            mensaje__contains=data["descripcion"][:200],
+            fecha_creacion__gte=timezone.now() - timedelta(hours=1),
+        ).exists()
+        if duplicada:
+            return success_response(
+                message="Su solicitud de cotización fue recibida. Nos pondremos en contacto pronto."
+            )
 
         # Try to find an existing account for this email
         usuario_vinculado = Usuario.objects.filter(email=data["email"]).first()
