@@ -6,6 +6,7 @@ import Navbar from '@/components/landing/Navbar'
 import AiAssistant from '@/components/AiAssistant'
 import Confetti from '@/components/landing/Confetti'
 import api from '@/api/client'
+import { validarEmail, validarTelefonoFlexible, normalizarTelefono } from '@/lib/validacion'
 
 const Chair3DViewer = lazy(() => import('@/components/chair/Chair3DViewer'))
 
@@ -140,11 +141,14 @@ export default function PersonalizarPage() {
 
   const steps = ['Tipo', 'Material', 'Diseño', 'Contacto']
 
+  const emailError = validarEmail(form.email)
+  const telError = validarTelefonoFlexible(form.telefono)
+
   const canNext =
     step === 0 ? !!form.tipo :
     step === 1 ? !!form.material :
     step === 2 ? !!form.descripcion :
-    !!(form.nombre && form.email)
+    !!(form.nombre && form.email && !emailError && !telError)
 
   const set = (k: keyof FormData, v: string) => setForm((f) => ({ ...f, [k]: v }))
 
@@ -176,13 +180,15 @@ export default function PersonalizarPage() {
       await api.post('/public/cotizacion-rapida/', {
         nombre: form.nombre,
         email: form.email,
-        telefono: form.telefono,
-        tipo: tipoLabel,
-        mensaje,
+        telefono: normalizarTelefono(form.telefono),
+        descripcion: mensaje, // el backend espera "descripcion"
       })
       setSent(true)
-    } catch {
-      setError('No se pudo enviar tu solicitud. Revisa tu conexión e intenta de nuevo, o escríbenos por WhatsApp al 098 057 2561.')
+    } catch (err) {
+      // Si el servidor rechazó un campo, mostramos su mensaje real
+      const e = err as { response?: { data?: { error?: { message?: string } } } }
+      const msg = e.response?.data?.error?.message
+      setError(msg ?? 'No se pudo enviar tu solicitud. Revisa tu conexión e intenta de nuevo, o escríbenos por WhatsApp al 098 057 2561.')
     } finally {
       setLoading(false)
     }
@@ -519,11 +525,11 @@ export default function PersonalizarPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {[
-                        { k: 'nombre' as const, label: 'Nombre completo', placeholder: 'Tu nombre', required: true, type: 'text' },
-                        { k: 'email' as const, label: 'Email', placeholder: 'tu@email.com', required: true, type: 'email' },
-                        { k: 'telefono' as const, label: 'WhatsApp / Teléfono', placeholder: '098 057 2561', required: false, type: 'tel' },
-                        { k: 'ciudad' as const, label: 'Ciudad', placeholder: 'Quito, Guayaquil...', required: false, type: 'text' },
-                      ].map(({ k, label, placeholder, required, type }) => (
+                        { k: 'nombre' as const, label: 'Nombre completo', placeholder: 'Tu nombre', required: true, type: 'text', error: '' },
+                        { k: 'email' as const, label: 'Email', placeholder: 'tu@email.com', required: true, type: 'email', error: emailError },
+                        { k: 'telefono' as const, label: 'WhatsApp / Teléfono', placeholder: '098 057 2561', required: false, type: 'tel', error: telError },
+                        { k: 'ciudad' as const, label: 'Ciudad', placeholder: 'Quito, Guayaquil...', required: false, type: 'text', error: '' },
+                      ].map(({ k, label, placeholder, required, type, error: fieldError }) => (
                         <div key={k}>
                           <Label required={required}>{label}</Label>
                           <input
@@ -531,8 +537,11 @@ export default function PersonalizarPage() {
                             onChange={(e) => set(k, e.target.value)}
                             placeholder={placeholder}
                             className="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition-colors mt-1.5"
-                            style={{ fontFamily: 'var(--font-body)', color: '#3d2215', borderColor: 'rgba(92,64,51,0.15)', background: '#fff' }}
+                            style={{ fontFamily: 'var(--font-body)', color: '#3d2215', borderColor: fieldError ? 'rgba(220,60,40,0.55)' : 'rgba(92,64,51,0.15)', background: '#fff' }}
                           />
+                          {fieldError && (
+                            <p style={{ fontFamily: 'var(--font-body)', fontSize: 11.5, color: '#a03a2a', margin: '4px 0 0' }}>{fieldError}</p>
+                          )}
                         </div>
                       ))}
                     </div>

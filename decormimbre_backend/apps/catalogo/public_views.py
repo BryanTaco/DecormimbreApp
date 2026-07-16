@@ -8,7 +8,16 @@ from apps.authentication.models import Notificacion, Usuario
 class CotizacionRapidaSerializer(serializers.Serializer):
     nombre = serializers.CharField(max_length=200)
     email = serializers.EmailField()
-    telefono = serializers.CharField(max_length=15)
+    telefono = serializers.CharField(max_length=20, required=False, allow_blank=True, default="")
+
+    def validate_telefono(self, value):
+        import re
+        limpio = re.sub(r"[\s\-().]", "", value)
+        if limpio and not re.fullmatch(r"(\+\d{8,15}|0\d{8,9})", limpio):
+            raise serializers.ValidationError(
+                "Escribe un celular válido, ej: 098 057 2561 o +593 99 123 4567."
+            )
+        return limpio
     descripcion = serializers.CharField(
         help_text="Descripción del producto o mueble que desea cotizar."
     )

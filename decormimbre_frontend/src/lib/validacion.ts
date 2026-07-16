@@ -17,6 +17,15 @@ export function validarTelefono(v: string): string {
   return /^\+\d{8,15}$/.test(n) ? '' : 'Incluye el código de país, ej: +593 99 123 4567'
 }
 
+/** Para formularios públicos: acepta formato local (098…) o internacional (+593…). */
+export function validarTelefonoFlexible(v: string): string {
+  if (!v) return ''
+  const n = normalizarTelefono(v)
+  return /^(\+\d{8,15}|0\d{8,9})$/.test(n)
+    ? ''
+    : 'Escribe un celular válido, ej: 098 057 2561 o +593 99 123 4567'
+}
+
 export interface ReglaPassword { ok: boolean; label: string }
 
 export function reglasPassword(p: string): ReglaPassword[] {

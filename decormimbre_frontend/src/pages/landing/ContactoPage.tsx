@@ -7,6 +7,7 @@ import MapEmbed from '@/components/landing/MapEmbed'
 import AiAssistant from '@/components/AiAssistant'
 import { EMPRESA, waLink } from '@/lib/empresa'
 import api from '@/api/client'
+import { validarEmail, validarTelefonoFlexible, normalizarTelefono } from '@/lib/validacion'
 
 const TIPOS = ['Sala de estar', 'Comedor', 'Dormitorio', 'Exterior / Jardín', 'Oficina', 'Otro']
 
@@ -18,18 +19,29 @@ export default function ContactoPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
+  const set = (k: string, v: string) => { setForm((f) => ({ ...f, [k]: v })); setError('') }
+
+  const emailError = validarEmail(form.email)
+  const telError = validarTelefonoFlexible(form.telefono)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (emailError) { setError(emailError); return }
+    if (telError) { setError(telError); return }
     setLoading(true)
     setError('')
     try {
-      await api.post('/public/cotizacion-rapida/', form)
+      await api.post('/public/cotizacion-rapida/', {
+        nombre: form.nombre,
+        email: form.email,
+        telefono: normalizarTelefono(form.telefono),
+        descripcion: `${form.tipo ? `Tipo de espacio: ${form.tipo}\n` : ''}${form.mensaje}`,
+      })
       setSent(true)
-    } catch {
-      // Si el endpoint no existe aún, mostramos éxito de todas formas (demo)
-      setSent(true)
+    } catch (err) {
+      const e2 = err as { response?: { data?: { error?: { message?: string } } } }
+      const msg = e2.response?.data?.error?.message
+      setError(msg ?? 'No se pudo enviar tu mensaje. Intenta de nuevo o escríbenos por WhatsApp.')
     } finally {
       setLoading(false)
     }
@@ -165,9 +177,10 @@ export default function ContactoPage() {
                       value={form.email}
                       onChange={(e) => set('email', e.target.value)}
                       placeholder="maria@ejemplo.com"
-                      className="w-full rounded-xl border border-[rgba(92,64,51,0.15)] bg-[#faf7f4] px-4 py-2.5 text-sm outline-none focus:border-[rgba(92,64,51,0.4)] transition-colors"
-                      style={{ fontFamily: 'var(--font-body)', color: 'rgba(92,64,51,0.9)' }}
+                      className="w-full rounded-xl border bg-[#faf7f4] px-4 py-2.5 text-sm outline-none focus:border-[rgba(92,64,51,0.4)] transition-colors"
+                      style={{ fontFamily: 'var(--font-body)', color: 'rgba(92,64,51,0.9)', borderColor: emailError ? 'rgba(220,60,40,0.55)' : 'rgba(92,64,51,0.15)' }}
                     />
+                    {emailError && <p style={{ fontFamily: 'var(--font-body)', fontSize: 11.5, color: '#a03a2a', margin: '4px 0 0' }}>{emailError}</p>}
                   </Field>
                 </div>
 
@@ -177,9 +190,10 @@ export default function ContactoPage() {
                       value={form.telefono}
                       onChange={(e) => set('telefono', e.target.value)}
                       placeholder="098 057 2561"
-                      className="w-full rounded-xl border border-[rgba(92,64,51,0.15)] bg-[#faf7f4] px-4 py-2.5 text-sm outline-none focus:border-[rgba(92,64,51,0.4)] transition-colors"
-                      style={{ fontFamily: 'var(--font-body)', color: 'rgba(92,64,51,0.9)' }}
+                      className="w-full rounded-xl border bg-[#faf7f4] px-4 py-2.5 text-sm outline-none focus:border-[rgba(92,64,51,0.4)] transition-colors"
+                      style={{ fontFamily: 'var(--font-body)', color: 'rgba(92,64,51,0.9)', borderColor: telError ? 'rgba(220,60,40,0.55)' : 'rgba(92,64,51,0.15)' }}
                     />
+                    {telError && <p style={{ fontFamily: 'var(--font-body)', fontSize: 11.5, color: '#a03a2a', margin: '4px 0 0' }}>{telError}</p>}
                   </Field>
                   <Field label="Tipo de espacio">
                     <select
