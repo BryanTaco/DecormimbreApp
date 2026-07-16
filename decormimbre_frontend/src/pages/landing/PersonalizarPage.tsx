@@ -7,6 +7,7 @@ import AiAssistant from '@/components/AiAssistant'
 import Confetti from '@/components/landing/Confetti'
 import api from '@/api/client'
 import { validarEmail, validarTelefonoFlexible, normalizarTelefono } from '@/lib/validacion'
+import { CIUDADES_ECUADOR } from '@/lib/ciudades'
 
 const Chair3DViewer = lazy(() => import('@/components/chair/Chair3DViewer'))
 
@@ -528,7 +529,6 @@ export default function PersonalizarPage() {
                         { k: 'nombre' as const, label: 'Nombre completo', placeholder: 'Tu nombre', required: true, type: 'text', error: '' },
                         { k: 'email' as const, label: 'Email', placeholder: 'tu@email.com', required: true, type: 'email', error: emailError },
                         { k: 'telefono' as const, label: 'WhatsApp / Teléfono', placeholder: '098 057 2561', required: false, type: 'tel', error: telError },
-                        { k: 'ciudad' as const, label: 'Ciudad', placeholder: 'Quito, Guayaquil...', required: false, type: 'text', error: '' },
                       ].map(({ k, label, placeholder, required, type, error: fieldError }) => (
                         <div key={k}>
                           <Label required={required}>{label}</Label>
@@ -544,6 +544,22 @@ export default function PersonalizarPage() {
                           )}
                         </div>
                       ))}
+                      {/* Ciudad: selector para evitar lugares inexistentes */}
+                      <div>
+                        <Label>Ciudad</Label>
+                        <select
+                          value={form.ciudad}
+                          onChange={(e) => set('ciudad', e.target.value)}
+                          className="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition-colors mt-1.5"
+                          style={{ fontFamily: 'var(--font-body)', color: form.ciudad ? '#3d2215' : 'rgba(92,64,51,0.4)', borderColor: 'rgba(92,64,51,0.15)', background: '#fff', appearance: 'auto', cursor: 'pointer' }}
+                        >
+                          <option value="">Selecciona tu ciudad…</option>
+                          {CIUDADES_ECUADOR.map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                          <option value="Otra ciudad del Ecuador">Otra ciudad del Ecuador</option>
+                        </select>
+                      </div>
                     </div>
 
                     <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'rgba(92,64,51,0.38)', lineHeight: 1.6, fontWeight: 400 }}>
