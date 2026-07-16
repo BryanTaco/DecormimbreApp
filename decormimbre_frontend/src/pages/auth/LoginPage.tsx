@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Eye, EyeOff, ArrowLeft, LogIn } from 'lucide-react'
-import { motion } from 'motion/react'
+import { motion, AnimatePresence } from 'motion/react'
 import { loginCliente } from '@/api/authApi'
 import { useAuthStore } from '@/store/auth'
 import BrandLogo from '@/components/BrandLogo'
+import CortinaBienvenida from '@/components/CortinaBienvenida'
+import { validarEmail } from '@/lib/validacion'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -16,6 +18,9 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [cortina, setCortina] = useState<string | null>(null)
+
+  const emailError = validarEmail(form.email)
 
   const handle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }))
@@ -24,6 +29,7 @@ export default function LoginPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (emailError) { setError(emailError); return }
     setLoading(true)
     setError('')
     try {
@@ -32,23 +38,23 @@ export default function LoginPage() {
         { id: res.user.id, email: res.user.email, nombre: res.user.nombre, rol: res.user.rol as any, clienteId: res.user.clienteId },
         res.access, res.refresh
       )
-      const rol = res.user.rol
-      if (rol === 'CLIENTE') navigate(from)
-      else navigate('/admin')
+      // Efecto cortina de bienvenida y luego navegamos
+      setCortina(res.user.nombre.split(' ')[0])
+      const destino = res.user.rol === 'CLIENTE' ? from : '/admin'
+      setTimeout(() => navigate(destino), 1100)
     } catch (err: any) {
       const msg = err.response?.data?.detail ?? err.response?.data?.non_field_errors?.[0]
       setError(msg ?? 'Credenciales incorrectas. Verifica tu correo y contraseña.')
-    } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f5f0eb 0%, #e8ddd0 100%)', display: 'flex', flexDirection: 'column' }}>
-      {/* Decorative background */}
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
-        <div style={{ position: 'absolute', top: '-20%', right: '-10%', width: '70vw', height: '70vw', maxWidth: 600, maxHeight: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(196,168,130,0.15) 0%, transparent 70%)' }} />
-        <div style={{ position: 'absolute', bottom: '-10%', left: '-15%', width: '50vw', height: '50vw', maxWidth: 500, maxHeight: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(92,64,51,0.08) 0%, transparent 70%)' }} />
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+      {/* Fondo con foto del showroom */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
+        <img src="/products/hero-sala-quito.jpg" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(120deg, rgba(245,240,235,0.94) 0%, rgba(245,240,235,0.8) 45%, rgba(61,34,21,0.4) 100%)' }} />
       </div>
 
       {/* Top bar */}
@@ -81,8 +87,9 @@ export default function LoginPage() {
               <input
                 name="email" type="email" value={form.email} onChange={handle}
                 placeholder="tu@correo.com" required autoComplete="email"
-                style={inputStyle}
+                style={{ ...inputStyle, borderColor: emailError ? 'rgba(220,60,40,0.55)' : undefined }}
               />
+              {emailError && <span style={{ fontFamily: 'var(--font-body)', fontSize: 11.5, color: '#b02020', marginTop: 4 }}>{emailError}</span>}
             </FieldGroup>
 
             <FieldGroup label="Contraseña">
@@ -122,6 +129,8 @@ export default function LoginPage() {
           </div>
         </motion.div>
       </div>
+
+      <AnimatePresence>{cortina !== null && <CortinaBienvenida nombre={cortina} />}</AnimatePresence>
 
       <style>{`
         @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }

@@ -123,10 +123,11 @@ class RegistroClienteView(APIView):
             return validation_error_response(serializer)
 
         data = serializer.validated_data
+        nombre_completo = f"{data['nombre'].strip()} {data['apellido'].strip()}"
 
         usuario = Usuario(
             email=data["email"],
-            nombre=data["nombre"],
+            nombre=nombre_completo,
             rol="CLIENTE",
         )
         usuario.set_password(data["password"])
@@ -136,7 +137,7 @@ class RegistroClienteView(APIView):
         # cedula_ruc is required/unique; use a traceable placeholder until the client completes their profile
         cedula_placeholder = f"W{str(usuario.id).replace('-', '')[:9]}"
         Cliente.objects.create(
-            nombre_completo=data["nombre"],
+            nombre_completo=nombre_completo,
             email=data["email"],
             telefono=data["telefono"],
             cedula_ruc=cedula_placeholder,

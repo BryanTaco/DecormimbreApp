@@ -74,13 +74,41 @@ class PerfilUpdateSerializer(serializers.ModelSerializer):
 
 class RegistroClienteSerializer(serializers.Serializer):
     nombre = serializers.CharField(max_length=150)
+    apellido = serializers.CharField(max_length=150)
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=8)
-    telefono = serializers.CharField(max_length=15)
+    telefono = serializers.CharField(max_length=20)
 
     def validate_email(self, value):
         if Usuario.objects.filter(email=value).exists():
             raise serializers.ValidationError("Ya existe una cuenta con este email.")
+        return value
+
+    def validate_telefono(self, value):
+        import re
+        limpio = re.sub(r"[\s\-().]", "", value)
+        if not re.fullmatch(r"\+\d{8,15}", limpio):
+            raise serializers.ValidationError("Incluye el código de país, ej: +593 99 123 4567.")
+        return limpio
+
+    def validate_password(self, value):
+        import re
+        from django.contrib.auth.password_validation import validate_password as django_validate
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        errores = []
+        if not re.search(r"[A-ZÁÉÍÓÚÑ]", value):
+            errores.append("al menos una letra mayúscula")
+        if not re.search(r"[a-záéíóúñ]", value):
+            errores.append("al menos una letra minúscula")
+        if not re.search(r"\d", value):
+            errores.append("al menos un número")
+        if errores:
+            raise serializers.ValidationError(f"La contraseña debe tener {', '.join(errores)}.")
+        try:
+            django_validate(value)  # bloquea contraseñas comunes o solo numéricas
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(list(e.messages)[0])
         return value
 
 
