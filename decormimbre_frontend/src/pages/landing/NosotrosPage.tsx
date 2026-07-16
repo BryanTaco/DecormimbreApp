@@ -305,6 +305,59 @@ export default function NosotrosPage() {
             ))}
           </div>
 
+          {/* Restauración + colecciones */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-14">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative rounded-[1.5rem] overflow-hidden min-h-[340px]"
+            >
+              <img
+                src="/products/restauracion-antes-despues.jpg"
+                alt="Restauración de muebles de mimbre: antes y después"
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(20,8,2,0.75) 0%, transparent 55%)' }} />
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.6)', margin: '0 0 6px' }}>
+                  También restauramos
+                </p>
+                <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24, color: '#fff', margin: '0 0 6px' }}>
+                  Tu mueble de mimbre puede volver a vivir
+                </p>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.5 }}>
+                  Reparamos y retejemos muebles de mimbre con las mismas técnicas artesanales. Escríbenos con una foto y te cotizamos la restauración.
+                </p>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-rows-2 gap-6">
+              {[
+                { img: '/products/coleccion-colores.jpg', label: 'Colección Cromática', desc: 'El polialuminio se teje en más de 30 colores de rollo.' },
+                { img: '/products/paris-coleccion.jpg', label: 'Colección París', desc: 'Piezas de exhibición de nuestro showroom.' },
+              ].map((c) => (
+                <motion.div
+                  key={c.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                  className="relative rounded-[1.5rem] overflow-hidden min-h-[160px]"
+                >
+                  <img src={c.img} alt={c.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(20,8,2,0.7) 0%, transparent 60%)' }} />
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: '#fff', margin: 0 }}>{c.label}</p>
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(255,255,255,0.7)', margin: '2px 0 0' }}>{c.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
           {/* Datos de la empresa */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
