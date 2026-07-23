@@ -76,12 +76,27 @@ class RegistroClienteSerializer(serializers.Serializer):
     nombre = serializers.CharField(max_length=150)
     apellido = serializers.CharField(max_length=150)
     email = serializers.EmailField()
+    cedula = serializers.CharField(min_length=10, max_length=10)
     password = serializers.CharField(write_only=True, min_length=8)
     telefono = serializers.CharField(max_length=20)
 
     def validate_email(self, value):
         if Usuario.objects.filter(email=value).exists():
             raise serializers.ValidationError("Ya existe una cuenta con este email.")
+        return value
+
+    def validate_cedula(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError("La cédula debe contener solo dígitos.")
+        from utils.validators import validar_cedula_ecuatoriana
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from apps.clientes.models import Cliente
+        try:
+            validar_cedula_ecuatoriana(value)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(str(e.message))
+        if Cliente.objects.filter(cedula_ruc__in=[value, f"{value}001"]).exists():
+            raise serializers.ValidationError("Esta cédula ya tiene una cuenta registrada.")
         return value
 
     def validate_telefono(self, value):
@@ -106,7 +121,7 @@ class RegistroClienteSerializer(serializers.Serializer):
         if errores:
             raise serializers.ValidationError(f"La contraseña debe tener {', '.join(errores)}.")
         try:
-            django_validate(value)  # bloquea contraseñas comunes o solo numéricas
+            django_validate(value)
         except DjangoValidationError as e:
             raise serializers.ValidationError(list(e.messages)[0])
         return value

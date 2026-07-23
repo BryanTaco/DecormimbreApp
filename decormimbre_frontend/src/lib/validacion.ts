@@ -1,5 +1,22 @@
 // Validaciones de formularios de autenticación (mismas reglas que el backend).
 
+const PROVINCIAS_EC = new Set([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,30])
+
+/** Valida cédula ecuatoriana con el algoritmo Módulo 10. Devuelve '' si es válida, mensaje de error si no. */
+export function validarCedulaEcuador(v: string): string {
+  if (!v) return ''
+  if (!/^\d{10}$/.test(v)) return 'La cédula debe tener exactamente 10 dígitos.'
+  const d = v.split('').map(Number)
+  const provincia = d[0] * 10 + d[1]
+  if (!PROVINCIAS_EC.has(provincia)) return 'Código de provincia inválido (primeros 2 dígitos).'
+  if (d[2] >= 6) return 'Tercer dígito debe ser menor a 6.'
+  const coef = [2,1,2,1,2,1,2,1,2]
+  const suma = coef.reduce((acc, c, i) => { const p = d[i] * c; return acc + (p >= 10 ? p - 9 : p) }, 0)
+  const verificador = (10 - (suma % 10)) % 10
+  if (verificador !== d[9]) return 'Cédula inválida. Revisa que esté bien escrita.'
+  return ''
+}
+
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/
 
 export function validarEmail(v: string): string {

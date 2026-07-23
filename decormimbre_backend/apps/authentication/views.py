@@ -134,14 +134,13 @@ class RegistroClienteView(APIView):
         usuario.save()
 
         from apps.clientes.models import Cliente
-        # cedula_ruc is required/unique; use a traceable placeholder until the client completes their profile
-        cedula_placeholder = f"W{str(usuario.id).replace('-', '')[:9]}"
         Cliente.objects.create(
             nombre_completo=nombre_completo,
             email=data["email"],
             telefono=data["telefono"],
-            cedula_ruc=cedula_placeholder,
+            cedula_ruc=data["cedula"],
             usuario_cuenta=usuario,
+            creado_por=None,
         )
 
         return success_response(

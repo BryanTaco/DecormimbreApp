@@ -1,27 +1,62 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, ArrowLeft, UserPlus, Check, X } from 'lucide-react'
+import { Eye, EyeOff, ArrowLeft, UserPlus, Check, X, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
-import { registrarCliente, loginCliente } from '@/api/authApi'
+import { registrarCliente, loginCliente, validarCedulaAsync } from '@/api/authApi'
 import { useAuthStore } from '@/store/auth'
 import BrandLogo from '@/components/BrandLogo'
 import CortinaBienvenida from '@/components/CortinaBienvenida'
-import { validarEmail, validarTelefono, normalizarTelefono, reglasPassword, fuerzaPassword } from '@/lib/validacion'
+import { validarEmail, validarTelefono, normalizarTelefono, reglasPassword, fuerzaPassword, validarCedulaEcuador } from '@/lib/validacion'
 
 export default function RegistroPage() {
   const navigate = useNavigate()
   const setAuth = useAuthStore((s) => s.setAuth)
 
-  const [form, setForm] = useState({ nombre: '', apellido: '', email: '', telefono: '', password: '', confirmPassword: '' })
+  const [form, setForm] = useState({ nombre: '', apellido: '', email: '', cedula: '', telefono: '', password: '', confirmPassword: '' })
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [cortina, setCortina] = useState<string | null>(null)
 
+  // Estado async de validación de cédula
+  const [cedulaChecking, setCedulaChecking] = useState(false)
+  const [cedulaAsyncMsg, setCedulaAsyncMsg] = useState('')
+  const [cedulaEnUso, setCedulaEnUso] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const handle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }))
     setError('')
   }
+
+  // Validación síncrona de cédula
+  const cedulaSyncError = validarCedulaEcuador(form.cedula)
+
+  // Comprobación async: solo cuando el formato es válido (sin error síncrono)
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (!form.cedula || cedulaSyncError) {
+      setCedulaAsyncMsg('')
+      setCedulaEnUso(false)
+      return
+    }
+    setCedulaChecking(true)
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await validarCedulaAsync(form.cedula)
+        setCedulaAsyncMsg(res.mensaje)
+        setCedulaEnUso(res.en_uso)
+      } catch {
+        setCedulaAsyncMsg('')
+        setCedulaEnUso(false)
+      } finally {
+        setCedulaChecking(false)
+      }
+    }, 500)
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [form.cedula, cedulaSyncError])
+
+  const cedulaOk = !cedulaSyncError && !cedulaChecking && !cedulaEnUso && form.cedula.length === 10
 
   // Validación en vivo
   const emailError = validarEmail(form.email)
@@ -33,6 +68,7 @@ export default function RegistroPage() {
   const listo =
     form.nombre.trim() && form.apellido.trim() &&
     form.email && !emailError &&
+    cedulaOk &&
     form.telefono && !telError &&
     passOk && form.confirmPassword && !confirmError
 
@@ -44,7 +80,8 @@ export default function RegistroPage() {
     try {
       await registrarCliente({
         nombre: form.nombre.trim(), apellido: form.apellido.trim(),
-        email: form.email, telefono: normalizarTelefono(form.telefono), password: form.password,
+        email: form.email, cedula: form.cedula,
+        telefono: normalizarTelefono(form.telefono), password: form.password,
       })
       const res = await loginCliente({ email: form.email, password: form.password })
       setAuth(
@@ -113,6 +150,45 @@ export default function RegistroPage() {
                 style={{ ...inputStyle, borderColor: emailError ? 'rgba(220,60,40,0.55)' : undefined }} />
             </FieldGroup>
 
+            {/* Cédula con validación en vivo */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(92,64,51,0.65)' }}>
+                Cédula de identidad
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  name="cedula" type="text" inputMode="numeric" maxLength={10}
+                  value={form.cedula} onChange={handle}
+                  placeholder="1712345678" required autoComplete="off"
+                  style={{
+                    ...inputStyle, paddingRight: 40,
+                    borderColor: cedulaSyncError || cedulaEnUso
+                      ? 'rgba(220,60,40,0.55)'
+                      : cedulaOk
+                        ? 'rgba(22,163,74,0.55)'
+                        : undefined,
+                  }}
+                />
+                {/* Icono de estado */}
+                <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+                  {cedulaChecking && <Loader2 size={15} style={{ color: 'rgba(92,64,51,0.4)', animation: 'spin 1s linear infinite' }} />}
+                  {!cedulaChecking && cedulaOk && <Check size={15} style={{ color: '#16a34a' }} />}
+                  {!cedulaChecking && form.cedula && (cedulaSyncError || cedulaEnUso) && <X size={15} style={{ color: '#dc3c28' }} />}
+                </span>
+              </div>
+              {/* Mensaje de error / confirmación */}
+              {form.cedula && (cedulaSyncError || cedulaEnUso) && (
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: 11.5, color: '#b02020' }}>
+                  {cedulaSyncError || cedulaAsyncMsg}
+                </span>
+              )}
+              {cedulaOk && (
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: 11.5, color: '#16a34a' }}>
+                  Cédula verificada ✓
+                </span>
+              )}
+            </div>
+
             <FieldGroup label="Celular (con código de país)" error={telError}>
               <input name="telefono" type="tel" value={form.telefono} onChange={handle} placeholder="+593 99 123 4567" required autoComplete="tel"
                 style={{ ...inputStyle, borderColor: telError ? 'rgba(220,60,40,0.55)' : undefined }} />
@@ -177,6 +253,7 @@ export default function RegistroPage() {
       <style>{`
         input::placeholder { color: rgba(92,64,51,0.3); }
         input:focus { outline: none; border-color: rgba(92,64,51,0.5) !important; box-shadow: 0 0 0 3px rgba(92,64,51,0.08); }
+        @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
       `}</style>
     </div>
   )

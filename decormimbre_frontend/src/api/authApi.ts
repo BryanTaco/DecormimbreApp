@@ -10,8 +10,20 @@ export interface RegisterPayload {
   nombre: string
   apellido: string
   email: string
+  cedula: string
   telefono: string
   password: string
+}
+
+export interface ValidarCedulaResult {
+  valida: boolean
+  en_uso: boolean
+  mensaje: string
+}
+
+export async function validarCedulaAsync(cedula: string): Promise<ValidarCedulaResult> {
+  const { data: body } = await axios.get(`/api/v1/public/validar-cedula/?cedula=${encodeURIComponent(cedula)}`)
+  return body.data ?? body
 }
 
 export interface AuthUser {

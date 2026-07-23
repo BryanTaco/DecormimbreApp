@@ -6,6 +6,34 @@ from utils.responses import success_response, error_response, validation_error_r
 from apps.authentication.models import Notificacion, Usuario
 
 
+class ValidarCedulaView(APIView):
+    """GET /api/v1/public/validar-cedula/?cedula=XXXXXXXXXX"""
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    versioning_class = None
+
+    def get(self, request):
+        cedula = request.query_params.get("cedula", "").strip()
+        if not cedula:
+            return success_response(data={"valida": False, "en_uso": False, "mensaje": "Ingresa tu cédula."})
+
+        from utils.validators import validar_cedula_ecuatoriana
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from apps.clientes.models import Cliente
+
+        try:
+            validar_cedula_ecuatoriana(cedula)
+        except DjangoValidationError as e:
+            return success_response(data={"valida": False, "en_uso": False, "mensaje": str(e.message)})
+
+        en_uso = Cliente.objects.filter(cedula_ruc__in=[cedula, f"{cedula}001"]).exists()
+        return success_response(data={
+            "valida": True,
+            "en_uso": en_uso,
+            "mensaje": "Esta cédula ya tiene una cuenta registrada." if en_uso else "Cédula válida.",
+        })
+
+
 class CotizacionRapidaThrottle(AnonRateThrottle):
     """Máximo 5 cotizaciones rápidas por hora por IP (anti-spam del formulario público)."""
     scope = "cotizacion_rapida"
