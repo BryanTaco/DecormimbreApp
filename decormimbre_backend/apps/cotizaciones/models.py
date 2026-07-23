@@ -192,6 +192,48 @@ class ItemCotizacion(models.Model):
         self.cotizacion.calcular_totales()
 
 
+class SolicitudRapida(models.Model):
+    """Solicitud de cotización enviada desde el formulario público del sitio."""
+    ESTADO_CHOICES = [
+        ("PENDIENTE", "Pendiente"),
+        ("EN_PROCESO", "En proceso"),
+        ("CONVERTIDA", "Convertida a cotización"),
+        ("IGNORADA", "Ignorada"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=200)
+    email = models.EmailField()
+    telefono = models.CharField(max_length=20, blank=True)
+    descripcion = models.TextField()
+    cantidad = models.PositiveIntegerField(default=1)
+    notas = models.TextField(blank=True)
+    fecha_solicitud = models.DateTimeField(auto_now_add=True)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default="PENDIENTE", db_index=True)
+    ip_origen = models.GenericIPAddressField(null=True, blank=True)
+    usuario_vinculado = models.ForeignKey(
+        "authentication.Usuario",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="solicitudes_rapidas",
+    )
+    cotizacion = models.OneToOneField(
+        "Cotizacion",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="solicitud_origen",
+    )
+
+    class Meta:
+        db_table = "solicitudes_rapidas"
+        ordering = ["-fecha_solicitud"]
+
+    def __str__(self):
+        return f"Solicitud de {self.nombre} <{self.email}> — {self.fecha_solicitud:%Y-%m-%d}"
+
+
 class VersionCotizacion(models.Model):
     cotizacion = models.ForeignKey(Cotizacion, on_delete=models.CASCADE, related_name="versiones")
     numero_version = models.PositiveIntegerField()

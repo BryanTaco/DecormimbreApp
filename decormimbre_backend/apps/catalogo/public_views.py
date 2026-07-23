@@ -50,36 +50,50 @@ class CotizacionRapidaView(APIView):
 
         data = serializer.validated_data
 
-        # Anti-spam: si el mismo email envió el mismo texto en la última hora,
-        # respondemos éxito pero no creamos otra notificación (deduplicación).
         from django.utils import timezone
         from datetime import timedelta
-        duplicada = Notificacion.objects.filter(
-            tipo="NUEVA_COTIZACION_RAPIDA",
-            entidad_id=data["email"],
-            mensaje__contains=data["descripcion"][:200],
-            fecha_creacion__gte=timezone.now() - timedelta(hours=1),
+        from apps.cotizaciones.models import SolicitudRapida
+
+        # Anti-spam: mismo email + misma descripción en la última hora → dedup.
+        duplicada = SolicitudRapida.objects.filter(
+            email=data["email"],
+            descripcion__startswith=data["descripcion"][:200],
+            fecha_solicitud__gte=timezone.now() - timedelta(hours=1),
         ).exists()
         if duplicada:
             return success_response(
                 message="Su solicitud de cotización fue recibida. Nos pondremos en contacto pronto."
             )
 
-        # Try to find an existing account for this email
+        # Vincula con cuenta existente si el email coincide.
         usuario_vinculado = Usuario.objects.filter(email=data["email"]).first()
 
-        titulo = f"Nueva cotización rápida de {data['nombre']}"
+        ip = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", ""))
+        ip = ip.split(",")[0].strip() if ip else None
+
+        solicitud = SolicitudRapida.objects.create(
+            nombre=data["nombre"],
+            email=data["email"],
+            telefono=data.get("telefono", ""),
+            descripcion=data["descripcion"],
+            cantidad=data.get("cantidad", 1),
+            notas=data.get("notas", ""),
+            ip_origen=ip or None,
+            usuario_vinculado=usuario_vinculado,
+        )
+
+        titulo = f"Nueva solicitud de cotización de {data['nombre']}"
         mensaje = (
             f"Nombre: {data['nombre']}\n"
             f"Email: {data['email']}\n"
-            f"Teléfono: {data['telefono']}\n"
-            f"Cantidad: {data['cantidad']}\n"
+            f"Teléfono: {data.get('telefono', '—')}\n"
+            f"Cantidad: {data.get('cantidad', 1)}\n"
             f"Descripción: {data['descripcion']}\n"
         )
         if data.get("notas"):
-            mensaje += f"Notas adicionales: {data['notas']}\n"
+            mensaje += f"Notas: {data['notas']}\n"
 
-        # Notify all PROPIETARIO and ADMIN users
+        # Notifica a propietario y admins.
         destinatarios = Usuario.objects.filter(rol__in=["PROPIETARIO", "ADMIN"], activo=True)
         for dest in destinatarios:
             Notificacion.objects.create(
@@ -88,25 +102,24 @@ class CotizacionRapidaView(APIView):
                 titulo=titulo,
                 mensaje=mensaje,
                 para_propietario=True,
-                entidad_tipo="COTIZACION_RAPIDA",
-                entidad_id=data["email"],
+                entidad_tipo="SOLICITUD_RAPIDA",
+                entidad_id=str(solicitud.id),
             )
 
-        # If the sender has a portal account, also send them a notification
+        # Si el remitente tiene cuenta en el portal, también le notifica.
         if usuario_vinculado and usuario_vinculado not in destinatarios:
             Notificacion.objects.create(
                 destinatario=usuario_vinculado,
                 tipo="NUEVA_COTIZACION_RAPIDA",
-                titulo="Hemos recibido su solicitud de cotización",
+                titulo="Hemos recibido tu solicitud de cotización",
                 mensaje=(
                     f"Estimado/a {data['nombre']},\n\n"
-                    "Hemos recibido su solicitud de cotización y nos pondremos en contacto "
-                    "con usted a la brevedad posible.\n\n"
+                    "Hemos recibido tu solicitud y nos pondremos en contacto contigo pronto.\n\n"
                     f"Detalle: {data['descripcion']}"
                 ),
                 para_propietario=False,
-                entidad_tipo="COTIZACION_RAPIDA",
-                entidad_id=data["email"],
+                entidad_tipo="SOLICITUD_RAPIDA",
+                entidad_id=str(solicitud.id),
             )
 
         return success_response(

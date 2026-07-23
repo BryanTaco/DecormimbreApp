@@ -8,10 +8,11 @@ from utils.responses import success_response, error_response, validation_error_r
 from utils.pagination import StandardPagination
 from utils.log_actividad import registrar_actividad
 from apps.authentication.permissions import IsAdminOrPropietario
-from .models import Cotizacion, ItemCotizacion, VersionCotizacion
+from .models import Cotizacion, ItemCotizacion, VersionCotizacion, SolicitudRapida
 from .serializers import (
     CotizacionSerializer, ItemCotizacionSerializer,
     VersionCotizacionSerializer, CambiarEstadoSerializer,
+    SolicitudRapidaSerializer, ConvertirSolicitudSerializer,
 )
 from .pdf_generator import generar_pdf_cotizacion
 
@@ -128,6 +129,76 @@ class ItemCotizacionCreateView(APIView):
             s.save(cotizacion=cot)
             return success_response(data=s.data, message="Ítem agregado.", status_code=status.HTTP_201_CREATED)
         return validation_error_response(s)
+
+
+class SolicitudRapidaListView(APIView):
+    """GET /api/v1/cotizaciones/solicitudes/ — lista solicitudes del formulario público."""
+    permission_classes = [IsAdminOrPropietario]
+
+    def get(self, request):
+        qs = SolicitudRapida.objects.all()
+        if estado := request.query_params.get("estado"):
+            qs = qs.filter(estado=estado)
+        return success_response(data=SolicitudRapidaSerializer(qs, many=True).data)
+
+    def patch(self, request):
+        """Actualiza el estado de una solicitud (ej: PENDIENTE → EN_PROCESO / IGNORADA)."""
+        pk = request.data.get("id")
+        nuevo_estado = request.data.get("estado")
+        sol = get_object_or_404(SolicitudRapida, pk=pk)
+        if nuevo_estado not in dict(SolicitudRapida.ESTADO_CHOICES):
+            return error_response("ESTADO_INVALIDO", "Estado no válido.")
+        if sol.estado == "CONVERTIDA":
+            return error_response("YA_CONVERTIDA", "Esta solicitud ya fue convertida.")
+        sol.estado = nuevo_estado
+        sol.save(update_fields=["estado"])
+        return success_response(data=SolicitudRapidaSerializer(sol).data)
+
+
+class SolicitudRapidaConvertirView(APIView):
+    """POST /api/v1/cotizaciones/solicitudes/<id>/convertir/ — crea Cotizacion desde solicitud."""
+    permission_classes = [IsAdminOrPropietario]
+
+    def post(self, request, pk):
+        sol = get_object_or_404(SolicitudRapida, pk=pk)
+        if sol.estado == "CONVERTIDA":
+            return error_response("YA_CONVERTIDA", "Esta solicitud ya fue convertida a cotización.")
+
+        s = ConvertirSolicitudSerializer(data=request.data)
+        if not s.is_valid():
+            return validation_error_response(s)
+
+        from apps.clientes.models import Cliente
+        cliente = get_object_or_404(Cliente, pk=s.validated_data["cliente_id"])
+
+        cuerpo_obs = f"Solicitud web de {sol.nombre} ({sol.email})"
+        if sol.telefono:
+            cuerpo_obs += f" — Tel: {sol.telefono}"
+        cuerpo_obs += f"\n\nDescripción: {sol.descripcion}"
+        if sol.notas:
+            cuerpo_obs += f"\nNotas: {sol.notas}"
+
+        cotizacion = Cotizacion.objects.create(
+            cliente=cliente,
+            creado_por=request.user,
+            forma_pago=s.validated_data["forma_pago"],
+            observaciones=cuerpo_obs,
+        )
+        sol.estado = "CONVERTIDA"
+        sol.cotizacion = cotizacion
+        sol.save(update_fields=["estado", "cotizacion"])
+
+        registrar_actividad(
+            request.user, "COTIZACIONES", "CONVERTIR_SOLICITUD",
+            entidad_id=cotizacion.pk,
+            descripcion=f"Solicitud de {sol.nombre} convertida a {cotizacion.numero}",
+            request=request,
+        )
+        return success_response(
+            data=CotizacionSerializer(cotizacion).data,
+            message=f"Solicitud convertida a cotización {cotizacion.numero}.",
+            status_code=status.HTTP_201_CREATED,
+        )
 
 
 class ItemCotizacionDetailView(APIView):

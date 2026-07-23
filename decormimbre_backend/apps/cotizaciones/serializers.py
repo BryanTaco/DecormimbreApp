@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Cotizacion, ItemCotizacion, VersionCotizacion
+from .models import Cotizacion, ItemCotizacion, VersionCotizacion, SolicitudRapida
 
 
 class ItemCotizacionSerializer(serializers.ModelSerializer):
@@ -66,3 +66,24 @@ class CotizacionSnapshotSerializer(serializers.ModelSerializer):
 
 class CambiarEstadoSerializer(serializers.Serializer):
     nuevo_estado = serializers.ChoiceField(choices=Cotizacion.ESTADO_CHOICES)
+
+
+class SolicitudRapidaSerializer(serializers.ModelSerializer):
+    cotizacion_numero = serializers.CharField(source="cotizacion.numero", read_only=True, default=None)
+
+    class Meta:
+        model = SolicitudRapida
+        fields = [
+            "id", "nombre", "email", "telefono", "descripcion",
+            "cantidad", "notas", "fecha_solicitud", "estado",
+            "usuario_vinculado", "cotizacion", "cotizacion_numero",
+        ]
+        read_only_fields = ["id", "fecha_solicitud", "usuario_vinculado", "cotizacion", "cotizacion_numero"]
+
+
+class ConvertirSolicitudSerializer(serializers.Serializer):
+    cliente_id = serializers.UUIDField()
+    forma_pago = serializers.ChoiceField(
+        choices=["50_50", "100_ANTICIPO", "100_ENTREGA", "PERSONALIZADO"],
+        default="50_50",
+    )
