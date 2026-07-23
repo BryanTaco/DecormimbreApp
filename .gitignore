@@ -38,3 +38,8 @@ yarn-debug.log*
 
 # Misc
 test_imagen.jpg
+
+# Backups locales
+backups/
+*.sql.gz
+*.sql.bak
