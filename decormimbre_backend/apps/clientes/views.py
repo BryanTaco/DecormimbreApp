@@ -16,10 +16,15 @@ class ClienteListCreateView(ListCreateAPIView):
 
     def get_queryset(self):
         qs = Cliente.objects.select_related("creado_por")
-        if nombre := self.request.query_params.get("nombre"):
-            qs = qs.filter(nombre_completo__icontains=nombre)
-        if cedula := self.request.query_params.get("cedula_ruc"):
-            qs = qs.filter(cedula_ruc__icontains=cedula)
+        # ?q= busca en nombre Y cédula simultáneamente (barra de búsqueda del frontend)
+        if q := self.request.query_params.get("q"):
+            from django.db.models import Q
+            qs = qs.filter(Q(nombre_completo__icontains=q) | Q(cedula_ruc__icontains=q))
+        else:
+            if nombre := self.request.query_params.get("nombre"):
+                qs = qs.filter(nombre_completo__icontains=nombre)
+            if cedula := self.request.query_params.get("cedula_ruc"):
+                qs = qs.filter(cedula_ruc__icontains=cedula)
         if (activo := self.request.query_params.get("activo")) is not None:
             qs = qs.filter(activo=activo.lower() == "true")
         return qs

@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Users, Plus, Search, Mail, Phone, Check } from 'lucide-react'
+import { Users, Plus, Search, Mail, Phone, Check, AlertCircle } from 'lucide-react'
 import { clientesApi, type Cliente } from '@/api/clientes'
 import { validarCedulaORuc } from '@/lib/cedula'
+import { validarTelefonoFlexible, normalizarTelefono } from '@/lib/validacion'
 import PageHeader from '@/components/ui/PageHeader'
 import StatCard from '@/components/ui/StatCard'
 import Spinner from '@/components/ui/Spinner'
@@ -19,6 +20,8 @@ export default function ClientesPage() {
   const [modal, setModal] = useState(false)
   const [form, setForm] = useState<Partial<Cliente>>(EMPTY)
   const [editing, setEditing] = useState<string | null>(null)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [telefonoTocado, setTelefonoTocado] = useState(false)
 
   const { data, isLoading } = useQuery({
     queryKey: ['clientes', search],
@@ -26,22 +29,48 @@ export default function ClientesPage() {
   })
 
   const save = useMutation({
-    mutationFn: () =>
-      editing ? clientesApi.update(editing, form) : clientesApi.create(form),
+    mutationFn: () => {
+      const payload = {
+        ...form,
+        telefono: normalizarTelefono(form.telefono ?? ''),
+      }
+      return editing ? clientesApi.update(editing, payload) : clientesApi.create(payload)
+    },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['clientes'] }); closeModal() },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: { message?: string }; message?: string } } })
+          ?.response?.data?.error?.message ??
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Error al guardar. Verifica los datos e intenta de nuevo.'
+      setApiError(msg)
+    },
   })
 
-  const openCreate = () => { setForm(EMPTY); setEditing(null); setModal(true) }
-  const openEdit = (c: Cliente) => { setForm(c); setEditing(c.id); setModal(true) }
-  const closeModal = () => { setModal(false); setForm(EMPTY); setEditing(null) }
-  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
+  const openCreate = () => { setForm(EMPTY); setEditing(null); setModal(true); setApiError(null); setTelefonoTocado(false) }
+  const openEdit = (c: Cliente) => { setForm(c); setEditing(c.id); setModal(true); setApiError(null); setTelefonoTocado(false) }
+  const closeModal = () => { setModal(false); setForm(EMPTY); setEditing(null); setApiError(null); setTelefonoTocado(false) }
+  const set = (k: string, v: string) => { setApiError(null); setForm((f) => ({ ...f, [k]: v })) }
 
   const clientes: Cliente[] = data?.data ?? []
 
-  // Validación de cédula/RUC en tiempo real (Módulo 10) — el backend re-valida por seguridad
+  // Validación cédula/RUC en tiempo real
   const cedulaVal = form.cedula_ruc ?? ''
   const cedulaTocada = cedulaVal.length > 0
   const cedulaCheck = validarCedulaORuc(cedulaVal)
+
+  // Validación teléfono en tiempo real
+  const telefonoVal = form.telefono ?? ''
+  const telefonoError = telefonoTocado ? validarTelefonoFlexible(telefonoVal) : ''
+
+  // Nombre requerido
+  const nombreVacio = (form.nombre_completo ?? '').trim().length === 0
+
+  // El formulario es válido si: nombre lleno, cédula válida o sin tocar, teléfono válido o sin tocar
+  const formInvalido =
+    nombreVacio ||
+    (cedulaTocada && !cedulaCheck.valido) ||
+    (telefonoTocado && telefonoError !== '')
 
   return (
     <div className="p-6 md:p-8">
@@ -101,21 +130,59 @@ export default function ClientesPage() {
 
       <Modal open={modal} onClose={closeModal} title={editing ? 'Editar cliente' : 'Nuevo cliente'}>
         <div className="flex flex-col gap-4">
-          <Input label="Nombre completo" value={form.nombre_completo ?? ''} onChange={(e) => set('nombre_completo', e.target.value)} />
+          {/* Error de API */}
+          {apiError && (
+            <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              <span>{apiError}</span>
+            </div>
+          )}
+
+          <Input
+            label="Nombre completo *"
+            value={form.nombre_completo ?? ''}
+            onChange={(e) => set('nombre_completo', e.target.value)}
+            error={nombreVacio && cedulaTocada ? 'El nombre es obligatorio' : undefined}
+          />
+
           <div>
-            <Input label="Cédula / RUC" value={form.cedula_ruc ?? ''} inputMode="numeric"
+            <Input
+              label="Cédula / RUC *"
+              value={form.cedula_ruc ?? ''}
+              inputMode="numeric"
               onChange={(e) => set('cedula_ruc', e.target.value.replace(/\D/g, ''))}
-              error={cedulaTocada && !cedulaCheck.valido ? cedulaCheck.mensaje : undefined} />
+              error={cedulaTocada && !cedulaCheck.valido ? cedulaCheck.mensaje : undefined}
+            />
             {cedulaTocada && cedulaCheck.valido && (
-              <p className="mt-1 text-[11px] text-green-600 flex items-center gap-1"><Check className="w-3 h-3" /> {cedulaCheck.mensaje}</p>
+              <p className="mt-1 text-[11px] text-green-600 flex items-center gap-1">
+                <Check className="w-3 h-3" /> {cedulaCheck.mensaje}
+              </p>
             )}
           </div>
+
           <Input label="Email" type="email" value={form.email ?? ''} onChange={(e) => set('email', e.target.value)} />
-          <Input label="Teléfono" value={form.telefono ?? ''} onChange={(e) => set('telefono', e.target.value)} />
+
+          <Input
+            label="Teléfono * (ej: 098 057 2561)"
+            value={form.telefono ?? ''}
+            inputMode="tel"
+            onChange={(e) => set('telefono', e.target.value)}
+            onBlur={() => setTelefonoTocado(true)}
+            error={telefonoError || undefined}
+          />
+
           <Input label="Dirección" value={form.direccion ?? ''} onChange={(e) => set('direccion', e.target.value)} />
+
           <div className="flex justify-end gap-3 mt-2">
             <Btn variant="secondary" onClick={closeModal}>Cancelar</Btn>
-            <Btn onClick={() => save.mutate()} disabled={save.isPending || (cedulaTocada && !cedulaCheck.valido)}>
+            <Btn
+              onClick={() => {
+                setTelefonoTocado(true)
+                if (formInvalido) return
+                save.mutate()
+              }}
+              disabled={save.isPending}
+            >
               {save.isPending ? 'Guardando…' : 'Guardar'}
             </Btn>
           </div>

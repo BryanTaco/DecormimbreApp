@@ -25,7 +25,8 @@ export interface Cotizacion {
   total: string
   observaciones: string
   fecha_expiracion: string | null
-  creado_en: string
+  fecha_creacion: string
+  creado_en?: string
   items: ItemCotizacion[]
 }
 

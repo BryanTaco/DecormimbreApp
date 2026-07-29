@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 import {
   FileText, Plus, Search, Send, CheckCircle2, DollarSign,
-  Inbox, Clock, AlertCircle, ArrowRight, UserCheck,
+  Inbox, Clock, AlertCircle, ArrowRight, UserCheck, XCircle,
 } from 'lucide-react'
 import { cotizacionesApi, type Cotizacion, type SolicitudRapida } from '@/api/cotizaciones'
 import { clientesApi } from '@/api/clientes'
@@ -59,7 +59,7 @@ export default function CotizacionesPage() {
   const [convertirCliente, setConvertirCliente] = useState('')
   const [convertirFormaPago, setConvertirFormaPago] = useState('50_50')
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['cotizaciones'],
     queryFn: () => cotizacionesApi.list(),
   })
@@ -73,12 +73,20 @@ export default function CotizacionesPage() {
     enabled: modal || !!convertirModal,
   })
 
+  const [crearError, setCrearError] = useState<string | null>(null)
+
   const crear = useMutation({
     mutationFn: () => cotizacionesApi.create(form),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ['cotizaciones'] })
       setModal(false)
       navigate(`/admin/cotizaciones/${res.data.id}`)
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: { message?: string } } } })
+          ?.response?.data?.error?.message ?? 'No se pudo crear la cotización.'
+      setCrearError(msg)
     },
   })
 
@@ -195,6 +203,14 @@ export default function CotizacionesPage() {
 
           {isLoading ? (
             <Spinner />
+          ) : isError ? (
+            <div className="flex items-center gap-3 rounded-2xl bg-red-50 border border-red-200 px-6 py-5 text-sm text-red-700">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              <div>
+                <p className="font-medium">No se pudieron cargar las cotizaciones.</p>
+                <p className="text-red-500 mt-0.5">Verifica tu conexión o recarga la página.</p>
+              </div>
+            </div>
           ) : cotizaciones.length === 0 ? (
             <EmptyState
               icon={FileText}
@@ -237,7 +253,7 @@ export default function CotizacionesPage() {
                       <td className="px-5 py-3.5"><Badge value={c.estado} type="cotizacion" /></td>
                       <td className="px-5 py-3.5 text-[rgba(92,64,51,0.85)] font-medium">{money(c.total)}</td>
                       <td className="px-5 py-3.5 text-[rgba(92,64,51,0.5)] text-xs">
-                        {c.creado_en ? new Date(c.creado_en).toLocaleDateString('es-EC') : '—'}
+                        {(c.fecha_creacion ?? c.creado_en) ? new Date(c.fecha_creacion ?? c.creado_en!).toLocaleDateString('es-EC') : '—'}
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         <span className="text-xs text-[rgba(92,64,51,0.4)] group-hover:text-[#5C4033] transition-colors">
@@ -329,8 +345,13 @@ export default function CotizacionesPage() {
       )}
 
       {/* Modal nueva cotización */}
-      <Modal open={modal} onClose={() => setModal(false)} title="Nueva cotización">
+      <Modal open={modal} onClose={() => { setModal(false); setCrearError(null) }} title="Nueva cotización">
         <div className="flex flex-col gap-4">
+          {crearError && (
+            <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              <XCircle className="w-4 h-4 shrink-0" />{crearError}
+            </div>
+          )}
           <Select
             label="Cliente"
             value={form.cliente}
