@@ -5,14 +5,16 @@ import { Package, ArrowRight, Truck, Wrench, CheckCircle2, Clock } from 'lucide-
 import { getMisPedidos } from '@/api/authApi'
 
 const PROGRESO: Record<string, number> = {
-  PENDIENTE: 0, EN_PRODUCCION: 40, LISTO: 80, EN_ENTREGA: 90, ENTREGADO: 100,
+  PENDIENTE: 0, EN_PRODUCCION: 50, LISTO_ENTREGA: 85, ENTREGADO: 100, CANCELADO: 0,
 }
 const ESTADO_LABEL: Record<string, string> = {
-  PENDIENTE: 'Pendiente', EN_PRODUCCION: 'En producción', LISTO: 'Listo', EN_ENTREGA: 'En camino', ENTREGADO: 'Entregado',
+  PENDIENTE: 'Pendiente', EN_PRODUCCION: 'En producción',
+  LISTO_ENTREGA: 'Listo para entrega', ENTREGADO: 'Entregado', CANCELADO: 'Cancelado',
 }
 type IconComponent = React.ComponentType<{ size?: number; color?: string }>
 const ESTADO_ICON: Record<string, IconComponent> = {
-  PENDIENTE: Clock, EN_PRODUCCION: Wrench, LISTO: CheckCircle2, EN_ENTREGA: Truck, ENTREGADO: CheckCircle2,
+  PENDIENTE: Clock, EN_PRODUCCION: Wrench,
+  LISTO_ENTREGA: Truck, ENTREGADO: CheckCircle2, CANCELADO: Clock,
 }
 
 export default function PedidosPage() {
@@ -26,7 +28,7 @@ export default function PedidosPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const activos = data.filter(p => p.estado !== 'ENTREGADO')
+  const activos = data.filter(p => !['ENTREGADO', 'CANCELADO'].includes(p.estado))
   const completados = data.filter(p => p.estado === 'ENTREGADO')
 
   return (
@@ -83,9 +85,9 @@ function PedidoCard({ pedido, index }: { pedido: any; index: number }) {
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = 'none'; (e.currentTarget as HTMLElement).style.transform = 'none' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
             <div>
-              <p style={{ margin: '0 0 3px', fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 700, color: '#3d2215' }}>{pedido.numero_pedido ?? `PED-${pedido.id?.slice(0, 6).toUpperCase()}`}</p>
+              <p style={{ margin: '0 0 3px', fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 700, color: '#3d2215' }}>{pedido.numero ?? `PED-${pedido.id?.slice(0, 6).toUpperCase()}`}</p>
               <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(92,64,51,0.5)' }}>
-                {pedido.fecha_pedido ? new Date(pedido.fecha_pedido).toLocaleDateString('es-EC', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Fecha pendiente'}
+                {pedido.fecha_creacion ? new Date(pedido.fecha_creacion).toLocaleDateString('es-EC', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Fecha pendiente'}
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: `${pedido.estado === 'ENTREGADO' ? '#22c55e' : '#3b82f6'}18`, padding: '6px 12px', borderRadius: 99 }}>
@@ -113,7 +115,7 @@ function PedidoCard({ pedido, index }: { pedido: any; index: number }) {
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(92,64,51,0.5)' }}>
-              {pedido.items_count ?? 1} mueble{(pedido.items_count ?? 1) !== 1 ? 's' : ''}
+              {pedido.items?.length ?? 1} mueble{(pedido.items?.length ?? 1) !== 1 ? 's' : ''}
               {pedido.total && ` · $${Number(pedido.total).toLocaleString('es-EC', { minimumFractionDigits: 2 })}`}
             </p>
             <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-body)', fontSize: 12, color: '#5C4033', fontWeight: 600 }}>

@@ -5,15 +5,14 @@ import { ArrowLeft, CheckCircle2, Wrench, Truck, Package } from 'lucide-react'
 import { getMiPedido } from '@/api/authApi'
 
 const TIMELINE_STEPS = [
-  { estado: 'PENDIENTE', label: 'Pedido recibido', desc: 'Tu pedido fue confirmado', icon: Package },
+  { estado: 'PENDIENTE', label: 'Pedido recibido', desc: 'Tu pedido está siendo preparado', icon: Package },
   { estado: 'EN_PRODUCCION', label: 'En producción', desc: 'Nuestros artesanos están trabajando en tu mueble', icon: Wrench },
-  { estado: 'LISTO', label: 'Listo', desc: 'Tu mueble está terminado y listo para entrega', icon: CheckCircle2 },
-  { estado: 'EN_ENTREGA', label: 'En camino', desc: 'Tu pedido está en camino', icon: Truck },
+  { estado: 'LISTO_ENTREGA', label: 'Listo para entrega', desc: 'Tu mueble está terminado y listo para ser entregado', icon: Truck },
   { estado: 'ENTREGADO', label: 'Entregado', desc: '¡Tu pedido fue entregado exitosamente!', icon: CheckCircle2 },
 ]
 
 const ORDER: Record<string, number> = {
-  PENDIENTE: 0, EN_PRODUCCION: 1, LISTO: 2, EN_ENTREGA: 3, ENTREGADO: 4,
+  PENDIENTE: 0, EN_PRODUCCION: 1, LISTO_ENTREGA: 2, ENTREGADO: 3,
 }
 
 export default function PedidoDetalle() {
@@ -56,7 +55,7 @@ export default function PedidoDetalle() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.38 }}>
         <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(92,64,51,0.5)', margin: '0 0 6px' }}>Detalle del pedido</p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 400, fontStyle: 'italic', color: '#3d2215', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
-          {pedido.numero_pedido ?? `PED-${pedido.id?.slice(0, 6).toUpperCase()}`}
+          {pedido.numero ?? `PED-${pedido.id?.slice(0, 6).toUpperCase()}`}
         </h1>
       </motion.div>
 
@@ -85,7 +84,7 @@ export default function PedidoDetalle() {
                   <div style={{ paddingTop: 5 }}>
                     <p style={{ margin: '0 0 2px', fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: isCurrent ? 700 : 500, color: isCompleted ? '#3d2215' : 'rgba(92,64,51,0.4)' }}>{step.label}</p>
                     {isCurrent && <p style={{ margin: '0 0 2px', fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(92,64,51,0.6)' }}>{step.desc}</p>}
-                    {logEntry && <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 11, color: 'rgba(92,64,51,0.4)' }}>{new Date(logEntry.fecha).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>}
+                    {logEntry && <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 11, color: 'rgba(92,64,51,0.4)' }}>{new Date(logEntry.timestamp).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>}
                   </div>
                 </div>
               )
@@ -98,9 +97,9 @@ export default function PedidoDetalle() {
           {/* Details */}
           <div style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', borderRadius: 18, border: '1px solid rgba(196,168,130,0.18)', padding: '24px 26px' }}>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 400, fontStyle: 'italic', color: '#3d2215', margin: '0 0 18px' }}>Detalles del pedido</h3>
-            <InfoRow label="Número" value={pedido.numero_pedido ?? `PED-${pedido.id?.slice(0, 6).toUpperCase()}`} />
-            <InfoRow label="Fecha" value={pedido.fecha_pedido ? new Date(pedido.fecha_pedido).toLocaleDateString('es-EC', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'} />
-            <InfoRow label="Entrega estimada" value={pedido.fecha_entrega_estimada ? new Date(pedido.fecha_entrega_estimada).toLocaleDateString('es-EC', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Por confirmar'} />
+            <InfoRow label="Número" value={pedido.numero ?? `PED-${pedido.id?.slice(0, 6).toUpperCase()}`} />
+            <InfoRow label="Fecha" value={pedido.fecha_creacion ? new Date(pedido.fecha_creacion).toLocaleDateString('es-EC', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'} />
+            <InfoRow label="Entrega estimada" value={pedido.fecha_promesa_entrega ? new Date(pedido.fecha_promesa_entrega).toLocaleDateString('es-EC', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Por confirmar'} />
             {pedido.total && <InfoRow label="Total" value={`$${Number(pedido.total).toLocaleString('es-EC', { minimumFractionDigits: 2 })}`} bold />}
           </div>
 
@@ -111,7 +110,7 @@ export default function PedidoDetalle() {
               {pedido.items.map((item: any, i: number) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderTop: i > 0 ? '1px solid rgba(196,168,130,0.12)' : 'none' }}>
                   <div>
-                    <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, color: '#3d2215' }}>{item.descripcion ?? item.tipo_mueble ?? 'Mueble artesanal'}</p>
+                    <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, color: '#3d2215' }}>{item.producto_nombre ?? 'Mueble artesanal'}</p>
                     {item.color && <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 11, color: 'rgba(92,64,51,0.5)' }}>{item.material ?? ''} · {item.color}</p>}
                   </div>
                   <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600, color: 'rgba(92,64,51,0.6)' }}>×{item.cantidad ?? 1}</span>

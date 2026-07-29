@@ -9,17 +9,17 @@ import BrandLogo from '@/components/BrandLogo'
 import PushToggle from '@/components/PushToggle'
 
 const ESTADO_COLOR: Record<string, string> = {
-  APROBADA: '#22c55e', PENDIENTE: '#f59e0b', RECHAZADA: '#ef4444',
-  EN_PRODUCCION: '#3b82f6', LISTO: '#22c55e', LISTO_ENTREGA: '#22c55e',
-  EN_ENTREGA: '#3b82f6', ENTREGADO: '#6b7280', BORRADOR: '#94a3b8', CONFIRMADO: '#3b82f6',
+  APROBADA: '#22c55e', ENVIADA: '#3b82f6', RECHAZADA: '#ef4444', BORRADOR: '#94a3b8',
+  PENDIENTE: '#f59e0b', EN_PRODUCCION: '#3b82f6', LISTO_ENTREGA: '#22c55e',
+  ENTREGADO: '#6b7280', CANCELADO: '#ef4444',
 }
 const ESTADO_LABEL: Record<string, string> = {
-  PENDIENTE: 'Pendiente', APROBADA: 'Aprobada', RECHAZADA: 'Rechazada',
-  EN_PRODUCCION: 'En producción', LISTO: 'Listo', LISTO_ENTREGA: 'Listo',
-  EN_ENTREGA: 'En camino', ENTREGADO: 'Entregado', BORRADOR: 'Borrador', CONFIRMADO: 'Confirmado',
+  BORRADOR: 'Borrador', ENVIADA: 'Enviada', APROBADA: 'Aprobada', RECHAZADA: 'Rechazada',
+  PENDIENTE: 'Pendiente', EN_PRODUCCION: 'En producción',
+  LISTO_ENTREGA: 'Listo para entrega', ENTREGADO: 'Entregado', CANCELADO: 'Cancelado',
 }
 const PROGRESO: Record<string, number> = {
-  PENDIENTE: 10, CONFIRMADO: 25, EN_PRODUCCION: 55, LISTO: 85, LISTO_ENTREGA: 85, EN_ENTREGA: 92, ENTREGADO: 100,
+  PENDIENTE: 10, EN_PRODUCCION: 55, LISTO_ENTREGA: 85, ENTREGADO: 100, CANCELADO: 0,
 }
 
 const INSPIRACION = [
@@ -45,12 +45,12 @@ export default function CuentaDashboard() {
   const hora = new Date().getHours()
   const saludo = hora < 12 ? 'Buenos días' : hora < 18 ? 'Buenas tardes' : 'Buenas noches'
   const nombre = user?.nombre?.split(' ')[0] ?? ''
-  const activos = pedidos.filter((p) => p.estado !== 'ENTREGADO')
+  const activos = pedidos.filter((p) => !['ENTREGADO', 'CANCELADO'].includes(p.estado))
 
   const stats = [
     { label: 'Cotizaciones', value: cotizaciones.length, icon: FileText, color: '#C4A882', to: '/cuenta/cotizaciones' },
     { label: 'Pedidos activos', value: activos.length, icon: Package, color: '#7B5840', to: '/cuenta/pedidos' },
-    { label: 'Pendientes', value: cotizaciones.filter((c) => c.estado === 'PENDIENTE').length, icon: Clock, color: '#f59e0b', to: '/cuenta/cotizaciones' },
+    { label: 'Enviadas', value: cotizaciones.filter((c) => c.estado === 'ENVIADA').length, icon: Clock, color: '#f59e0b', to: '/cuenta/cotizaciones' },
     { label: 'Completados', value: pedidos.filter((p) => p.estado === 'ENTREGADO').length, icon: CheckCircle, color: '#22c55e', to: '/cuenta/pedidos' },
   ]
 
@@ -156,7 +156,7 @@ export default function CuentaDashboard() {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                       <div>
                         <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, color: '#3d2215' }}>{p.numero_pedido ?? p.numero ?? `PED-${p.id?.slice(0, 6).toUpperCase()}`}</p>
-                        <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 11, color: 'rgba(92,64,51,0.5)' }}>{p.items_count ?? 1} mueble{(p.items_count ?? 1) !== 1 ? 's' : ''}</p>
+                        <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 11, color: 'rgba(92,64,51,0.5)' }}>{p.items?.length ?? 1} mueble{(p.items?.length ?? 1) !== 1 ? 's' : ''}</p>
                       </div>
                       <StatusBadge estado={p.estado} />
                     </div>

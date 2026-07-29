@@ -34,7 +34,8 @@ class PedidoListCreateView(ListCreateAPIView):
     def get_queryset(self):
         qs = Pedido.objects.select_related("cliente", "creado_por").prefetch_related("tareas")
         if estado := self.request.query_params.get("estado"):
-            qs = qs.filter(estado=estado)
+            estados = [e.strip() for e in estado.split(",") if e.strip()]
+            qs = qs.filter(estado__in=estados)
         if cliente := self.request.query_params.get("cliente"):
             qs = qs.filter(cliente__id=cliente)
         return qs

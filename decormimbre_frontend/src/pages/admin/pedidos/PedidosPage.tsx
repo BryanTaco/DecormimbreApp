@@ -13,7 +13,6 @@ import EmptyState from '@/components/ui/EmptyState'
 const ESTADOS = [
   { value: '', label: 'Todos' },
   { value: 'PENDIENTE', label: 'Pendiente' },
-  { value: 'CONFIRMADO', label: 'Confirmado' },
   { value: 'EN_PRODUCCION', label: 'En producción' },
   { value: 'LISTO_ENTREGA', label: 'Listo para entrega' },
   { value: 'ENTREGADO', label: 'Entregado' },

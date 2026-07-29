@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Download, UserCheck, CheckCircle, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Download, UserCheck, CheckCircle, ChevronRight, AlertCircle } from 'lucide-react'
 import { pedidosApi, type TareaProduccion } from '@/api/pedidos'
 import { usuariosApi } from '@/api/usuarios'
 import Badge from '@/components/ui/Badge'
@@ -12,9 +12,8 @@ import Btn from '@/components/ui/Btn'
 import PageHeader from '@/components/ui/PageHeader'
 
 const TRANSICIONES: Record<string, { label: string; next: string }[]> = {
-  PENDIENTE: [{ label: 'Confirmar pedido', next: 'CONFIRMADO' }],
-  CONFIRMADO: [{ label: 'Iniciar producción', next: 'EN_PRODUCCION' }],
-  EN_PRODUCCION: [],
+  PENDIENTE: [{ label: 'Iniciar producción', next: 'EN_PRODUCCION' }, { label: 'Cancelar pedido', next: 'CANCELADO' }],
+  EN_PRODUCCION: [{ label: 'Cancelar pedido', next: 'CANCELADO' }],
   LISTO_ENTREGA: [{ label: 'Marcar entregado', next: 'ENTREGADO' }],
   ENTREGADO: [],
   CANCELADO: [],
@@ -28,6 +27,7 @@ export default function PedidoDetalle() {
   const [artesanoId, setArtesanoId] = useState('')
   const [completarModal, setCompletarModal] = useState<TareaProduccion | null>(null)
   const [notas, setNotas] = useState('')
+  const [apiError, setApiError] = useState<string | null>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['pedido', id],
@@ -41,19 +41,27 @@ export default function PedidoDetalle() {
     enabled: !!asignarModal,
   })
 
+  const extractError = (err: unknown) =>
+    (err as { response?: { data?: { error?: { message?: string }; message?: string } } })?.response?.data?.error?.message ??
+    (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+    'Error al procesar la acción.'
+
   const cambiarEstado = useMutation({
     mutationFn: (s: string) => pedidosApi.cambiarEstado(id!, s),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['pedido', id] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['pedido', id] }); setApiError(null) },
+    onError: (err: unknown) => setApiError(extractError(err)),
   })
 
   const asignar = useMutation({
     mutationFn: () => pedidosApi.asignarArtesano(asignarModal!.id, artesanoId),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['pedido', id] }); setAsignarModal(null) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['pedido', id] }); setAsignarModal(null); setApiError(null) },
+    onError: (err: unknown) => setApiError(extractError(err)),
   })
 
   const completar = useMutation({
     mutationFn: () => pedidosApi.completarTarea(completarModal!.id, notas),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['pedido', id] }); setCompletarModal(null); setNotas('') },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['pedido', id] }); setCompletarModal(null); setNotas(''); setApiError(null) },
+    onError: (err: unknown) => setApiError(extractError(err)),
   })
 
   if (isLoading) return <div className="p-8"><Spinner /></div>
@@ -85,6 +93,15 @@ export default function PedidoDetalle() {
           </div>
         }
       />
+
+      {/* Error banner */}
+      {apiError && (
+        <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 mb-4">
+          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>{apiError}</span>
+          <button onClick={() => setApiError(null)} className="ml-auto text-red-400 hover:text-red-600">✕</button>
+        </div>
+      )}
 
       {/* Estado + progreso */}
       <div className="flex items-center gap-3 mb-6 flex-wrap">

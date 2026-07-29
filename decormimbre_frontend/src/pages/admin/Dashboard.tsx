@@ -42,7 +42,7 @@ export default function Dashboard() {
   const [rango, setRango] = useState(14)
 
   const { data: cotData } = useQuery({ queryKey: ['dashboard-cotizaciones'], queryFn: () => cotizacionesApi.list({ estado: 'BORRADOR,ENVIADA' }) })
-  const { data: pedData } = useQuery({ queryKey: ['dashboard-pedidos'], queryFn: () => pedidosApi.list({ estado: 'EN_PRODUCCION,CONFIRMADO' }) })
+  const { data: pedData } = useQuery({ queryKey: ['dashboard-pedidos'], queryFn: () => pedidosApi.list({ estado: 'EN_PRODUCCION,PENDIENTE' }) })
   const { data: alertasData } = useQuery({ queryKey: ['dashboard-alertas'], queryFn: () => inventarioApi.alertas.list() })
   const { data: clientesData } = useQuery({ queryKey: ['dashboard-clientes'], queryFn: () => clientesApi.list() })
   const { data: ultimasCotData, isLoading: loadingCot } = useQuery({ queryKey: ['dashboard-ultimas-cot'], queryFn: () => cotizacionesApi.list() })
@@ -79,7 +79,7 @@ export default function Dashboard() {
 
   const STATS = [
     { label: 'Cotizaciones activas', value: cotizaciones.length, icon: FileText, from: '#f59e0b', spark: serieCot.data, trend: trend(serieCot.data), to: '/admin/cotizaciones' },
-    { label: 'Pedidos en producción', value: pedidos.length, icon: ShoppingBag, from: '#16a34a', spark: seriePed.data, trend: trend(seriePed.data), to: '/admin/pedidos' },
+    { label: 'Pedidos activos', value: pedidos.length, icon: ShoppingBag, from: '#16a34a', spark: seriePed.data, trend: trend(seriePed.data), to: '/admin/pedidos' },
     { label: 'Stock crítico', value: alertas.length, icon: Package, from: alertas.length > 0 ? '#ef4444' : '#16a34a', spark: [], trend: 0, to: '/admin/inventario' },
     { label: 'Clientes este mes', value: clientesEsteMes.length, icon: Users, from: '#3b82f6', spark: [], trend: 0, to: '/admin/clientes' },
   ]

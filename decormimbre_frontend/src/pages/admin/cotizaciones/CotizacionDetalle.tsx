@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Download, Plus, Trash2, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Download, Plus, Trash2, ChevronRight, AlertCircle } from 'lucide-react'
 import { cotizacionesApi } from '@/api/cotizaciones'
 import { clientesApi } from '@/api/clientes'
 import Badge from '@/components/ui/Badge'
@@ -27,6 +27,12 @@ export default function CotizacionDetalle() {
   const qc = useQueryClient()
   const [addItem, setAddItem] = useState(false)
   const [itemForm, setItemForm] = useState({ producto: '', cantidad: '1', precio_unitario: '', ancho_cm: '', alto_cm: '', observaciones: '' })
+  const [apiError, setApiError] = useState<string | null>(null)
+
+  const extractError = (err: unknown) =>
+    (err as { response?: { data?: { error?: { message?: string }; message?: string } } })?.response?.data?.error?.message ??
+    (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+    'Error al procesar la acción.'
 
   const { data, isLoading } = useQuery({
     queryKey: ['cotizacion', id],
@@ -41,17 +47,20 @@ export default function CotizacionDetalle() {
 
   const cambiarEstado = useMutation({
     mutationFn: (nuevo: string) => cotizacionesApi.cambiarEstado(id!, nuevo),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['cotizacion', id] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cotizacion', id] }); setApiError(null) },
+    onError: (err: unknown) => setApiError(extractError(err)),
   })
 
   const agregarItem = useMutation({
     mutationFn: () => cotizacionesApi.addItem(id!, { ...itemForm, cantidad: Number(itemForm.cantidad) }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cotizacion', id] }); setAddItem(false) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cotizacion', id] }); setAddItem(false); setApiError(null) },
+    onError: (err: unknown) => setApiError(extractError(err)),
   })
 
   const eliminarItem = useMutation({
     mutationFn: (itemId: string) => cotizacionesApi.deleteItem(id!, itemId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['cotizacion', id] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cotizacion', id] }); setApiError(null) },
+    onError: (err: unknown) => setApiError(extractError(err)),
   })
 
   if (isLoading) return <div className="p-8"><Spinner /></div>
@@ -84,6 +93,15 @@ export default function CotizacionDetalle() {
           </div>
         }
       />
+
+      {/* Error banner */}
+      {apiError && (
+        <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 mb-4">
+          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>{apiError}</span>
+          <button onClick={() => setApiError(null)} className="ml-auto text-red-400 hover:text-red-600">✕</button>
+        </div>
+      )}
 
       {/* Estado + acciones */}
       <div className="flex items-center gap-3 mb-6 flex-wrap">
@@ -183,8 +201,13 @@ export default function CotizacionDetalle() {
       </div>
 
       {/* Modal agregar ítem */}
-      <Modal open={addItem} onClose={() => setAddItem(false)} title="Agregar ítem">
+      <Modal open={addItem} onClose={() => { setAddItem(false); setApiError(null) }} title="Agregar ítem">
         <div className="flex flex-col gap-4">
+          {apiError && (
+            <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" /><span>{apiError}</span>
+            </div>
+          )}
           <Input label="Nombre del producto" value={itemForm.producto} onChange={(e) => setItemForm({ ...itemForm, producto: e.target.value })} placeholder="Ej: Silla Mimbre Clásica" />
           <div className="grid grid-cols-2 gap-3">
             <Input label="Cantidad" type="number" min="1" value={itemForm.cantidad} onChange={(e) => setItemForm({ ...itemForm, cantidad: e.target.value })} />

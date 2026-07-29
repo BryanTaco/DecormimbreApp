@@ -5,32 +5,31 @@ import { FileText, Search } from 'lucide-react'
 import { getMisCotizaciones } from '@/api/authApi'
 
 const ESTADO_COLOR: Record<string, string> = {
-  APROBADA: '#22c55e', PENDIENTE: '#f59e0b', RECHAZADA: '#ef4444',
-  EN_REVISION: '#3b82f6', BORRADOR: '#94a3b8',
+  APROBADA: '#22c55e', ENVIADA: '#3b82f6', RECHAZADA: '#ef4444', BORRADOR: '#94a3b8',
 }
 const ESTADO_LABEL: Record<string, string> = {
-  PENDIENTE: 'Pendiente revisión', APROBADA: 'Aprobada', RECHAZADA: 'Rechazada',
-  EN_REVISION: 'En revisión', BORRADOR: 'Borrador',
+  BORRADOR: 'Borrador', ENVIADA: 'Enviada', APROBADA: 'Aprobada', RECHAZADA: 'Rechazada',
 }
-const FILTROS = ['Todas', 'PENDIENTE', 'APROBADA', 'RECHAZADA']
+const FILTROS = ['Todas', 'BORRADOR', 'ENVIADA', 'APROBADA', 'RECHAZADA']
 
 export default function CotizacionesPage() {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [filtro, setFiltro] = useState('Todas')
   const [busqueda, setBusqueda] = useState('')
 
   useEffect(() => {
     getMisCotizaciones()
       .then((d) => setData(d.results ?? d))
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [])
 
   const filtered = data.filter((c) => {
     const matchFiltro = filtro === 'Todas' || c.estado === filtro
     const term = busqueda.toLowerCase()
-    const matchBusq = !term || (c.codigo ?? '').toLowerCase().includes(term) || (c.tipo_mueble ?? '').toLowerCase().includes(term)
+    const matchBusq = !term || (c.numero ?? '').toLowerCase().includes(term) || (c.observaciones ?? '').toLowerCase().includes(term)
     return matchFiltro && matchBusq
   })
 
@@ -58,7 +57,11 @@ export default function CotizacionesPage() {
 
       {/* Table */}
       <div style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', borderRadius: 16, border: '1px solid rgba(196,168,130,0.18)', overflow: 'hidden' }}>
-        {loading ? (
+        {error ? (
+          <div style={{ padding: '40px 24px', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: '#b02020', margin: 0 }}>No se pudieron cargar tus cotizaciones. Recarga la página o intenta más tarde.</p>
+          </div>
+        ) : loading ? (
           <div style={{ padding: 48, textAlign: 'center' }}>
             <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid rgba(196,168,130,0.3)', borderTopColor: '#5C4033', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
           </div>
@@ -74,7 +77,7 @@ export default function CotizacionesPage() {
         ) : (
           <>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px 120px 100px', gap: 0, padding: '12px 22px', borderBottom: '1px solid rgba(196,168,130,0.15)', background: 'rgba(245,240,235,0.5)' }}>
-              {['Código', 'Mueble', 'Fecha', 'Estado', ''].map(h => (
+              {['Número', 'Forma de pago', 'Fecha', 'Estado', ''].map(h => (
                 <span key={h} style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(92,64,51,0.45)' }}>{h}</span>
               ))}
             </div>
@@ -83,9 +86,9 @@ export default function CotizacionesPage() {
                 style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px 120px 100px', gap: 0, padding: '16px 22px', borderBottom: i < filtered.length - 1 ? '1px solid rgba(196,168,130,0.1)' : 'none', alignItems: 'center', transition: 'background 180ms' }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'rgba(245,240,235,0.5)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, color: '#3d2215' }}>{c.codigo ?? `COT-${c.id?.slice(0, 6).toUpperCase()}`}</span>
-                <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'rgba(92,64,51,0.7)' }}>{c.tipo_mueble ?? '—'}</span>
-                <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(92,64,51,0.5)' }}>{c.fecha_solicitud ? new Date(c.fecha_solicitud).toLocaleDateString('es-EC', { day: '2-digit', month: 'short' }) : '—'}</span>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, color: '#3d2215' }}>{c.numero ?? `COT-${c.id?.slice(0, 6).toUpperCase()}`}</span>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'rgba(92,64,51,0.7)' }}>{c.forma_pago?.replace(/_/g, ' ') ?? '—'}</span>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(92,64,51,0.5)' }}>{c.fecha_creacion ? new Date(c.fecha_creacion).toLocaleDateString('es-EC', { day: '2-digit', month: 'short' }) : '—'}</span>
                 <span>
                   <span style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: ESTADO_COLOR[c.estado] ?? '#94a3b8', background: `${ESTADO_COLOR[c.estado] ?? '#94a3b8'}18`, padding: '3px 8px', borderRadius: 99 }}>
                     {ESTADO_LABEL[c.estado] ?? c.estado}

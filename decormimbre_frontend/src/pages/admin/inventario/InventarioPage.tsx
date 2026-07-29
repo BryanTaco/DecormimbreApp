@@ -61,7 +61,7 @@ export default function InventarioPage() {
 
   const saveLote = useMutation({
     mutationFn: () => inventarioApi.lotes.create({ ...formLote, cantidad_disponible: formLote.cantidad_inicial }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['lotes', 'materias'] }); setModalLote(false); setFormLote(EMPTY_LOTE) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['lotes'] }); qc.invalidateQueries({ queryKey: ['materias'] }); setModalLote(false); setFormLote(EMPTY_LOTE) },
   })
 
   const saveAjuste = useMutation({
