@@ -43,7 +43,7 @@ export interface Pedido {
   margen?: string
   margen_porcentaje?: string
   fecha_promesa_entrega: string | null
-  creado_en: string
+  fecha_creacion: string
   items: ItemPedido[]
   tareas: TareaProduccion[]
   porcentaje_completado: number

@@ -10,7 +10,7 @@ import Modal from '@/components/ui/Modal'
 import Btn from '@/components/ui/Btn'
 import Spinner from '@/components/ui/Spinner'
 
-const TIPO_COLOR: Record<string, string> = { ESTRUCTURA: '#7B5840', TEJIDO: '#C4A882', ACABADO: '#a855f7', COJINES: '#3b82f6', EMPAQUE: '#16a34a' }
+const TIPO_COLOR: Record<string, string> = { ESTRUCTURA: '#7B5840', TEJIDO: '#C4A882', ACABADOS: '#a855f7', COJINES: '#3b82f6', CONTROL_CALIDAD: '#16a34a' }
 const hexDe = (s: string | null) => { const m = s?.match(/#([0-9a-fA-F]{3,8})/); return m ? m[0] : null }
 const dims = (t: TareaArtesano['items'][0]) => [t.ancho_cm && `${t.ancho_cm}`, t.alto_cm && `${t.alto_cm}`, t.largo_cm && `${t.largo_cm}`].filter(Boolean).join(' × ')
 
