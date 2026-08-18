@@ -41,7 +41,7 @@ PRODUCTOS = [
     ("Set Modular Olivo", "Exterior", "POLIALUMINIO", 980, "set-modular-olivo.jpg", "Set modular redondo para exterior con cojines verde olivo. Polialuminio resistente."),
     ("Taburete Terraza", "Exterior", "POLIALUMINIO", 160, "taburete-terraza.jpg", "Taburete alto tejido para barras y terrazas. Resistente al sol y la humedad."),
     ("Set Terraza Cobre", "Exterior", "POLIALUMINIO", 850, "set-terraza-cobre.jpg", "Set de terraza en tonos cobre para azoteas. Sillones tejidos con cojines premium."),
-    ("Búhos Decorativos", "Accesorios", "MIMBRE", 55, "buhos-decorativos.jpg", "Figuras decorativas de búho tejidas a mano. Pieza artesanal única para tu hogar."),
+    ("Búhos Decorativos", "Accesorios", "MIMBRE", 55, "gatera-polialuminio.jpg", "Figuras decorativas de búho tejidas a mano. Pieza artesanal única para tu hogar."),
     ("Dúo Papasan", "Sala", "MIMBRE", 370, "duo-papasan.jpg", "Par de sillas papasan tejidas en mimbre natural. Forma envolvente y acogedora."),
     ("Comedor Alameda", "Comedor", "COMBINADO", 820, "comedor-alameda.jpg", "Comedor de líneas cálidas con sillas de respaldo tejido y mesa amplia."),
 ]
