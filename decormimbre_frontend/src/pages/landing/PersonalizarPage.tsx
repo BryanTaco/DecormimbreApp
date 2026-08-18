@@ -183,6 +183,17 @@ export default function PersonalizarPage() {
         email: form.email,
         telefono: normalizarTelefono(form.telefono),
         descripcion: mensaje, // el backend espera "descripcion"
+        personalizacion: {
+          tipo: tipoLabel,
+          material: materialLabel,
+          color: { nombre: colorLabel, hex: currentColor },
+          cojin: { nombre: cojinLabel, hex: currentCojin },
+          medidas: {
+            ancho_cm: form.ancho ? Number(form.ancho) : null,
+            alto_cm: form.alto ? Number(form.alto) : null,
+            profundidad_cm: form.profundidad ? Number(form.profundidad) : null,
+          },
+        },
       })
       setSent(true)
     } catch (err) {

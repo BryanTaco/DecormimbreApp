@@ -40,7 +40,14 @@ export default function LoginPage() {
       )
       // Efecto cortina de bienvenida y luego navegamos
       setCortina(res.user.nombre.split(' ')[0])
-      const destino = res.user.rol === 'CLIENTE' ? from : '/admin'
+      // Cada rol debe entrar únicamente a su espacio. `from` se limita al
+      // portal del cliente para evitar que una URL administrativa se reutilice
+      // tras una sesión anterior.
+      const destino = res.user.rol === 'CLIENTE'
+        ? (from.startsWith('/cuenta') ? from : '/cuenta')
+        : res.user.rol === 'ARTESANO'
+          ? '/taller'
+          : '/admin'
       setTimeout(() => navigate(destino), 1100)
     } catch (err: any) {
       const msg = err.response?.data?.detail ?? err.response?.data?.non_field_errors?.[0]

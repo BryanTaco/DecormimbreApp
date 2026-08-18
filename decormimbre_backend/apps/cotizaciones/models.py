@@ -51,6 +51,9 @@ class Cotizacion(models.Model):
     fecha_expiracion = models.DateTimeField(null=True, blank=True)
     fecha_respuesta = models.DateTimeField(null=True, blank=True)
     observaciones = models.TextField(blank=True)
+    # Especificación estructurada originada en el personalizador web: colores
+    # exactos, medidas y material. Se conserva hasta el pedido y el taller.
+    configuracion = models.JSONField(default=dict, blank=True)
 
     class Meta:
         db_table = "cotizaciones"
@@ -142,6 +145,7 @@ class Cotizacion(models.Model):
             forma_pago=self.forma_pago,
             fecha_promesa_entrega=self.fecha_promesa_entrega,
             observaciones=f"Generado automáticamente desde cotización {self.numero}",
+            configuracion=self.configuracion,
         )
         for item in self.items.all():
             precio_pedido = (
@@ -208,6 +212,7 @@ class SolicitudRapida(models.Model):
     descripcion = models.TextField()
     cantidad = models.PositiveIntegerField(default=1)
     notas = models.TextField(blank=True)
+    personalizacion = models.JSONField(default=dict, blank=True)
     fecha_solicitud = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default="PENDIENTE", db_index=True)
     ip_origen = models.GenericIPAddressField(null=True, blank=True)

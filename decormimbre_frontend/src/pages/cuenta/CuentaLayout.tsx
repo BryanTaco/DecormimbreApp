@@ -22,14 +22,15 @@ export default function CuentaLayout() {
 
   useEffect(() => {
     if (!user) { navigate('/login', { state: { from: location.pathname } }); return }
-    if (user.rol !== 'CLIENTE') navigate('/admin')
+    if (user.rol === 'ARTESANO') navigate('/taller', { replace: true })
+    if (user.rol === 'ADMIN' || user.rol === 'PROPIETARIO') navigate('/admin', { replace: true })
   }, [user, navigate, location.pathname])
 
   // Cerrar drawer al navegar y bloquear scroll de fondo
   useEffect(() => { setOpen(false) }, [location.pathname])
   useEffect(() => { document.body.style.overflow = open ? 'hidden' : ''; return () => { document.body.style.overflow = '' } }, [open])
 
-  if (!user) return null
+  if (!user || user.rol !== 'CLIENTE') return null
 
   const logout = () => { clearAuth(); navigate('/') }
   const initials = user.nombre.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()

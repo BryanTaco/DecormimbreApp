@@ -177,12 +177,31 @@ class SolicitudRapidaConvertirView(APIView):
         cuerpo_obs += f"\n\nDescripción: {sol.descripcion}"
         if sol.notas:
             cuerpo_obs += f"\nNotas: {sol.notas}"
+        ficha = sol.personalizacion or {}
+        if ficha:
+            color = ficha.get("color", {})
+            cojin = ficha.get("cojin", {})
+            medidas = ficha.get("medidas", {})
+            medidas_txt = " × ".join(
+                f"{etiqueta}: {medidas[campo]:g} cm"
+                for campo, etiqueta in (("ancho_cm", "Ancho"), ("alto_cm", "Alto"), ("profundidad_cm", "Profundidad"))
+                if isinstance(medidas.get(campo), (int, float))
+            )
+            cuerpo_obs += (
+                f"\n\nFicha de personalización\n"
+                f"Tipo: {ficha.get('tipo') or '—'}\n"
+                f"Material: {ficha.get('material') or '—'}\n"
+                f"Color: {color.get('nombre') or '—'} {color.get('hex') or ''}\n"
+                f"Cojín: {cojin.get('nombre') or '—'} {cojin.get('hex') or ''}"
+                + (f"\nMedidas: {medidas_txt}" if medidas_txt else "")
+            )
 
         cotizacion = Cotizacion.objects.create(
             cliente=cliente,
             creado_por=request.user,
             forma_pago=s.validated_data["forma_pago"],
             observaciones=cuerpo_obs,
+            configuracion=ficha,
         )
         sol.estado = "CONVERTIDA"
         sol.cotizacion = cotizacion

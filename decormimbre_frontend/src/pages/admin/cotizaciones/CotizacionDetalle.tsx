@@ -10,6 +10,7 @@ import Modal from '@/components/ui/Modal'
 import Input from '@/components/ui/Input'
 import Btn from '@/components/ui/Btn'
 import PageHeader from '@/components/ui/PageHeader'
+import FichaPersonalizacion from '@/components/cotizaciones/FichaPersonalizacion'
 
 const TRANSICIONES: Record<string, { label: string; next: string }[]> = {
   BORRADOR: [{ label: 'Enviar al cliente', next: 'ENVIADA' }],
@@ -126,7 +127,8 @@ export default function CotizacionDetalle() {
             {cot.items?.length === 0 ? (
               <p className="text-sm text-[rgba(92,64,51,0.4)] text-center py-8">Sin ítems aún</p>
             ) : (
-              <table className="w-full text-sm">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[620px] text-sm">
                 <thead>
                   <tr className="border-b border-[rgba(92,64,51,0.05)]">
                     {['Producto', 'Cant.', 'P.Unit', 'Subtotal', ''].map((h) => (
@@ -152,6 +154,7 @@ export default function CotizacionDetalle() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </div>
         </div>
@@ -182,6 +185,7 @@ export default function CotizacionDetalle() {
                 <p className="text-sm text-[rgba(92,64,51,0.8)]">{cot.observaciones}</p>
               </>
             )}
+            <FichaPersonalizacion ficha={cot.configuracion} compact />
           </div>
 
           <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] p-5 flex flex-col gap-2">
@@ -209,11 +213,11 @@ export default function CotizacionDetalle() {
             </div>
           )}
           <Input label="Nombre del producto" value={itemForm.producto} onChange={(e) => setItemForm({ ...itemForm, producto: e.target.value })} placeholder="Ej: Silla Mimbre Clásica" />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input label="Cantidad" type="number" min="1" value={itemForm.cantidad} onChange={(e) => setItemForm({ ...itemForm, cantidad: e.target.value })} />
             <Input label="Precio unitario ($)" type="number" value={itemForm.precio_unitario} onChange={(e) => setItemForm({ ...itemForm, precio_unitario: e.target.value })} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input label="Ancho (cm)" type="number" value={itemForm.ancho_cm} onChange={(e) => setItemForm({ ...itemForm, ancho_cm: e.target.value })} />
             <Input label="Alto (cm)" type="number" value={itemForm.alto_cm} onChange={(e) => setItemForm({ ...itemForm, alto_cm: e.target.value })} />
           </div>

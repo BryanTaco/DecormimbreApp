@@ -10,6 +10,7 @@ import Modal from '@/components/ui/Modal'
 import Select from '@/components/ui/Select'
 import Btn from '@/components/ui/Btn'
 import PageHeader from '@/components/ui/PageHeader'
+import FichaPersonalizacion from '@/components/cotizaciones/FichaPersonalizacion'
 
 const TRANSICIONES: Record<string, { label: string; next: string }[]> = {
   PENDIENTE: [{ label: 'Iniciar producción', next: 'EN_PRODUCCION' }, { label: 'Cancelar pedido', next: 'CANCELADO' }],
@@ -122,7 +123,7 @@ export default function PedidoDetalle() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Tareas de producción */}
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-x-auto">
             <div className="px-5 py-4 border-b border-[rgba(92,64,51,0.07)]">
               <span className="text-sm font-normal text-[rgba(92,64,51,0.8)]">Etapas de producción</span>
             </div>
@@ -170,7 +171,7 @@ export default function PedidoDetalle() {
             <div className="px-5 py-4 border-b border-[rgba(92,64,51,0.07)]">
               <span className="text-sm font-normal text-[rgba(92,64,51,0.8)]">Ítems ({pedido.items?.length ?? 0})</span>
             </div>
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[540px] text-sm">
               <thead>
                 <tr className="border-b border-[rgba(92,64,51,0.05)]">
                   {['Producto', 'Cant.', 'Dims.', 'Subtotal'].map((h) => (
@@ -223,6 +224,8 @@ export default function PedidoDetalle() {
               </span>
             </div>
           </div>
+
+          <FichaPersonalizacion ficha={pedido.configuracion} />
 
           {/* Enlace público de seguimiento para el cliente */}
           {pedido.tracking_token && (

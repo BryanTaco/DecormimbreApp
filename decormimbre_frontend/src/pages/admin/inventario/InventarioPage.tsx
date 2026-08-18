@@ -99,7 +99,7 @@ export default function InventarioPage() {
       />
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4 mb-6 max-w-2xl">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 max-w-2xl">
         <StatCard label="Materias primas" value={materias.length} icon={Package} color="#5C4033" delay={0} onClick={() => setTab('Materias primas')} />
         <StatCard label="En stock crítico" value={materias.filter((m) => m.en_stock_critico).length} icon={AlertTriangle} color="#ef4444" delay={0.06} onClick={() => setTab('Alertas')} />
         <StatCard label="Valor inventario" value={'$' + materias.reduce((s, m) => s + Number(m.stock_actual || 0) * Number(m.costo_unitario || 0), 0).toLocaleString('es-EC', { maximumFractionDigits: 0 })} icon={DollarSign} color="#C4A882" delay={0.12} />
@@ -119,8 +119,8 @@ export default function InventarioPage() {
         loadingMaterias ? <Spinner /> : materias.length === 0 ? (
           <EmptyState icon={Package} title="Sin materias primas" />
         ) : (
-          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-x-auto">
+            <table className="w-full min-w-[680px] text-sm">
               <thead>
                 <tr className="border-b border-[rgba(92,64,51,0.07)]">
                   {['Material', 'Unidad', 'Stock actual', 'Stock mínimo', 'Estado', ''].map((h) => (
@@ -158,8 +158,8 @@ export default function InventarioPage() {
         loadingLotes ? <Spinner /> : lotes.length === 0 ? (
           <EmptyState icon={Package} title="Sin lotes registrados" action={<Btn onClick={() => setModalLote(true)}><Plus className="w-4 h-4" /> Nuevo lote</Btn>} />
         ) : (
-          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-x-auto">
+            <table className="w-full min-w-[680px] text-sm">
               <thead>
                 <tr className="border-b border-[rgba(92,64,51,0.07)]">
                   {['Lote', 'Materia prima', 'Cant. inicial', 'Cant. disponible', 'Recepción'].map((h) => (
@@ -214,7 +214,7 @@ export default function InventarioPage() {
         <div className="flex flex-col gap-4">
           <Input label="Nombre" value={formMateria.nombre ?? ''} onChange={(e) => setFormMateria({ ...formMateria, nombre: e.target.value })} />
           <Select label="Unidad" value={formMateria.unidad ?? 'ROLLO'} onChange={(e) => setFormMateria({ ...formMateria, unidad: e.target.value })} options={UNIDADES} />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input label="Stock actual" type="number" value={String(formMateria.stock_actual ?? 0)} onChange={(e) => setFormMateria({ ...formMateria, stock_actual: e.target.value })} />
             <Input label="Stock mínimo" type="number" value={String(formMateria.stock_minimo ?? 0)} onChange={(e) => setFormMateria({ ...formMateria, stock_minimo: e.target.value })} />
           </div>
@@ -231,7 +231,7 @@ export default function InventarioPage() {
         <div className="flex flex-col gap-4">
           <Select label="Materia prima" value={formLote.materia_prima} onChange={(e) => setFormLote({ ...formLote, materia_prima: e.target.value })} options={materias.map((m) => ({ value: m.id, label: m.nombre }))} placeholder="Seleccionar" />
           <Input label="Número de lote" value={formLote.numero_lote} onChange={(e) => setFormLote({ ...formLote, numero_lote: e.target.value })} />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input label="Cantidad inicial" type="number" value={formLote.cantidad_inicial} onChange={(e) => setFormLote({ ...formLote, cantidad_inicial: e.target.value })} />
             <Input label="Costo unitario ($)" type="number" value={formLote.costo_unitario} onChange={(e) => setFormLote({ ...formLote, costo_unitario: e.target.value })} />
           </div>

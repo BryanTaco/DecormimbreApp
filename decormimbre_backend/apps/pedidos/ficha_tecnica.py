@@ -53,10 +53,13 @@ GRIS_MEDIO = colors.HexColor("#D0D0D0")
 
 
 def _hex_to_color(hex_str: str):
-    hex_str = hex_str.lstrip("#")
+    hex_str = (hex_str or "").lstrip("#")
     if len(hex_str) == 6:
-        r, g, b = int(hex_str[0:2], 16), int(hex_str[2:4], 16), int(hex_str[4:6], 16)
-        return colors.Color(r / 255, g / 255, b / 255)
+        try:
+            r, g, b = int(hex_str[0:2], 16), int(hex_str[2:4], 16), int(hex_str[4:6], 16)
+            return colors.Color(r / 255, g / 255, b / 255)
+        except ValueError:
+            pass
     return colors.white
 
 
@@ -343,6 +346,43 @@ def _estilo_tabla_base(color_cabecera) -> list:
 
 def _footer(pedido, e) -> list:
     story: list[Flowable] = [Spacer(1, 0.5 * cm)]
+    ficha = pedido.configuracion or {}
+    if ficha:
+        color = ficha.get("color") or {}
+        cojin = ficha.get("cojin") or {}
+        medidas = ficha.get("medidas") or {}
+        dimensiones = " × ".join(
+            f"{etiqueta}: {medidas[campo]:g} cm"
+            for campo, etiqueta in (("ancho_cm", "Ancho"), ("alto_cm", "Alto"), ("profundidad_cm", "Profundidad"))
+            if isinstance(medidas.get(campo), (int, float))
+        ) or "—"
+        filas = [
+            ["Ficha de personalización", ""],
+            ["Tipo / material", " · ".join(filter(None, [ficha.get("tipo"), ficha.get("material")])) or "—"],
+            ["Color del tejido", f"{color.get('nombre') or '—'} {color.get('hex') or ''}"],
+            ["Color del cojín", f"{cojin.get('nombre') or '—'} {cojin.get('hex') or ''}"],
+            ["Medidas solicitadas", dimensiones],
+        ]
+        tabla = Table(filas, colWidths=[4 * cm, 13 * cm])
+        estilo = [
+            ("SPAN", (0, 0), (1, 0)),
+            ("FONTNAME", (0, 0), (1, 0), _f(bold=True)),
+            ("FONTNAME", (0, 1), (0, -1), _f(bold=True)),
+            ("FONTNAME", (1, 1), (1, -1), _f()),
+            ("FONTSIZE", (0, 0), (-1, -1), 8.5),
+            ("BACKGROUND", (0, 0), (-1, 0), e["acento"]),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("BACKGROUND", (0, 1), (-1, -1), GRIS),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.white),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ]
+        if color.get("hex"):
+            estilo.append(("BACKGROUND", (1, 2), (1, 2), _hex_to_color(color["hex"])))
+        if cojin.get("hex"):
+            estilo.append(("BACKGROUND", (1, 3), (1, 3), _hex_to_color(cojin["hex"])))
+        tabla.setStyle(TableStyle(estilo))
+        story.append(tabla)
+        story.append(Spacer(1, 0.3 * cm))
     if pedido.observaciones:
         story.append(Paragraph(
             "Observaciones generales:",

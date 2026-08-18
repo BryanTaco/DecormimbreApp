@@ -82,7 +82,7 @@ export default function ClientesPage() {
       />
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4 mb-6 max-w-2xl">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 max-w-2xl">
         <StatCard label="Clientes" value={clientes.length} icon={Users} color="#5C4033" delay={0} />
         <StatCard label="Con correo" value={clientes.filter((c) => c.email).length} icon={Mail} color="#3b82f6" delay={0.06} />
         <StatCard label="Con teléfono" value={clientes.filter((c) => c.telefono).length} icon={Phone} color="#16a34a" delay={0.12} />
@@ -102,8 +102,8 @@ export default function ClientesPage() {
       {isLoading ? <Spinner /> : clientes.length === 0 ? (
         <EmptyState icon={Users} title="Sin clientes aún" action={<Btn onClick={openCreate}><Plus className="w-4 h-4" /> Agregar cliente</Btn>} />
       ) : (
-        <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-x-auto">
+          <table className="w-full min-w-[680px] text-sm">
             <thead>
               <tr className="border-b border-[rgba(92,64,51,0.07)]">
                 {['Nombre', 'Cédula / RUC', 'Email', 'Teléfono', ''].map((h) => (

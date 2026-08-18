@@ -35,6 +35,13 @@ export interface TareaArtesano {
   bloqueada: boolean
   materiales: Material[]
   requiere_pedido: boolean
+  personalizacion: {
+    tipo?: string
+    material?: string
+    color?: { nombre?: string; hex?: string }
+    cojin?: { nombre?: string; hex?: string }
+    medidas?: { ancho_cm?: number | null; alto_cm?: number | null; profundidad_cm?: number | null }
+  }
 }
 
 export const tallerApi = {

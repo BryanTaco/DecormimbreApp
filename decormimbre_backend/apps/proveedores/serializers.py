@@ -12,6 +12,8 @@ class ProveedorSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "fecha_creacion"]
 
     def validate_ruc(self, value):
+        if not value:
+            return value
         if not value.isdigit() or len(value) not in (10, 13):
             raise serializers.ValidationError("El RUC debe tener 10 o 13 dígitos.")
         return value

@@ -136,11 +136,11 @@ export default function PipelinePage() {
             placeholder="Sin cliente / lead"
             options={clientes.map((c: { id: string; nombre?: string; nombre_completo?: string }) => ({ value: c.id, label: c.nombre_completo || c.nombre || c.id }))}
           />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input label="Valor estimado ($)" type="number" value={form.valor_estimado} onChange={(e) => setForm({ ...form, valor_estimado: e.target.value })} />
             <Input label="Probabilidad (%)" type="number" value={form.probabilidad} onChange={(e) => setForm({ ...form, probabilidad: e.target.value })} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Select label="Etapa" value={form.etapa} onChange={(e) => setForm({ ...form, etapa: e.target.value as Etapa })} options={ETAPAS.map((e) => ({ value: e, label: ETAPA_LABEL[e] }))} />
             <Select label="Fuente" value={form.fuente} onChange={(e) => setForm({ ...form, fuente: e.target.value })} options={FUENTES.map((f) => ({ value: f, label: f }))} />
           </div>

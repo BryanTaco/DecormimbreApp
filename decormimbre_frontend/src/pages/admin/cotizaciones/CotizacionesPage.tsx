@@ -16,6 +16,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import Modal from '@/components/ui/Modal'
 import Select from '@/components/ui/Select'
 import Btn from '@/components/ui/Btn'
+import FichaPersonalizacion from '@/components/cotizaciones/FichaPersonalizacion'
 
 const ESTADOS = [
   { value: '', label: 'Todos los estados' },
@@ -226,9 +227,9 @@ export default function CotizacionesPage() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden"
+              className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-x-auto"
             >
-              <table className="w-full text-sm">
+              <table className="w-full min-w-[640px] text-sm">
                 <thead>
                   <tr className="border-b border-[rgba(92,64,51,0.07)] bg-[rgba(92,64,51,0.015)]">
                     {['Número', 'Cliente', 'Estado', 'Total', 'Fecha', ''].map((h) => (
@@ -309,6 +310,7 @@ export default function CotizacionesPage() {
                       {sol.cantidad > 1 && <span>Cant: {sol.cantidad}</span>}
                     </div>
                     <p className="text-sm text-[rgba(92,64,51,0.75)] line-clamp-3 leading-relaxed">{sol.descripcion}</p>
+                    <FichaPersonalizacion ficha={sol.personalizacion} compact />
                     {sol.notas && (
                       <p className="text-xs text-[rgba(92,64,51,0.5)] mt-1 italic">{sol.notas}</p>
                     )}
@@ -401,6 +403,7 @@ export default function CotizacionesPage() {
               <p className="text-sm font-medium text-[rgba(92,64,51,0.9)]">{convertirModal.nombre}</p>
               <p className="text-xs text-[rgba(92,64,51,0.55)]">{convertirModal.email} {convertirModal.telefono && `· ${convertirModal.telefono}`}</p>
               <p className="text-xs text-[rgba(92,64,51,0.65)] mt-1 leading-relaxed line-clamp-3">{convertirModal.descripcion}</p>
+              <FichaPersonalizacion ficha={convertirModal.personalizacion} compact />
             </div>
 
             <Select

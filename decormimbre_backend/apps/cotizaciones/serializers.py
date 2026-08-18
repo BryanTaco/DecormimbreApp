@@ -43,7 +43,7 @@ class CotizacionSerializer(serializers.ModelSerializer):
             "id", "numero", "cliente", "cliente_nombre", "estado", "version",
             "subtotal", "iva", "total", "forma_pago", "fecha_promesa_entrega",
             "fecha_creacion", "fecha_envio", "fecha_expiracion", "fecha_respuesta",
-            "observaciones", "items", "versiones",
+            "observaciones", "configuracion", "items", "versiones",
         ]
         read_only_fields = [
             "id", "numero", "version", "subtotal", "iva", "total",
@@ -61,6 +61,7 @@ class CotizacionSnapshotSerializer(serializers.ModelSerializer):
             "id", "numero", "cliente", "estado", "version",
             "subtotal", "iva", "total", "forma_pago", "fecha_promesa_entrega",
             "fecha_creacion", "observaciones", "items",
+            "configuracion",
         ]
 
 
@@ -76,7 +77,7 @@ class SolicitudRapidaSerializer(serializers.ModelSerializer):
         fields = [
             "id", "nombre", "email", "telefono", "descripcion",
             "cantidad", "notas", "fecha_solicitud", "estado",
-            "usuario_vinculado", "cotizacion", "cotizacion_numero",
+            "personalizacion", "usuario_vinculado", "cotizacion", "cotizacion_numero",
         ]
         read_only_fields = ["id", "fecha_solicitud", "usuario_vinculado", "cotizacion", "cotizacion_numero"]
 

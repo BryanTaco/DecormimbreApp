@@ -64,7 +64,13 @@ export default function AdminLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
-    if (!user) navigate('/admin/login')
+    if (!user) {
+      navigate('/admin/login', { replace: true })
+    } else if (user.rol === 'ARTESANO') {
+      navigate('/taller', { replace: true })
+    } else if (user.rol === 'CLIENTE') {
+      navigate('/cuenta', { replace: true })
+    }
   }, [user, navigate])
 
   // Cerrar el drawer al cambiar de ruta
@@ -72,7 +78,7 @@ export default function AdminLayout() {
   // Bloquear el scroll de fondo con el drawer abierto
   useEffect(() => { document.body.style.overflow = menuOpen ? 'hidden' : ''; return () => { document.body.style.overflow = '' } }, [menuOpen])
 
-  if (!user) return null
+  if (!user || !['ADMIN', 'PROPIETARIO'].includes(user.rol)) return null
 
   const tituloActual = NAV.find((n) => (n.end ? location.pathname === n.to : location.pathname.startsWith(n.to)))?.label ?? 'Admin'
 

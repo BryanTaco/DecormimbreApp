@@ -57,6 +57,55 @@ class CotizacionRapidaSerializer(serializers.Serializer):
     )
     cantidad = serializers.IntegerField(min_value=1, default=1)
     notas = serializers.CharField(required=False, allow_blank=True, default="")
+    personalizacion = serializers.JSONField(required=False, default=dict)
+
+    def validate_personalizacion(self, value):
+        """Normaliza la ficha de diseño pública y bloquea HEX/medidas inválidos."""
+        import re
+
+        if not value:
+            return {}
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("La personalización debe tener un formato válido.")
+
+        def texto(campo, maximo=100):
+            dato = value.get(campo, "")
+            return str(dato).strip()[:maximo] if dato is not None else ""
+
+        def color(campo):
+            dato = value.get(campo) or {}
+            if not isinstance(dato, dict):
+                raise serializers.ValidationError({campo: "El color debe incluir nombre y hexadecimal."})
+            nombre = str(dato.get("nombre", "")).strip()[:100]
+            hex_valor = str(dato.get("hex", "")).strip().upper()
+            if hex_valor and not re.fullmatch(r"#[0-9A-F]{6}", hex_valor):
+                raise serializers.ValidationError({campo: "El color hexadecimal debe tener el formato #RRGGBB."})
+            return {"nombre": nombre, "hex": hex_valor}
+
+        medidas_entrada = value.get("medidas") or {}
+        if not isinstance(medidas_entrada, dict):
+            raise serializers.ValidationError({"medidas": "Las medidas deben tener un formato válido."})
+        medidas = {}
+        for campo in ("ancho_cm", "alto_cm", "profundidad_cm"):
+            bruto = medidas_entrada.get(campo)
+            if bruto in (None, ""):
+                medidas[campo] = None
+                continue
+            try:
+                numero = float(bruto)
+            except (TypeError, ValueError):
+                raise serializers.ValidationError({"medidas": "Las medidas deben ser numéricas."})
+            if not 1 <= numero <= 1000:
+                raise serializers.ValidationError({"medidas": "Cada medida debe estar entre 1 y 1000 cm."})
+            medidas[campo] = numero
+
+        return {
+            "tipo": texto("tipo"),
+            "material": texto("material"),
+            "color": color("color"),
+            "cojin": color("cojin"),
+            "medidas": medidas,
+        }
 
 
 class CotizacionRapidaView(APIView):
@@ -106,6 +155,7 @@ class CotizacionRapidaView(APIView):
             descripcion=data["descripcion"],
             cantidad=data.get("cantidad", 1),
             notas=data.get("notas", ""),
+            personalizacion=data.get("personalizacion", {}),
             ip_origen=ip or None,
             usuario_vinculado=usuario_vinculado,
         )
@@ -120,6 +170,20 @@ class CotizacionRapidaView(APIView):
         )
         if data.get("notas"):
             mensaje += f"Notas: {data['notas']}\n"
+        if data.get("personalizacion"):
+            ficha = data["personalizacion"]
+            medidas = ficha.get("medidas", {})
+            medidas_txt = " × ".join(
+                f"{etiqueta}: {medidas[campo]:g} cm"
+                for campo, etiqueta in (("ancho_cm", "Ancho"), ("alto_cm", "Alto"), ("profundidad_cm", "Profundidad"))
+                if medidas.get(campo) is not None
+            )
+            mensaje += (
+                f"Especificación: {ficha.get('tipo') or '—'} · {ficha.get('material') or '—'}\n"
+                f"Color: {ficha.get('color', {}).get('nombre') or '—'} {ficha.get('color', {}).get('hex') or ''}\n"
+                f"Cojín: {ficha.get('cojin', {}).get('nombre') or '—'} {ficha.get('cojin', {}).get('hex') or ''}\n"
+                + (f"Medidas: {medidas_txt}\n" if medidas_txt else "")
+            )
 
         # Notifica a propietario y admins.
         destinatarios = Usuario.objects.filter(rol__in=["PROPIETARIO", "ADMIN"], activo=True)

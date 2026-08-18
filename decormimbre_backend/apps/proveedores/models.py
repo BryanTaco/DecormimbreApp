@@ -12,7 +12,10 @@ class Proveedor(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=200)
-    ruc = models.CharField(max_length=13, unique=True)
+    # Los colectivos artesanales pueden no contar con un RUC único para el
+    # grupo. Se permite dejarlo vacío, en lugar de registrar un dato fiscal
+    # inventado.
+    ruc = models.CharField(max_length=13, unique=True, blank=True, default="")
     contacto_nombre = models.CharField(max_length=150, blank=True, default="")
     contacto_telefono = models.CharField(max_length=20, blank=True, default="")
     contacto_email = models.EmailField(blank=True, default="")
@@ -31,7 +34,7 @@ class Proveedor(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.nombre} ({self.ruc})"
+        return f"{self.nombre} ({self.ruc or 'Sin RUC registrado'})"
 
 
 class OrdenTrabajo(models.Model):

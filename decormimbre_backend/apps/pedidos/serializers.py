@@ -75,7 +75,7 @@ class PedidoSerializer(serializers.ModelSerializer):
             "fecha_promesa_entrega", "fecha_entrega_real",
             "subtotal", "iva", "total", "anticipo", "saldo_pendiente",
             "costo_real", "margen", "margen_porcentaje",
-            "observaciones", "items", "logs_estado", "tareas",
+            "observaciones", "configuracion", "items", "logs_estado", "tareas",
             "porcentaje_completado", "fecha_creacion",
         ]
         read_only_fields = [

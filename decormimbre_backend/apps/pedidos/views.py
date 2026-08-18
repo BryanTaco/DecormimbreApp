@@ -391,6 +391,9 @@ class MisTareasView(APIView):
                 ],
                 "iniciada_en": tarea.iniciada_en.isoformat() if tarea.iniciada_en else None,
                 "notas": tarea.notas,
+                # La ficha llega completa al artesano sin depender de que la
+                # cotización haya sido escrita manualmente.
+                "personalizacion": pedido.configuracion or {},
                 **_estado_produccion_tarea(tarea),
             })
         return success_response(data=data)

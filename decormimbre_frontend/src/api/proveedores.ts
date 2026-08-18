@@ -20,7 +20,7 @@ export interface OrdenTrabajo {
   estado: string
   descripcion: string
   monto_acordado: string
-  creado_en: string
+  fecha_creacion: string
 }
 
 export const proveedoresApi = {

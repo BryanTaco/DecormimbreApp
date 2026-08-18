@@ -42,6 +42,13 @@ export interface Pedido {
   costo_real?: string
   margen?: string
   margen_porcentaje?: string
+  configuracion?: {
+    tipo?: string
+    material?: string
+    color?: { nombre?: string; hex?: string }
+    cojin?: { nombre?: string; hex?: string }
+    medidas?: { ancho_cm?: number | null; alto_cm?: number | null; profundidad_cm?: number | null }
+  }
   fecha_promesa_entrega: string | null
   fecha_creacion: string
   items: ItemPedido[]
@@ -53,7 +60,7 @@ export const pedidosApi = {
   list: (params?: Record<string, string>) => api.get('/pedidos/', { params }),
   detail: (id: string) => api.get(`/pedidos/${id}/`),
   cambiarEstado: (id: string, nuevo_estado: string) =>
-    api.post(`/pedidos/${id}/estado/`, { nuevo_estado }),
+    api.post(`/pedidos/${id}/cambiar-estado/`, { nuevo_estado }),
   tareas: (id: string) => api.get(`/pedidos/${id}/tareas/`),
   asignarArtesano: (tareaId: string, artesanoId: string) =>
     api.patch(`/pedidos/tareas/${tareaId}/asignar/`, { artesano: artesanoId }),

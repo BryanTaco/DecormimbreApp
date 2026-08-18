@@ -82,7 +82,7 @@ export default function ProveedoresPage() {
       />
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4 mb-6 max-w-2xl">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 max-w-2xl">
         <StatCard label="Proveedores" value={proveedores.length} icon={Truck} color="#5C4033" delay={0} onClick={() => setTab('Proveedores')} />
         <StatCard label="Activos" value={proveedores.filter((p) => p.activo).length} icon={CheckCircle2} color="#16a34a" delay={0.06} />
         <StatCard label="Órdenes de trabajo" value={ordenes.length} icon={ClipboardList} color="#3b82f6" delay={0.12} onClick={() => setTab('Órdenes de trabajo')} />
@@ -102,11 +102,11 @@ export default function ProveedoresPage() {
         loadingProv ? <Spinner /> : proveedores.length === 0 ? (
           <EmptyState icon={Truck} title="Sin proveedores" />
         ) : (
-          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-x-auto">
+            <table className="w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-b border-[rgba(92,64,51,0.07)]">
-                  {['Proveedor', 'RUC', 'Tipo', 'Contacto', 'Email', ''].map((h) => (
+                  {['Proveedor', 'RUC / cédula', 'Tipo', 'Contacto', 'Email', ''].map((h) => (
                     <th key={h} className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[rgba(92,64,51,0.5)]">{h}</th>
                   ))}
                 </tr>
@@ -115,7 +115,7 @@ export default function ProveedoresPage() {
                 {proveedores.map((p) => (
                   <tr key={p.id} className="border-b border-[rgba(92,64,51,0.05)] hover:bg-[rgba(92,64,51,0.02)]">
                     <td className="px-5 py-3 text-[rgba(92,64,51,0.9)]">{p.nombre}</td>
-                    <td className="px-5 py-3 text-[rgba(92,64,51,0.6)]">{p.ruc}</td>
+                    <td className="px-5 py-3 text-[rgba(92,64,51,0.6)]">{p.ruc || 'No registrado'}</td>
                     <td className="px-5 py-3 text-[rgba(92,64,51,0.6)] text-xs">{p.tipo}</td>
                     <td className="px-5 py-3 text-[rgba(92,64,51,0.6)]">{p.contacto_nombre}</td>
                     <td className="px-5 py-3 text-[rgba(92,64,51,0.5)] text-xs">{p.contacto_email}</td>
@@ -133,8 +133,8 @@ export default function ProveedoresPage() {
         loadingOrdenes ? <Spinner /> : ordenes.length === 0 ? (
           <EmptyState icon={Truck} title="Sin órdenes de trabajo" action={<Btn onClick={() => setModalOrden(true)}><Plus className="w-4 h-4" /> Nueva orden</Btn>} />
         ) : (
-          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-x-auto">
+            <table className="w-full min-w-[620px] text-sm">
               <thead>
                 <tr className="border-b border-[rgba(92,64,51,0.07)]">
                   {['Número', 'Proveedor', 'Estado', 'Monto', 'Fecha'].map((h) => (
@@ -149,7 +149,7 @@ export default function ProveedoresPage() {
                     <td className="px-5 py-3 text-[rgba(92,64,51,0.7)]">{o.proveedor_nombre}</td>
                     <td className="px-5 py-3"><Badge value={o.estado} type="orden" /></td>
                     <td className="px-5 py-3 text-[rgba(92,64,51,0.8)]">${o.monto_acordado}</td>
-                    <td className="px-5 py-3 text-[rgba(92,64,51,0.5)] text-xs">{new Date(o.creado_en).toLocaleDateString('es-EC')}</td>
+                    <td className="px-5 py-3 text-[rgba(92,64,51,0.5)] text-xs">{formatearFecha(o.fecha_creacion)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -162,9 +162,9 @@ export default function ProveedoresPage() {
       <Modal open={modalProv} onClose={() => setModalProv(false)} title={editando ? 'Editar proveedor' : 'Nuevo proveedor'}>
         <div className="flex flex-col gap-4">
           <Input label="Nombre" value={formProv.nombre ?? ''} onChange={(e) => setP('nombre', e.target.value)} />
-          <Input label="RUC / Cédula" value={formProv.ruc ?? ''} onChange={(e) => setP('ruc', e.target.value)} />
+          <Input label="RUC / Cédula (si aplica)" value={formProv.ruc ?? ''} onChange={(e) => setP('ruc', e.target.value)} />
           <Select label="Tipo" value={formProv.tipo ?? 'MATERIA_PRIMA'} onChange={(e) => setP('tipo', e.target.value)} options={TIPOS} />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input label="Contacto" value={formProv.contacto_nombre ?? ''} onChange={(e) => setP('contacto_nombre', e.target.value)} />
             <Input label="Teléfono" value={formProv.contacto_telefono ?? ''} onChange={(e) => setP('contacto_telefono', e.target.value)} />
           </div>
@@ -184,7 +184,7 @@ export default function ProveedoresPage() {
             <label className="text-[11px] font-semibold uppercase tracking-wider text-[rgba(92,64,51,0.6)]">Descripción</label>
             <textarea rows={3} value={formOrden.descripcion ?? ''} onChange={(e) => setO('descripcion', e.target.value)} className="rounded-xl border border-[rgba(92,64,51,0.15)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[rgba(92,64,51,0.4)] resize-none transition-colors" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input label="Monto acordado ($)" type="number" value={formOrden.monto_acordado ?? ''} onChange={(e) => setO('monto_acordado', e.target.value)} />
             <Select label="Estado inicial" value={formOrden.estado ?? 'BORRADOR'} onChange={(e) => setO('estado', e.target.value)} options={ESTADOS_ORDEN} />
           </div>
@@ -196,4 +196,10 @@ export default function ProveedoresPage() {
       </Modal>
     </div>
   )
+}
+
+function formatearFecha(valor?: string) {
+  if (!valor) return 'Sin fecha'
+  const fecha = new Date(valor)
+  return Number.isNaN(fecha.getTime()) ? 'Sin fecha' : fecha.toLocaleDateString('es-EC')
 }

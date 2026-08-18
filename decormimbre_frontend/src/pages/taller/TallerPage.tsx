@@ -9,6 +9,7 @@ import BrandLogo from '@/components/BrandLogo'
 import Modal from '@/components/ui/Modal'
 import Btn from '@/components/ui/Btn'
 import Spinner from '@/components/ui/Spinner'
+import FichaPersonalizacion from '@/components/cotizaciones/FichaPersonalizacion'
 
 const TIPO_COLOR: Record<string, string> = { ESTRUCTURA: '#7B5840', TEJIDO: '#C4A882', ACABADOS: '#a855f7', COJINES: '#3b82f6', CONTROL_CALIDAD: '#16a34a' }
 const hexDe = (s: string | null) => { const m = s?.match(/#([0-9a-fA-F]{3,8})/); return m ? m[0] : null }
@@ -24,7 +25,8 @@ export default function TallerPage() {
 
   useEffect(() => {
     if (!user) { navigate('/admin/login'); return }
-    if (user.rol === 'CLIENTE') navigate('/cuenta')
+    if (user.rol === 'CLIENTE') navigate('/cuenta', { replace: true })
+    if (user.rol === 'ADMIN' || user.rol === 'PROPIETARIO') navigate('/admin', { replace: true })
   }, [user, navigate])
 
   const { data, isLoading } = useQuery({ queryKey: ['mis-tareas'], queryFn: () => tallerApi.misTareas(), enabled: !!user })
@@ -41,7 +43,7 @@ export default function TallerPage() {
     onSuccess: (_r, tareaId) => setSolicitado((s) => ({ ...s, [tareaId]: true })),
   })
 
-  if (!user) return null
+  if (!user || user.rol !== 'ARTESANO') return null
   const logout = () => { clearAuth(); navigate('/admin/login') }
 
   const enProceso = tareas.filter((t) => t.estado === 'EN_PROCESO')
@@ -150,6 +152,10 @@ export default function TallerPage() {
                         </div>
                       )
                     })}
+                  </div>
+
+                  <div className="px-5 pb-3">
+                    <FichaPersonalizacion ficha={t.personalizacion} compact />
                   </div>
 
                   {/* Materiales e inventario (preparación del tejedor) */}

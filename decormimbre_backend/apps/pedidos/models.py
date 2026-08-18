@@ -84,6 +84,8 @@ class Pedido(models.Model):
     anticipo = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
     saldo_pendiente = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
     observaciones = models.TextField(blank=True, default="")
+    # Copia inmutable de la especificación aceptada en la cotización.
+    configuracion = models.JSONField(default=dict, blank=True)
     creado_por = models.ForeignKey(
         "authentication.Usuario",
         on_delete=models.SET_NULL,

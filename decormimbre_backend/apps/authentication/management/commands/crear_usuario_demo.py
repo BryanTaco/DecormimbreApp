@@ -36,19 +36,27 @@ class Command(BaseCommand):
             usuario.set_password(password)
             usuario.save()
 
-            # Para el cliente demo, asegurar un perfil de Cliente vinculado
+            # Para el cliente demo, asegurar un perfil de Cliente vinculado.
+            # La cédula y teléfono son valores de demostración válidos para
+            # que el flujo de cotización formal pase las mismas reglas que una
+            # cuenta real.
             if rol == "CLIENTE":
                 try:
                     from apps.clientes.models import Cliente
-                    Cliente.objects.get_or_create(
+                    cliente, _ = Cliente.objects.get_or_create(
                         usuario_cuenta=usuario,
                         defaults={
                             "nombre_completo": nombre,
                             "email": email,
-                            "telefono": "0980572561",
-                            "cedula_ruc": "9999999999",
+                            "telefono": "+593980572561",
+                            "cedula_ruc": "1710034065",
                         },
                     )
+                    cliente.nombre_completo = nombre
+                    cliente.email = email
+                    cliente.telefono = "+593980572561"
+                    cliente.cedula_ruc = "1710034065"
+                    cliente.save(update_fields=["nombre_completo", "email", "telefono", "cedula_ruc"])
                 except Exception as exc:  # noqa: BLE001
                     self.stdout.write(self.style.WARNING(f"  (No se pudo crear perfil de cliente: {exc})"))
 

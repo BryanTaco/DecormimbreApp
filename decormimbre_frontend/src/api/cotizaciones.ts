@@ -13,6 +13,14 @@ export interface ItemCotizacion {
   observaciones?: string
 }
 
+export interface Personalizacion {
+  tipo?: string
+  material?: string
+  color?: { nombre?: string; hex?: string }
+  cojin?: { nombre?: string; hex?: string }
+  medidas?: { ancho_cm?: number | null; alto_cm?: number | null; profundidad_cm?: number | null }
+}
+
 export interface Cotizacion {
   id: string
   numero: string
@@ -24,6 +32,7 @@ export interface Cotizacion {
   iva: string
   total: string
   observaciones: string
+  configuracion?: Personalizacion
   fecha_expiracion: string | null
   fecha_creacion: string
   creado_en?: string
@@ -42,6 +51,7 @@ export interface SolicitudRapida {
   estado: 'PENDIENTE' | 'EN_PROCESO' | 'CONVERTIDA' | 'IGNORADA'
   cotizacion: string | null
   cotizacion_numero: string | null
+  personalizacion: Personalizacion
 }
 
 export const cotizacionesApi = {

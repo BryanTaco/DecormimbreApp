@@ -69,8 +69,8 @@ export default function PedidosPage() {
         <EmptyState icon={ShoppingBag} title="Sin pedidos" description="Los pedidos se crean automáticamente al aprobar una cotización." />
       ) : (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
-          className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-hidden">
-          <table className="w-full text-sm">
+          className="bg-white rounded-[1.5rem] border border-[rgba(92,64,51,0.09)] shadow-[0_1px_3px_rgba(92,64,51,0.05)] overflow-x-auto">
+          <table className="w-full min-w-[760px] text-sm">
             <thead>
               <tr className="border-b border-[rgba(92,64,51,0.07)] bg-[rgba(92,64,51,0.015)]">
                 {['Número', 'Cliente', 'Estado', 'Progreso', 'Total', 'Entrega', ''].map((h) => (
