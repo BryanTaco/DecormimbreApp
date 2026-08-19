@@ -90,6 +90,47 @@ function safeHex(c: string) {
   return c.startsWith('#') && c.length === 7 ? c : '#C4A882'
 }
 
+// ── Textura de fibra natural (para el mimbre en modelos GLB) ──────────────────
+// Patrón en escala de grises (cerca del blanco) con trama tejida over/under y
+// ruido fino. Como MeshStandardMaterial multiplica map × color, esto tiñe la
+// fibra con el color elegido y le da variación tonal natural (no un plano liso).
+function makeFiberTexture(): THREE.CanvasTexture {
+  const size = 128
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = size
+  const ctx = canvas.getContext('2d')!
+  ctx.fillStyle = '#ddd8cf'
+  ctx.fillRect(0, 0, size, size)
+  const cell = 14
+  for (let gy = -1; gy * cell < size; gy++) {
+    for (let gx = -1; gx * cell < size; gx++) {
+      const x = gx * cell, y = gy * cell
+      const over = (gx + gy) % 2 === 0
+      const light = '#f4f0e8'
+      const dark = '#c8c0b2'
+      // banda "under" y "over" entrelazadas (mimbre cerrado)
+      if (over) {
+        ctx.fillStyle = dark; ctx.fillRect(x - 1, y + cell * 0.28, cell + 2, cell * 0.44)
+        ctx.fillStyle = light; ctx.fillRect(x + cell * 0.28, y - 1, cell * 0.44, cell + 2)
+      } else {
+        ctx.fillStyle = dark; ctx.fillRect(x + cell * 0.28, y - 1, cell * 0.44, cell + 2)
+        ctx.fillStyle = light; ctx.fillRect(x - 1, y + cell * 0.28, cell + 2, cell * 0.44)
+      }
+    }
+  }
+  // ruido fino para que la fibra no se vea perfecta
+  for (let i = 0; i < 2600; i++) {
+    ctx.fillStyle = `rgba(90,70,45,${Math.random() * 0.05})`
+    ctx.fillRect(Math.random() * size, Math.random() * size, 1, 1)
+  }
+  const tex = new THREE.CanvasTexture(canvas)
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping
+  tex.repeat.set(9, 9)
+  tex.colorSpace = THREE.SRGBColorSpace
+  tex.anisotropy = 8
+  return tex
+}
+
 // Ajusta el tono según el material para que la diferencia sea evidente en
 // cualquier iluminación: el polialuminio se ve más frío (grafito/azulado) y algo
 // más oscuro que el mimbre, que se mantiene cálido.
@@ -117,7 +158,7 @@ const SILLA_GLB = '/models/silla-acapulco.glb'
 const COLUMPIO_GLB = '/models/columpio-mimbre.glb'
 
 // Parámetros de color para los modelos GLB.
-type GP = { struct: string; structRough: number; structMetal: number; cushion: string }
+type GP = { struct: string; structRough: number; structMetal: number; cushion: string; structMap?: THREE.Texture | null }
 
 function GlbFurniture({ url, targetH, gp }: { url: string; targetH: number; gp: GP }) {
   const { scene } = useGLTF(url)
@@ -126,6 +167,7 @@ function GlbFurniture({ url, targetH, gp }: { url: string; targetH: number; gp: 
     const root = scene.clone(true)
     const structMat = new THREE.MeshStandardMaterial({
       color: gp.struct, roughness: gp.structRough, metalness: gp.structMetal,
+      map: gp.structMap ?? null,
     })
     const cushionMat = new THREE.MeshStandardMaterial({
       color: gp.cushion, roughness: 0.95, metalness: 0,
@@ -350,6 +392,8 @@ function FurnitureModel({ tipo, color, mat, cushion }: { tipo: string; color: st
   const isCombinado = mat === 'combinado'
   const hex = toneForMaterial(safeHex(color), isPolyalu)
   const texture = useMemo(() => makeWickerTexture(hex, mat), [hex, mat])
+  // Textura de fibra natural para el mimbre en los modelos GLB (se crea una vez).
+  const fiberTexture = useMemo(() => makeFiberTexture(), [])
 
   // La textura ya trae el tono del material: base blanca para no oscurecerla.
   // Mimbre: fibra natural mate y áspera, estructura del mismo tono.
@@ -379,6 +423,8 @@ function FurnitureModel({ tipo, color, mat, cushion }: { tipo: string; color: st
     structRough: isPolyalu ? 0.14 : isCombinado ? 0.42 : 1.0,
     structMetal: isPolyalu ? 0.55 : isCombinado ? 0.2 : 0,
     cushion: safeHex(cushion),
+    // El mimbre lleva textura de fibra natural; el polialuminio queda liso satinado.
+    structMap: isPolyalu ? null : fiberTexture,
   }
 
   switch (tipo) {
