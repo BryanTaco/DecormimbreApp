@@ -108,70 +108,87 @@ function toneForMaterial(hex: string, poly: boolean): string {
 type WP = { map: THREE.CanvasTexture; color: string; roughness: number; metalness: number }
 type FP = { color: string; roughness: number; metalness: number }
 
-// ── SILLA — respaldo circular tipo abanico (ref: silla-circular.jpg) ──────────
-// Aro exterior grande con radios que salen del centro (como rueda), aros
-// concéntricos, asiento tejido en la parte baja y patas dobladas tipo trineo.
-function SillaModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
-  const R = 0.78
-  const spokes = Array.from({ length: 22 })
+// ── Cordón/varilla entre dos puntos ──────────────────────────────────────────
+// Coloca un cilindro orientado desde `a` hasta `b`. Se usa para los cordones del
+// tejido (material wp) y para las patas metálicas (material fp).
+function Cord({ a, b, r, mat }: { a: THREE.Vector3; b: THREE.Vector3; r: number; mat: WP | FP }) {
+  const { pos, quat, len } = useMemo(() => {
+    const dir = new THREE.Vector3().subVectors(b, a)
+    const length = dir.length()
+    const position = new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5)
+    const quaternion = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 1, 0), dir.clone().normalize(),
+    )
+    return { pos: position, quat: quaternion, len: length }
+  }, [a, b])
+  return (
+    <mesh position={pos} quaternion={quat} castShadow>
+      <cylinderGeometry args={[r, r, len, 6]} />
+      <meshStandardMaterial {...mat} />
+    </mesh>
+  )
+}
+
+// ── SILLA — Acapulco: aro tipo pera con cordones radiales y patas de trípode ──
+// El aro y las patas usan el material de estructura (metal en polialuminio); los
+// cordones radiales usan el tejido del material (mimbre cálido / polialuminio).
+function SillaModel({ wp, fp }: { wp: WP; fp: FP; cp: FP }) {
+  const R = 0.6         // radio del aro
+  const rHole = 0.07    // radio del hueco central
+  const D = 0.5         // profundidad del cuenco (hacia atrás)
+  const N = 62          // nº de cordones radiales
+
+  const cords = useMemo(() => {
+    const arr: { a: THREE.Vector3; b: THREE.Vector3 }[] = []
+    for (let i = 0; i < N; i++) {
+      const t = (i / N) * Math.PI * 2
+      arr.push({
+        a: new THREE.Vector3(Math.cos(t) * R, Math.sin(t) * R, 0),
+        b: new THREE.Vector3(Math.cos(t) * rHole, Math.sin(t) * rHole, -D),
+      })
+    }
+    return arr
+  }, [])
+
+  // Patas de trípode + barras conectoras (esquinas de la base)
+  const legs = useMemo(() => (
+    [[0.42, 0.32], [-0.42, 0.32], [0.32, -0.42], [-0.32, -0.42]] as [number, number][]
+  ).map(([x, z]) => ({
+    a: new THREE.Vector3(x * 0.38, -0.02, z * 0.38),
+    b: new THREE.Vector3(x, -0.9, z),
+  })), [])
+  const bars = useMemo(() => ([
+    [new THREE.Vector3(0.42, -0.86, 0.32), new THREE.Vector3(-0.42, -0.86, 0.32)],
+    [new THREE.Vector3(0.32, -0.86, -0.42), new THREE.Vector3(-0.32, -0.86, -0.42)],
+  ] as [THREE.Vector3, THREE.Vector3][]), [])
 
   return (
     <group>
-      <group position={[0, 0.28, 0]} rotation={[-0.14, 0, 0]}>
-        {/* Aro exterior */}
+      {/* Cuenco de cordones (aro + tejido), forma de pera e inclinado atrás */}
+      <group position={[0, 0.42, 0]} rotation={[-0.18, 0, 0]} scale={[1, 1.12, 1]}>
+        {/* Aro exterior (marco) */}
         <mesh castShadow>
-          <torusGeometry args={[R, 0.042, 14, 80]} />
+          <torusGeometry args={[R, 0.03, 16, 96]} />
           <meshStandardMaterial {...fp} />
         </mesh>
-        {/* Aros concéntricos */}
-        {[0.58, 0.36].map((f, i) => (
-          <mesh key={i}>
-            <torusGeometry args={[R * f, 0.018, 10, 56]} />
-            <meshStandardMaterial {...fp} />
-          </mesh>
+        {/* Cordones radiales (tejido) */}
+        {cords.map((c, i) => (
+          <Cord key={i} a={c.a} b={c.b} r={0.007} mat={wp} />
         ))}
-        {/* Radios del abanico */}
-        {spokes.map((_, i) => {
-          const a = (i / spokes.length) * Math.PI * 2
-          return (
-            <mesh key={i} position={[Math.cos(a) * R * 0.5, Math.sin(a) * R * 0.5, 0]} rotation={[0, 0, a + Math.PI / 2]}>
-              <cylinderGeometry args={[0.01, 0.01, R, 6]} />
-              <meshStandardMaterial {...fp} />
-            </mesh>
-          )
-        })}
-        {/* Centro tejido (cubo del abanico) */}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.1, 0.1, 0.05, 20]} />
-          <meshStandardMaterial {...wp} />
-        </mesh>
-        {/* Asiento tejido (bolsillo en la parte baja del aro) */}
-        <mesh position={[0, -R * 0.56, 0.14]} rotation={[0.45, 0, 0]} scale={[1, 0.45, 0.85]} castShadow>
-          <sphereGeometry args={[0.42, 28, 18, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5]} />
-          <meshStandardMaterial {...wp} side={THREE.DoubleSide} />
-        </mesh>
-        {/* Cojín del asiento */}
-        <mesh position={[0, -R * 0.52, 0.14]} rotation={[0.45, 0, 0]} scale={[1, 0.3, 0.85]} castShadow>
-          <sphereGeometry args={[0.37, 24, 16]} />
-          <meshStandardMaterial {...cp} />
+        {/* Anillo del hueco central */}
+        <mesh position={[0, 0, -D]}>
+          <torusGeometry args={[rHole, 0.012, 10, 32]} />
+          <meshStandardMaterial {...fp} />
         </mesh>
       </group>
 
-      {/* Patas dobladas tipo trineo */}
-      {([-1, 1] as number[]).map((s) => (
-        <group key={s}>
-          {[-0.5, 0.5].map((z, i) => (
-            <mesh key={i} position={[s * 0.42, -0.64, z * 0.5]} rotation={[z > 0 ? -0.4 : 0.4, 0, s * 0.1]} castShadow>
-              <cylinderGeometry args={[0.024, 0.028, 0.56, 10]} />
-              <meshStandardMaterial {...fp} />
-            </mesh>
-          ))}
-          {/* Pie trineo (barra a lo largo del piso) */}
-          <mesh position={[s * 0.46, -0.88, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-            <cylinderGeometry args={[0.026, 0.026, 0.74, 10]} />
-            <meshStandardMaterial {...fp} />
-          </mesh>
-        </group>
+      {/* Patas de trípode metálicas */}
+      {legs.map((l, i) => (
+        <Cord key={`leg${i}`} a={l.a} b={l.b} r={0.02} mat={fp} />
+      ))}
+      {/* Barras conectoras bajas */}
+      {bars.map((bar, i) => (
+        <Cord key={`bar${i}`} a={bar[0]} b={bar[1]} r={0.016} mat={fp} />
       ))}
     </group>
   )
