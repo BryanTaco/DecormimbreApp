@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import {
   LayoutDashboard, FileText, ShoppingBag, Package,
-  Users, Truck, BarChart2, LogOut, Menu, X, Target, CheckSquare,
+  Users, Truck, BarChart2, LogOut, Menu, X, Target, CheckSquare, Armchair,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/auth'
 import BrandLogo from '@/components/BrandLogo'
@@ -15,6 +15,7 @@ const NAV = [
   { to: '/admin/tareas', label: 'Tareas', icon: CheckSquare },
   { to: '/admin/cotizaciones', label: 'Cotizaciones', icon: FileText },
   { to: '/admin/pedidos', label: 'Pedidos', icon: ShoppingBag },
+  { to: '/admin/catalogo', label: 'Catálogo', icon: Armchair },
   { to: '/admin/inventario', label: 'Inventario', icon: Package },
   { to: '/admin/clientes', label: 'Clientes', icon: Users },
   { to: '/admin/proveedores', label: 'Proveedores', icon: Truck },

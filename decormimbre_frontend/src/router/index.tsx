@@ -56,6 +56,7 @@ export const router = createBrowserRouter([
       { path: 'cotizaciones/:id', lazy: () => lazy(() => import('@/pages/admin/cotizaciones/CotizacionDetalle')) },
       { path: 'pedidos', lazy: () => lazy(() => import('@/pages/admin/pedidos/PedidosPage')) },
       { path: 'pedidos/:id', lazy: () => lazy(() => import('@/pages/admin/pedidos/PedidoDetalle')) },
+      { path: 'catalogo', lazy: () => lazy(() => import('@/pages/admin/catalogo/CatalogoPage')) },
       { path: 'inventario', lazy: () => lazy(() => import('@/pages/admin/inventario/InventarioPage')) },
       { path: 'proveedores', lazy: () => lazy(() => import('@/pages/admin/proveedores/ProveedoresPage')) },
       { path: 'reportes', lazy: () => lazy(() => import('@/pages/admin/reportes/ReportesPage')) },
