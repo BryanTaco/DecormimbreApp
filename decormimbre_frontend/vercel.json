@@ -7,6 +7,10 @@
     {
       "source": "/media/(.*)",
       "destination": "https://decormimbre-backend.onrender.com/media/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
