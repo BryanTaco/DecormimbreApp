@@ -1,6 +1,6 @@
 import { Suspense, useMemo, useRef, useState, useEffect } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { OrbitControls, ContactShadows } from '@react-three/drei'
+import { OrbitControls, ContactShadows, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 
 // ── Wicker texture generator ──────────────────────────────────────────────────
@@ -108,93 +108,52 @@ function toneForMaterial(hex: string, poly: boolean): string {
 type WP = { map: THREE.CanvasTexture; color: string; roughness: number; metalness: number }
 type FP = { color: string; roughness: number; metalness: number }
 
-// ── Cordón/varilla entre dos puntos ──────────────────────────────────────────
-// Coloca un cilindro orientado desde `a` hasta `b`. Se usa para los cordones del
-// tejido (material wp) y para las patas metálicas (material fp).
-function Cord({ a, b, r, mat }: { a: THREE.Vector3; b: THREE.Vector3; r: number; mat: WP | FP }) {
-  const { pos, quat, len } = useMemo(() => {
-    const dir = new THREE.Vector3().subVectors(b, a)
-    const length = dir.length()
-    const position = new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5)
-    const quaternion = new THREE.Quaternion().setFromUnitVectors(
-      new THREE.Vector3(0, 1, 0), dir.clone().normalize(),
-    )
-    return { pos: position, quat: quaternion, len: length }
-  }, [a, b])
-  return (
-    <mesh position={pos} quaternion={quat} castShadow>
-      <cylinderGeometry args={[r, r, len, 6]} />
-      <meshStandardMaterial {...mat} />
-    </mesh>
-  )
-}
+// ── SILLA — modelo 3D real de silla Acapulco ──────────────────────────────────
+// GLB (crédito: Gaeon-Architect / CGTrader). Se normaliza escala y posición para
+// encajar en el escenario, y se cambia el material: el tejido (malla grande de
+// cordones) usa wp; el marco metálico usa fp.
+const SILLA_GLB = '/models/silla-acapulco.glb'
 
-// ── SILLA — Acapulco: aro tipo pera con cordones radiales y patas de trípode ──
-// El aro y las patas usan el material de estructura (metal en polialuminio); los
-// cordones radiales usan el tejido del material (mimbre cálido / polialuminio).
 function SillaModel({ wp, fp }: { wp: WP; fp: FP; cp: FP }) {
-  const R = 0.58        // radio del aro
-  const rHole = 0.06    // radio del hueco central
-  const D = 0.16        // profundidad del cuenco (plano, no embudo)
-  const N = 60          // nº de cordones radiales
+  const { scene } = useGLTF(SILLA_GLB)
 
-  const cords = useMemo(() => {
-    const arr: { a: THREE.Vector3; b: THREE.Vector3 }[] = []
-    for (let i = 0; i < N; i++) {
-      const t = (i / N) * Math.PI * 2
-      arr.push({
-        a: new THREE.Vector3(Math.cos(t) * R, Math.sin(t) * R, 0),
-        b: new THREE.Vector3(Math.cos(t) * rHole, Math.sin(t) * rHole, -D),
-      })
-    }
-    return arr
-  }, [])
-
-  // Marcos laterales metálicos (dos "hairpins") + travesaños en el piso.
-  const frame = useMemo(() => {
-    const segs: { a: THREE.Vector3; b: THREE.Vector3; r: number }[] = []
-    for (const s of [-1, 1]) {
-      const topF = new THREE.Vector3(s * 0.5, -0.12, 0.30)   // apoyo delantero del aro
-      const topB = new THREE.Vector3(s * 0.44, 0.34, -0.32)  // apoyo trasero (más alto)
-      const footF = new THREE.Vector3(s * 0.54, -0.9, 0.44)
-      const footB = new THREE.Vector3(s * 0.46, -0.9, -0.34)
-      segs.push({ a: footF, b: topF, r: 0.02 })
-      segs.push({ a: footB, b: topB, r: 0.02 })
-      segs.push({ a: topF, b: topB, r: 0.018 })              // riel lateral que sostiene el aro
-    }
-    // travesaños que unen los dos marcos en el piso
-    segs.push({ a: new THREE.Vector3(-0.54, -0.87, 0.44), b: new THREE.Vector3(0.54, -0.87, 0.44), r: 0.016 })
-    segs.push({ a: new THREE.Vector3(-0.46, -0.87, -0.34), b: new THREE.Vector3(0.46, -0.87, -0.34), r: 0.016 })
-    return segs
-  }, [])
-
-  return (
-    <group>
-      {/* Cuenco de cordones (aro + tejido), inclinado atrás como asiento Acapulco */}
-      <group position={[0, 0.12, 0]} rotation={[-0.62, 0, 0]} scale={[1, 1.16, 1]}>
-        {/* Aro exterior (marco) */}
-        <mesh castShadow>
-          <torusGeometry args={[R, 0.03, 16, 96]} />
-          <meshStandardMaterial {...fp} />
-        </mesh>
-        {/* Cordones radiales (tejido) */}
-        {cords.map((c, i) => (
-          <Cord key={i} a={c.a} b={c.b} r={0.007} mat={wp} />
-        ))}
-        {/* Anillo del hueco central */}
-        <mesh position={[0, 0, -D]}>
-          <torusGeometry args={[rHole, 0.012, 10, 32]} />
-          <meshStandardMaterial {...fp} />
-        </mesh>
-      </group>
-
-      {/* Marcos laterales + travesaños */}
-      {frame.map((f, i) => (
-        <Cord key={`f${i}`} a={f.a} b={f.b} r={f.r} mat={fp} />
-      ))}
-    </group>
+  const cordMat = useMemo(
+    () => new THREE.MeshStandardMaterial({
+      map: wp.map, color: wp.color, roughness: wp.roughness, metalness: wp.metalness,
+    }),
+    [wp],
   )
+  const frameMat = useMemo(
+    () => new THREE.MeshStandardMaterial({
+      color: fp.color, roughness: fp.roughness, metalness: fp.metalness,
+    }),
+    [fp],
+  )
+
+  const model = useMemo(() => {
+    const root = scene.clone(true)
+    root.traverse((o) => {
+      const mesh = o as THREE.Mesh
+      if (!mesh.isMesh) return
+      mesh.castShadow = true
+      mesh.receiveShadow = false
+      // El tejido (Acapulco) es la malla más densa; el resto es marco metálico.
+      const isCords = /acapulco|design|cord|weav|tejid|rope|string/i.test(mesh.name)
+      mesh.material = isCords ? cordMat : frameMat
+    })
+    // Normaliza: centra en XY, escala a una altura objetivo y apoya en el piso.
+    const box = new THREE.Box3().setFromObject(root)
+    const size = box.getSize(new THREE.Vector3())
+    const center = box.getCenter(new THREE.Vector3())
+    const s = 1.5 / (size.y || 1)
+    root.scale.setScalar(s)
+    root.position.set(-center.x * s, -box.min.y * s - 0.9, -center.z * s)
+    return root
+  }, [scene, cordMat, frameMat])
+
+  return <primitive object={model} />
 }
+useGLTF.preload(SILLA_GLB)
 
 // ── SOFÁ — loveseat nido redondeado (ref: sala-ebano.jpg) ─────────────────────
 // Cuenco tejido bajo y ancho con respaldo curvo elevado atrás, cojín de asiento
