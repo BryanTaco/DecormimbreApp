@@ -757,6 +757,14 @@ export default function PersonalizarPage() {
               <p style={{ textAlign: 'center', fontSize: 10, color: 'rgba(92,64,51,0.3)', marginTop: 10, fontFamily: 'var(--font-body)', letterSpacing: '0.06em' }}>
                 Visualización referencial · Diseño final puede variar
               </p>
+              {form.tipo === 'silla' && (
+                <p style={{ textAlign: 'center', fontSize: 9, color: 'rgba(92,64,51,0.28)', marginTop: 2, fontFamily: 'var(--font-body)', letterSpacing: '0.05em' }}>
+                  Modelo 3D de la silla: {' '}
+                  <a href="https://www.cgtrader.com/gaeon-architect" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
+                    Gaeon-Architect
+                  </a>{' '}· CGTrader
+                </p>
+              )}
             </div>
           )}
         </div>
