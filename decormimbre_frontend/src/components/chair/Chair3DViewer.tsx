@@ -108,74 +108,35 @@ function toneForMaterial(hex: string, poly: boolean): string {
 type WP = { map: THREE.CanvasTexture; color: string; roughness: number; metalness: number }
 type FP = { color: string; roughness: number; metalness: number }
 
-// ── SILLA — modelo 3D real de silla Acapulco ──────────────────────────────────
-// GLB (crédito: Gaeon-Architect / CGTrader). Se normaliza escala y posición para
-// encajar en el escenario, y se cambia el material: el tejido (malla grande de
-// cordones) usa wp; el marco metálico usa fp.
+// ── Modelos GLB reales (silla Acapulco y columpio de mimbre) ──────────────────
+// Los modelos ya traen el tejido en su geometría, así que usamos COLOR SÓLIDO
+// (no textura) para que el color elegido se vea claramente. El cojín se detecta
+// por su material de tela ("Fab") y toma el color de cojín; el resto usa el color
+// de la estructura/tejido. Se normaliza escala y posición al escenario.
 const SILLA_GLB = '/models/silla-acapulco.glb'
-
-function SillaModel({ wp, fp }: { wp: WP; fp: FP; cp: FP }) {
-  const { scene } = useGLTF(SILLA_GLB)
-
-  const cordMat = useMemo(
-    () => new THREE.MeshStandardMaterial({
-      map: wp.map, color: wp.color, roughness: wp.roughness, metalness: wp.metalness,
-    }),
-    [wp],
-  )
-  const frameMat = useMemo(
-    () => new THREE.MeshStandardMaterial({
-      color: fp.color, roughness: fp.roughness, metalness: fp.metalness,
-    }),
-    [fp],
-  )
-
-  const model = useMemo(() => {
-    const root = scene.clone(true)
-    root.traverse((o) => {
-      const mesh = o as THREE.Mesh
-      if (!mesh.isMesh) return
-      mesh.castShadow = true
-      mesh.receiveShadow = false
-      // El tejido (Acapulco) es la malla más densa; el resto es marco metálico.
-      const isCords = /acapulco|design|cord|weav|tejid|rope|string/i.test(mesh.name)
-      mesh.material = isCords ? cordMat : frameMat
-    })
-    // Normaliza: centra en XY, escala a una altura objetivo y apoya en el piso.
-    const box = new THREE.Box3().setFromObject(root)
-    const size = box.getSize(new THREE.Vector3())
-    const center = box.getCenter(new THREE.Vector3())
-    const s = 1.5 / (size.y || 1)
-    root.scale.setScalar(s)
-    root.position.set(-center.x * s, -box.min.y * s - 0.9, -center.z * s)
-    return root
-  }, [scene, cordMat, frameMat])
-
-  return <primitive object={model} />
-}
-useGLTF.preload(SILLA_GLB)
-
-// ── HAMACA / COLUMPIO — modelo GLB real de silla colgante de mimbre ───────────
-// GLB convertido de FBX y comprimido con Draco. Aplica el tejido (wp) a todas
-// las mallas y normaliza escala/posición.
 const COLUMPIO_GLB = '/models/columpio-mimbre.glb'
 
-function HamacaModel({ wp }: { wp: WP; fp: FP; cp: FP }) {
-  const { scene } = useGLTF(COLUMPIO_GLB)
+// Parámetros de color para los modelos GLB.
+type GP = { struct: string; structRough: number; structMetal: number; cushion: string }
 
-  const mat = useMemo(
-    () => new THREE.MeshStandardMaterial({
-      map: wp.map, color: wp.color, roughness: wp.roughness, metalness: wp.metalness,
-    }),
-    [wp],
-  )
+function GlbFurniture({ url, targetH, gp }: { url: string; targetH: number; gp: GP }) {
+  const { scene } = useGLTF(url)
 
   const model = useMemo(() => {
     const root = scene.clone(true)
+    const structMat = new THREE.MeshStandardMaterial({
+      color: gp.struct, roughness: gp.structRough, metalness: gp.structMetal,
+    })
+    const cushionMat = new THREE.MeshStandardMaterial({
+      color: gp.cushion, roughness: 0.95, metalness: 0,
+    })
     root.traverse((o) => {
       const mesh = o as THREE.Mesh
-      if (!(mesh as unknown as { isMesh?: boolean }).isMesh && !(mesh as unknown as { isLine?: boolean }).isLine) return
-      mesh.material = mat
+      const meshLike = (mesh as unknown as { isMesh?: boolean; isLine?: boolean })
+      if (!meshLike.isMesh && !meshLike.isLine) return
+      const matName = ((mesh.material as THREE.Material | undefined)?.name || '').toLowerCase()
+      const isCushion = /fab|cushion|cojin|coj[ií]n|pillow|cushn/.test(matName)
+      mesh.material = isCushion ? cushionMat : structMat
       mesh.castShadow = true
       mesh.receiveShadow = false
     })
@@ -183,14 +144,22 @@ function HamacaModel({ wp }: { wp: WP; fp: FP; cp: FP }) {
     const box = new THREE.Box3().setFromObject(root)
     const size = box.getSize(new THREE.Vector3())
     const center = box.getCenter(new THREE.Vector3())
-    const s = 1.7 / (size.y || 1)
+    const s = targetH / (size.y || 1)
     root.scale.setScalar(s)
     root.position.set(-center.x * s, -box.min.y * s - 0.9, -center.z * s)
     return root
-  }, [scene, mat])
+  }, [scene, gp, targetH])
 
   return <primitive object={model} />
 }
+
+function SillaModel({ gp }: { gp: GP }) {
+  return <GlbFurniture url={SILLA_GLB} targetH={1.5} gp={gp} />
+}
+function HamacaModel({ gp }: { gp: GP }) {
+  return <GlbFurniture url={COLUMPIO_GLB} targetH={1.7} gp={gp} />
+}
+useGLTF.preload(SILLA_GLB)
 useGLTF.preload(COLUMPIO_GLB)
 
 // ── SOFÁ — loveseat nido redondeado (ref: sala-ebano.jpg) ─────────────────────
@@ -399,11 +368,20 @@ function FurnitureModel({ tipo, color, mat, cushion }: { tipo: string; color: st
   // Material del cojín (tela mate, color independiente del tejido)
   const cp: FP = { color: safeHex(cushion), roughness: 0.97, metalness: 0 }
 
+  // Parámetros de color sólido para los modelos GLB (silla y columpio): el color
+  // de estructura/tejido es el acabado elegido (ya tonificado); el cojín, aparte.
+  const gp: GP = {
+    struct: hex,
+    structRough: isPolyalu ? 0.45 : isCombinado ? 0.6 : 0.9,
+    structMetal: isPolyalu ? 0.25 : isCombinado ? 0.12 : 0,
+    cushion: safeHex(cushion),
+  }
+
   switch (tipo) {
-    case 'silla':     return <SillaModel wp={wp} fp={fp} cp={cp} />
+    case 'silla':     return <SillaModel gp={gp} />
     case 'sofa':      return <SofaModel wp={wp} fp={fp} cp={cp} />
     case 'mesa':      return <MesaModel wp={wp} fp={fp} />
-    case 'hamaca':    return <HamacaModel wp={wp} fp={fp} cp={cp} />
+    case 'hamaca':    return <HamacaModel gp={gp} />
     case 'cabecera':  return <DaybedModel wp={wp} fp={fp} cp={cp} />
     case 'accesorio': return <AccesorioModel wp={wp} fp={fp} cp={cp} />
     default:          return <SofaModel wp={wp} fp={fp} cp={cp} />
