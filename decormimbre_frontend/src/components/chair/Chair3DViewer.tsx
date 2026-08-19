@@ -133,10 +133,10 @@ function Cord({ a, b, r, mat }: { a: THREE.Vector3; b: THREE.Vector3; r: number;
 // El aro y las patas usan el material de estructura (metal en polialuminio); los
 // cordones radiales usan el tejido del material (mimbre cálido / polialuminio).
 function SillaModel({ wp, fp }: { wp: WP; fp: FP; cp: FP }) {
-  const R = 0.6         // radio del aro
-  const rHole = 0.07    // radio del hueco central
-  const D = 0.5         // profundidad del cuenco (hacia atrás)
-  const N = 62          // nº de cordones radiales
+  const R = 0.58        // radio del aro
+  const rHole = 0.06    // radio del hueco central
+  const D = 0.16        // profundidad del cuenco (plano, no embudo)
+  const N = 60          // nº de cordones radiales
 
   const cords = useMemo(() => {
     const arr: { a: THREE.Vector3; b: THREE.Vector3 }[] = []
@@ -150,22 +150,28 @@ function SillaModel({ wp, fp }: { wp: WP; fp: FP; cp: FP }) {
     return arr
   }, [])
 
-  // Patas de trípode + barras conectoras (esquinas de la base)
-  const legs = useMemo(() => (
-    [[0.42, 0.32], [-0.42, 0.32], [0.32, -0.42], [-0.32, -0.42]] as [number, number][]
-  ).map(([x, z]) => ({
-    a: new THREE.Vector3(x * 0.38, -0.02, z * 0.38),
-    b: new THREE.Vector3(x, -0.9, z),
-  })), [])
-  const bars = useMemo(() => ([
-    [new THREE.Vector3(0.42, -0.86, 0.32), new THREE.Vector3(-0.42, -0.86, 0.32)],
-    [new THREE.Vector3(0.32, -0.86, -0.42), new THREE.Vector3(-0.32, -0.86, -0.42)],
-  ] as [THREE.Vector3, THREE.Vector3][]), [])
+  // Marcos laterales metálicos (dos "hairpins") + travesaños en el piso.
+  const frame = useMemo(() => {
+    const segs: { a: THREE.Vector3; b: THREE.Vector3; r: number }[] = []
+    for (const s of [-1, 1]) {
+      const topF = new THREE.Vector3(s * 0.5, -0.12, 0.30)   // apoyo delantero del aro
+      const topB = new THREE.Vector3(s * 0.44, 0.34, -0.32)  // apoyo trasero (más alto)
+      const footF = new THREE.Vector3(s * 0.54, -0.9, 0.44)
+      const footB = new THREE.Vector3(s * 0.46, -0.9, -0.34)
+      segs.push({ a: footF, b: topF, r: 0.02 })
+      segs.push({ a: footB, b: topB, r: 0.02 })
+      segs.push({ a: topF, b: topB, r: 0.018 })              // riel lateral que sostiene el aro
+    }
+    // travesaños que unen los dos marcos en el piso
+    segs.push({ a: new THREE.Vector3(-0.54, -0.87, 0.44), b: new THREE.Vector3(0.54, -0.87, 0.44), r: 0.016 })
+    segs.push({ a: new THREE.Vector3(-0.46, -0.87, -0.34), b: new THREE.Vector3(0.46, -0.87, -0.34), r: 0.016 })
+    return segs
+  }, [])
 
   return (
     <group>
-      {/* Cuenco de cordones (aro + tejido), forma de pera e inclinado atrás */}
-      <group position={[0, 0.42, 0]} rotation={[-0.18, 0, 0]} scale={[1, 1.12, 1]}>
+      {/* Cuenco de cordones (aro + tejido), inclinado atrás como asiento Acapulco */}
+      <group position={[0, 0.12, 0]} rotation={[-0.62, 0, 0]} scale={[1, 1.16, 1]}>
         {/* Aro exterior (marco) */}
         <mesh castShadow>
           <torusGeometry args={[R, 0.03, 16, 96]} />
@@ -182,13 +188,9 @@ function SillaModel({ wp, fp }: { wp: WP; fp: FP; cp: FP }) {
         </mesh>
       </group>
 
-      {/* Patas de trípode metálicas */}
-      {legs.map((l, i) => (
-        <Cord key={`leg${i}`} a={l.a} b={l.b} r={0.02} mat={fp} />
-      ))}
-      {/* Barras conectoras bajas */}
-      {bars.map((bar, i) => (
-        <Cord key={`bar${i}`} a={bar[0]} b={bar[1]} r={0.016} mat={fp} />
+      {/* Marcos laterales + travesaños */}
+      {frame.map((f, i) => (
+        <Cord key={`f${i}`} a={f.a} b={f.b} r={f.r} mat={fp} />
       ))}
     </group>
   )
