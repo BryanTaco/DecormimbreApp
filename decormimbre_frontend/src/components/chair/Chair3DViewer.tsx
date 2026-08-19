@@ -1,6 +1,6 @@
 import { Suspense, useMemo, useRef, useState, useEffect } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { OrbitControls, ContactShadows, useGLTF } from '@react-three/drei'
+import { OrbitControls, ContactShadows, useGLTF, Environment, Lightformer } from '@react-three/drei'
 import * as THREE from 'three'
 
 // ── Wicker texture generator ──────────────────────────────────────────────────
@@ -376,8 +376,8 @@ function FurnitureModel({ tipo, color, mat, cushion }: { tipo: string; color: st
   //  - Combinado: intermedio.
   const gp: GP = {
     struct: hex,
-    structRough: isPolyalu ? 0.16 : isCombinado ? 0.42 : 1.0,
-    structMetal: isPolyalu ? 0.35 : isCombinado ? 0.15 : 0,
+    structRough: isPolyalu ? 0.14 : isCombinado ? 0.42 : 1.0,
+    structMetal: isPolyalu ? 0.55 : isCombinado ? 0.2 : 0,
     cushion: safeHex(cushion),
   }
 
@@ -532,9 +532,18 @@ export default function Chair3DViewer({
             blur={2.8}
             far={1.4}
           />
-          {/* Luz de relleno hemisférica en lugar de <Environment> (que descargaba
-              un HDRI de una CDN externa y dejaba el visor en blanco si fallaba). */}
+          {/* Luz de relleno hemisférica. */}
           <hemisphereLight args={['#fff6ec', '#6b5233', 0.65]} />
+
+          {/* Entorno de estudio GENERADO EN LOCAL con Lightformers (no descarga
+              ningún HDRI de CDN, así nunca deja el visor en blanco). Da reflejos
+              para que el polialuminio satinado se vea brillante y el mimbre mate. */}
+          <Environment resolution={128}>
+            <Lightformer form="rect" intensity={3} position={[3, 3, 2]} scale={[5, 5, 1]} rotation={[0, -Math.PI / 4, 0]} />
+            <Lightformer form="rect" intensity={1.5} position={[-4, 2, -2]} scale={[5, 5, 1]} rotation={[0, Math.PI / 3, 0]} />
+            <Lightformer form="ring" intensity={2} position={[0, 5, -1]} scale={4} />
+            <Lightformer form="rect" intensity={0.6} position={[0, -2, 3]} scale={[6, 3, 1]} />
+          </Environment>
 
           <CameraRig target={target} controlsRef={controlsRef} />
 
