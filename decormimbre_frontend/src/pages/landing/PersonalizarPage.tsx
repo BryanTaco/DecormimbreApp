@@ -652,7 +652,7 @@ export default function PersonalizarPage() {
 
           {/* Panel derecho: Visor 3D */}
           {show3D && (
-            <div className="hidden md:block sticky top-24 self-start">
+            <div className="block md:sticky md:top-24 self-start">
               <div style={{
                 borderRadius: 28, overflow: 'hidden',
                 background: 'linear-gradient(145deg, rgba(255,251,247,0.9), rgba(240,232,222,0.7))',
