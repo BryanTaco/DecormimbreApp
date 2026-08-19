@@ -370,10 +370,14 @@ function FurnitureModel({ tipo, color, mat, cushion }: { tipo: string; color: st
 
   // Parámetros de color sólido para los modelos GLB (silla y columpio): el color
   // de estructura/tejido es el acabado elegido (ya tonificado); el cojín, aparte.
+  // La diferencia visible entre materiales es el ACABADO de superficie:
+  //  - Mimbre: mate y áspero (rough alto, sin brillo) → fibra natural.
+  //  - Polialuminio: satinado/brillante y algo metálico → sintético.
+  //  - Combinado: intermedio.
   const gp: GP = {
     struct: hex,
-    structRough: isPolyalu ? 0.45 : isCombinado ? 0.6 : 0.9,
-    structMetal: isPolyalu ? 0.25 : isCombinado ? 0.12 : 0,
+    structRough: isPolyalu ? 0.16 : isCombinado ? 0.42 : 1.0,
+    structMetal: isPolyalu ? 0.35 : isCombinado ? 0.15 : 0,
     cushion: safeHex(cushion),
   }
 
