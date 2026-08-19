@@ -155,6 +155,44 @@ function SillaModel({ wp, fp }: { wp: WP; fp: FP; cp: FP }) {
 }
 useGLTF.preload(SILLA_GLB)
 
+// ── HAMACA / COLUMPIO — modelo GLB real de silla colgante de mimbre ───────────
+// GLB convertido de FBX y comprimido con Draco. Aplica el tejido (wp) a todas
+// las mallas y normaliza escala/posición.
+const COLUMPIO_GLB = '/models/columpio-mimbre.glb'
+
+function HamacaModel({ wp }: { wp: WP; fp: FP; cp: FP }) {
+  const { scene } = useGLTF(COLUMPIO_GLB)
+
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({
+      map: wp.map, color: wp.color, roughness: wp.roughness, metalness: wp.metalness,
+    }),
+    [wp],
+  )
+
+  const model = useMemo(() => {
+    const root = scene.clone(true)
+    root.traverse((o) => {
+      const mesh = o as THREE.Mesh
+      if (!(mesh as unknown as { isMesh?: boolean }).isMesh && !(mesh as unknown as { isLine?: boolean }).isLine) return
+      mesh.material = mat
+      mesh.castShadow = true
+      mesh.receiveShadow = false
+    })
+    // Normaliza: centra en XY, escala a una altura objetivo y apoya en el piso.
+    const box = new THREE.Box3().setFromObject(root)
+    const size = box.getSize(new THREE.Vector3())
+    const center = box.getCenter(new THREE.Vector3())
+    const s = 1.7 / (size.y || 1)
+    root.scale.setScalar(s)
+    root.position.set(-center.x * s, -box.min.y * s - 0.9, -center.z * s)
+    return root
+  }, [scene, mat])
+
+  return <primitive object={model} />
+}
+useGLTF.preload(COLUMPIO_GLB)
+
 // ── SOFÁ — loveseat nido redondeado (ref: sala-ebano.jpg) ─────────────────────
 // Cuenco tejido bajo y ancho con respaldo curvo elevado atrás, cojín de asiento
 // corrido y dos cojines de respaldo. Sin patas: el nido se apoya en el piso.
@@ -235,60 +273,7 @@ function MesaModel({ wp, fp }: { wp: WP; fp: FP }) {
   )
 }
 
-// ── HAMACA — silla colgante tipo huevo bajo pérgola (ref: hamaca-jardin.jpg) ──
-// Casco tejido en forma de huevo con abertura frontal, cojín adentro, colgado
-// con cuerda de una viga de pérgola sobre dos postes de madera.
-function HamacaModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
-  const gap = Math.PI * 0.62 // abertura frontal del casco
-  const madera = { color: '#8a6a4c', roughness: 0.8, metalness: 0.05 }
-
-  return (
-    <group>
-      {/* Pérgola: viga superior y postes */}
-      <mesh position={[0, 1.22, 0]} castShadow>
-        <boxGeometry args={[2.3, 0.11, 0.16]} />
-        <meshStandardMaterial {...madera} />
-      </mesh>
-      {([-1.08, 1.08] as number[]).map((x, i) => (
-        <mesh key={i} position={[x, 0.17, 0]} castShadow>
-          <boxGeometry args={[0.11, 2.2, 0.13]} />
-          <meshStandardMaterial {...madera} />
-        </mesh>
-      ))}
-
-      {/* Cuerda y argolla */}
-      <mesh position={[0, 0.99, 0]}>
-        <cylinderGeometry args={[0.018, 0.018, 0.38, 8]} />
-        <meshStandardMaterial color="#c9b18c" roughness={1} metalness={0} />
-      </mesh>
-      <mesh position={[0, 0.8, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.055, 0.016, 8, 24]} />
-        <meshStandardMaterial {...fp} />
-      </mesh>
-
-      {/* Casco huevo tejido con abertura frontal */}
-      <mesh position={[0, 0.1, 0]} scale={[0.95, 1.12, 0.95]} castShadow receiveShadow>
-        <sphereGeometry args={[0.62, 48, 32, Math.PI / 2 + gap / 2, Math.PI * 2 - gap]} />
-        <meshStandardMaterial {...wp} side={THREE.DoubleSide} />
-      </mesh>
-      {/* Aro estructural del casco */}
-      <mesh position={[0, 0.1, 0]} scale={[0.95, 1.12, 0.95]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.62, 0.02, 8, 48]} />
-        <meshStandardMaterial {...fp} />
-      </mesh>
-
-      {/* Cojín interior y almohada */}
-      <mesh position={[0, -0.24, 0.06]} scale={[1, 0.55, 1]} castShadow>
-        <sphereGeometry args={[0.4, 28, 18]} />
-        <meshStandardMaterial {...cp} />
-      </mesh>
-      <mesh position={[0, 0.06, -0.28]} rotation={[0.4, 0, 0]} scale={[1, 1, 0.45]} castShadow>
-        <sphereGeometry args={[0.26, 22, 14]} />
-        <meshStandardMaterial {...cp} />
-      </mesh>
-    </group>
-  )
-}
+// (HamacaModel ahora usa el modelo GLB definido más arriba)
 
 // ── CABECERA / DAYBED IGLOO — cápsula huevo abierta al frente (ref: daybeds-igloo.jpg)
 function DaybedModel({ wp, fp, cp }: { wp: WP; fp: FP; cp: FP }) {
