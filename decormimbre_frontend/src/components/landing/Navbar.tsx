@@ -147,7 +147,16 @@ export default function Navbar({ theme = 'dark' }: NavbarProps) {
                 Acceder
               </motion.span>
             </Link>
-          ) : null}
+          ) : (
+            <Link to={user.rol === 'ARTESANO' ? '/taller' : '/admin'} style={{ textDecoration: 'none' }} className="hidden md:flex">
+              <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                className="flex items-center gap-2 rounded-full py-2 px-4"
+                style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(92,64,51,0.08)', border: `1px solid ${borderColor}`, backdropFilter: 'blur(8px)', color: isDark ? 'rgba(255,255,255,0.85)' : '#5C4033', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                <User className="w-3.5 h-3.5" />
+                {user.rol === 'ARTESANO' ? 'Taller' : 'Panel'}
+              </motion.span>
+            </Link>
+          )}
           <Link
             to="/personalizar"
             style={{ textDecoration: 'none' }}
@@ -264,7 +273,17 @@ export default function Navbar({ theme = 'dark' }: NavbarProps) {
                     Acceder
                   </span>
                 </Link>
-              ) : null}
+              ) : (
+                <Link to={user.rol === 'ARTESANO' ? '/taller' : '/admin'} onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>
+                  <span
+                    className="flex items-center gap-2 rounded-full py-3.5 px-6 w-fit"
+                    style={{ background: 'transparent', border: `1px solid ${borderColor}`, color: isDark ? 'rgba(255,255,255,0.85)' : '#5C4033', fontSize: 14, fontWeight: 600, fontFamily: 'var(--font-body)' }}
+                  >
+                    <User className="w-4 h-4" />
+                    {user.rol === 'ARTESANO' ? 'Ir al taller' : 'Ir al panel'}
+                  </span>
+                </Link>
+              )}
               <Link to="/personalizar" onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>
                 <span
                   className="flex items-center gap-2 rounded-full py-3.5 px-6 w-fit"
