@@ -13,15 +13,22 @@ export default function Login() {
   const [showPwd, setShowPwd] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [otpRequired, setOtpRequired] = useState(false)
+  const [otp, setOtp] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      // 1) Obtener tokens
-      const { data } = await api.post('/auth/token/', form)
+      // 1) Obtener tokens (incluye el código 2FA si la cuenta lo tiene activo)
+      const { data } = await api.post('/auth/token/', { ...form, otp })
       const tokens = data.data ?? data
+      if (tokens.otp_required) {
+        setOtpRequired(true)
+        setError(tokens.otp_error ?? '')
+        return
+      }
       localStorage.setItem('access_token', tokens.access)
       localStorage.setItem('refresh_token', tokens.refresh)
       // 2) El endpoint de token no incluye el usuario: lo pedimos aparte
@@ -102,18 +109,39 @@ export default function Login() {
             </div>
           </div>
 
+          {otpRequired && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-[rgba(92,64,51,0.6)]">
+                Código de verificación
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                autoFocus
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                className="rounded-xl border border-[rgba(92,64,51,0.15)] bg-white px-4 py-2.5 text-center text-lg tracking-[0.4em] text-[rgba(92,64,51,0.9)] outline-none focus:border-[rgba(92,64,51,0.4)] transition-colors"
+                placeholder="123456"
+              />
+              <p className="text-[11px] text-[rgba(92,64,51,0.5)]">
+                Abre tu app de autenticación (Google Authenticator/Authy) e ingresa el código de 6 dígitos.
+              </p>
+            </div>
+          )}
+
           {error && (
             <p className="text-sm text-red-500/80 text-center">{error}</p>
           )}
 
           <motion.button
             type="submit"
-            disabled={loading}
+            disabled={loading || (otpRequired && otp.length < 6)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="mt-2 bg-[rgba(92,64,51,0.9)] text-white rounded-xl py-3 text-sm font-normal hover:bg-[rgba(92,64,51,1)] transition-colors disabled:opacity-60"
           >
-            {loading ? 'Ingresando...' : 'Ingresar'}
+            {loading ? 'Ingresando...' : otpRequired ? 'Verificar' : 'Ingresar'}
           </motion.button>
         </form>
       </motion.div>

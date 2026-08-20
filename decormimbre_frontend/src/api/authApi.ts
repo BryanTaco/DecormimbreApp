@@ -40,10 +40,21 @@ export interface LoginResult {
   user: AuthUser
 }
 
-export async function loginCliente(payload: LoginPayload): Promise<LoginResult> {
+// Se lanza cuando la cuenta tiene 2FA activo y falta (o falla) el código.
+export class OtpRequiredError extends Error {
+  otpError?: string
+  constructor(otpError?: string) {
+    super('otp_required')
+    this.name = 'OtpRequiredError'
+    this.otpError = otpError
+  }
+}
+
+export async function loginCliente(payload: LoginPayload & { otp?: string }): Promise<LoginResult> {
   // Response: {success, data:{access, refresh}, message}
   const { data: body } = await axios.post('/api/v1/auth/token/', payload)
   const tokens = body.data ?? body
+  if (tokens.otp_required) throw new OtpRequiredError(tokens.otp_error)
   const access: string = tokens.access
   const refresh: string = tokens.refresh
 

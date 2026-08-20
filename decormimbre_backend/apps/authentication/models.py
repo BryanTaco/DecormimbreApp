@@ -36,6 +36,9 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     ultimo_login = models.DateTimeField(null=True, blank=True)
+    # Verificación en dos pasos (TOTP / app autenticadora)
+    otp_secret = models.CharField(max_length=64, blank=True, default="")
+    otp_enabled = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["nombre"]

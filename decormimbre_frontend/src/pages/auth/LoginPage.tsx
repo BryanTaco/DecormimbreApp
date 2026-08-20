@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Eye, EyeOff, ArrowLeft, LogIn } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
-import { loginCliente } from '@/api/authApi'
+import { loginCliente, OtpRequiredError } from '@/api/authApi'
 import { useAuthStore } from '@/store/auth'
 import BrandLogo from '@/components/BrandLogo'
 import CortinaBienvenida from '@/components/CortinaBienvenida'
@@ -19,6 +19,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [cortina, setCortina] = useState<string | null>(null)
+  const [otpRequired, setOtpRequired] = useState(false)
+  const [otp, setOtp] = useState('')
 
   const emailError = validarEmail(form.email)
 
@@ -33,7 +35,7 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      const res = await loginCliente({ email: form.email, password: form.password })
+      const res = await loginCliente({ email: form.email, password: form.password, otp })
       setAuth(
         { id: res.user.id, email: res.user.email, nombre: res.user.nombre, rol: res.user.rol as any, clienteId: res.user.clienteId },
         res.access, res.refresh
@@ -50,6 +52,12 @@ export default function LoginPage() {
           : '/admin'
       setTimeout(() => navigate(destino), 1100)
     } catch (err: any) {
+      if (err instanceof OtpRequiredError) {
+        setOtpRequired(true)
+        setError(err.otpError ?? '')
+        setLoading(false)
+        return
+      }
       const msg = err.response?.data?.detail ?? err.response?.data?.non_field_errors?.[0]
       setError(msg ?? 'Credenciales incorrectas. Verifica tu correo y contraseña.')
       setLoading(false)
@@ -112,6 +120,20 @@ export default function LoginPage() {
                 </button>
               </div>
             </FieldGroup>
+
+            {otpRequired && (
+              <FieldGroup label="Código de verificación">
+                <input
+                  name="otp" type="text" inputMode="numeric" maxLength={6} autoFocus
+                  value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                  placeholder="123456"
+                  style={{ ...inputStyle, textAlign: 'center', letterSpacing: '0.35em', fontSize: 18 }}
+                />
+                <p style={{ fontSize: 11, color: 'rgba(92,64,51,0.5)', marginTop: 6, fontFamily: 'var(--font-body)' }}>
+                  Ingresa el código de 6 dígitos de tu app de autenticación.
+                </p>
+              </FieldGroup>
+            )}
 
             {error && (
               <div style={{ background: 'rgba(220,60,40,0.08)', border: '1px solid rgba(220,60,40,0.2)', borderRadius: 10, padding: '10px 14px', color: '#b02020', fontSize: 13, fontFamily: 'var(--font-body)' }}>

@@ -5,6 +5,7 @@ from .views import (
     UsuarioListCreateView, UsuarioDetailView,
     RegistroClienteView, MisNotificacionesView, MarcarNotificacionLeidaView,
     VapidPublicKeyView, PushSubscribeView, PushUnsubscribeView,
+    TwoFAStatusView, TwoFASetupView, TwoFAEnableView, TwoFADisableView,
 )
 
 urlpatterns = [
@@ -12,6 +13,11 @@ urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("token/blacklist/", TokenBlacklistView.as_view(), name="token_blacklist"),
     path("me/", MeView.as_view(), name="me"),
+    # Verificación en dos pasos (TOTP)
+    path("2fa/status/", TwoFAStatusView.as_view(), name="2fa_status"),
+    path("2fa/setup/", TwoFASetupView.as_view(), name="2fa_setup"),
+    path("2fa/enable/", TwoFAEnableView.as_view(), name="2fa_enable"),
+    path("2fa/disable/", TwoFADisableView.as_view(), name="2fa_disable"),
     path("usuarios/", UsuarioListCreateView.as_view(), name="usuarios_list_create"),
     path("usuarios/<uuid:pk>/", UsuarioDetailView.as_view(), name="usuarios_detail"),
     path("registro/", RegistroClienteView.as_view(), name="registro_cliente"),

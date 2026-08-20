@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+import pyotp
 from .models import Usuario, LogActividad, Notificacion
 
 
@@ -7,8 +9,29 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usuario
-        fields = ["id", "nombre", "email", "rol", "activo", "fecha_creacion", "cliente_id"]
-        read_only_fields = ["id", "fecha_creacion"]
+        fields = ["id", "nombre", "email", "rol", "activo", "fecha_creacion", "cliente_id", "otp_enabled"]
+        read_only_fields = ["id", "fecha_creacion", "otp_enabled"]
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Login con soporte de verificación en dos pasos (TOTP).
+
+    Si el usuario tiene 2FA activo, exige el campo ``otp`` y lo valida contra su
+    secreto. Señaliza con códigos ``otp_required`` / ``otp_invalid`` para que la
+    vista devuelva una respuesta clara al frontend.
+    """
+    otp = serializers.CharField(required=False, allow_blank=True, write_only=True)
+
+    def validate(self, attrs):
+        otp = (attrs.pop("otp", "") or "").strip()
+        data = super().validate(attrs)  # valida email/contraseña; deja self.user
+        user = self.user
+        if getattr(user, "otp_enabled", False):
+            if not otp:
+                raise serializers.ValidationError("otp_required", code="otp_required")
+            if not pyotp.TOTP(user.otp_secret).verify(otp, valid_window=1):
+                raise serializers.ValidationError("otp_invalid", code="otp_invalid")
+        return data
 
     def get_cliente_id(self, obj):
         try:
